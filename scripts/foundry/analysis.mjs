@@ -76,7 +76,8 @@ async function guessBaseItem(item, type) {
   const id = Object.keys(ids).find((key) => words.includes(key.toLowerCase()));
   if (!id) return null;
   try {
-    return (await dnd5e.documents.Trait.getBaseItem(id, { fullItem: true }))?.toObject?.() ?? null;
+    // `Trait.getBaseItem(id, { fullItem })` returns nothing for these packs in dnd5e 6.0.6; the UUID is in the config
+    return (await fromUuid(ids[id]))?.toObject?.() ?? null;
   } catch {
     return null;
   }
