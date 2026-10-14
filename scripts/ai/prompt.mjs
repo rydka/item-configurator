@@ -4,9 +4,12 @@
  * `resolver.mjs` rejects any fact whose quote is not in the sentence.
  */
 
-/** Kinds of facts the model may return. `consume` and `cast` are accepted by the schema but not representable. */
-export const FACT_KINDS = ["attack", "damage", "save", "heal", "uses", "activation", "consume", "cast", "effect", "detail"];
-export const EFFECT_KINDS = ["ac", "attack", "damage", "save", "check", "resistance", "immunity", "advantage", "abilityScore", "speed"];
+/** Kinds of facts the model may return (all are representable by the parser library). */
+export const FACT_KINDS = ["attack", "damage", "extraDamage", "save", "heal", "uses", "activation", "consume", "cast", "effect", "detail"];
+export const EFFECT_KINDS = ["ac", "attack", "damage", "save", "check", "resistance", "immunity", "vulnerability", "advantage",
+  "disadvantage", "abilityScore", "speed"];
+/** Effect kinds whose amount is a bonus written as a signed string ("+1"), like the rules do. */
+export const BONUS_KINDS = ["ac", "attack", "damage", "save", "check"];
 export const PERIODS = ["day", "dawn", "dusk", "sr", "lr"];
 export const ACTIVATIONS = ["action", "bonus", "reaction", "legendary", "special"];
 export const ATTUNEMENTS = ["required", "optional"];
@@ -55,6 +58,10 @@ export function buildSchema(keys) {
       denomination: { type: "integer" },
       bonus: { type: "integer" },
       damageType: { type: "string", enum: enumFor(keys, "damageTypes") },
+      spell: { type: "string" },
+      level: { type: "integer" },
+      charges: { type: "integer" },
+      on: { type: "string", enum: ["save", "check"] },
       attackType: { type: "string", enum: ["melee", "ranged"] },
       classification: { type: "string", enum: ["weapon", "spell"] },
       ability: { type: "string", enum: enumFor(keys, "abilities") },
@@ -94,10 +101,11 @@ export const SYSTEM_PROMPT = [
   "Extract ONLY mechanics that the sentence states explicitly. Never infer, never complete, never invent.",
   "If the sentence states no mechanic (flavor text, lore, advice), return an empty facts list.",
   "Every fact has `kind` and `evidence`: `evidence` is an exact, contiguous quote copied from the sentence that proves the fact.",
-  "Kinds: attack (attack roll), damage (dice and damage type), heal (healing dice), save (saving throw: ability, dc, onSave),",
-  "uses (max uses and period), activation (action, bonus, reaction), effect (passive: ac, attack, damage, save, check,",
-  "resistance, immunity, advantage, abilityScore, speed; use effectKind, amount and scope), detail (rarity, attunement),",
-  "consume (spends a resource) and cast (casts a spell).",
+  "Kinds: attack (attack roll), damage (dice and damage type), extraDamage (damage dealt IN ADDITION to the normal damage),",
+  "heal (healing dice), save (saving throw: ability, dc, onSave), uses (max uses and period),",
+  "activation (action, bonus, reaction), effect (passive: ac, attack, damage, save, check, resistance, immunity,",
+  "vulnerability, advantage, disadvantage, abilityScore, speed; use effectKind, amount and scope; on = save or check for",
+  "advantage), detail (rarity, attunement), consume (spends charges: amount) and cast (casts a spell: spell, level, dc).",
   "A resistance is not an advantage. A bonus is a number, not dice.",
   "An attack fact needs an attack roll (attack type or bonus); a saving throw is a save fact, never an attack.",
   "",

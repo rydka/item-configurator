@@ -4,7 +4,7 @@
  */
 import * as ollama from "./ollama.mjs";
 import {
-  ACTIVATIONS, ATTUNEMENTS, EFFECT_KINDS, PERIODS, buildMessages, buildSchema, enumFor, isQuoted
+  ACTIVATIONS, ATTUNEMENTS, BONUS_KINDS, EFFECT_KINDS, PERIODS, buildMessages, buildSchema, enumFor, isQuoted
 } from "./prompt.mjs";
 
 const PROBE_CACHE_MS = 60000;
@@ -17,10 +17,10 @@ const has = (keys, name, key) => enumFor(keys, name).includes(key);
 function effectScopes(kind, keys) {
   switch ( kind ) {
     case "resistance": return enumFor(keys, "damageTypes");
+    case "vulnerability": return enumFor(keys, "damageTypes");
     case "immunity": return [...enumFor(keys, "damageTypes"), ...enumFor(keys, "conditionTypes")];
-    case "save": return [...enumFor(keys, "abilities"), "all"];
-    case "check": return [...enumFor(keys, "abilities"), ...enumFor(keys, "skills"), "all"];
-    case "advantage": return [...enumFor(keys, "abilities"), ...enumFor(keys, "skills"), ...enumFor(keys, "conditionTypes"), "all"];
+    case "save": case "check": return [...enumFor(keys, "abilities"), "all"];
+    case "advantage": case "disadvantage": return [...enumFor(keys, "abilities"), ...enumFor(keys, "skills"), "all"];
     case "abilityScore": return enumFor(keys, "abilities");
     case "speed": return ["walk", "fly", "swim", "climb", "burrow"];
     case "attack": case "damage": return ["mwak", "rwak", "msak", "rsak", "all"];
@@ -75,12 +75,33 @@ export function toFacts(json, request, keys) {
         };
         break;
       }
-      case "damage": case "heal": {
+      case "damage": case "extraDamage": case "heal": {
         const type = (kind === "heal") ? "healing" : fact.damageType;
-        if ( (kind === "damage") && !has(keys, "damageTypes", type) ) { reject("unknown damage type"); continue; }
+        if ( (kind !== "heal") && !has(keys, "damageTypes", type) ) { reject("unknown damage type"); continue; }
+        if ( (kind !== "damage") && !single(kind) ) continue;
         const { part, error } = damagePart(fact, type);
         if ( error ) { reject(error); continue; }
-        (facts.damage ??= []).push(part);
+        if ( kind === "damage" ) (facts.damage ??= []).push(part);
+        else facts[kind] = part;
+        break;
+      }
+      case "consume": {
+        if ( !single("consume") ) continue;
+        const amount = fact.amount ?? fact.charges;
+        if ( !isInt(amount, 1, 100) ) { reject("consumed amount missing or out of bounds"); continue; }
+        facts.consume = { target: "itemUses", amount, raw: evidence };
+        break;
+      }
+      case "cast": {
+        if ( !single("cast") ) continue;
+        const spell = typeof fact.spell === "string" ? fact.spell.trim() : "";
+        if ( !spell ) { reject("no spell name"); continue; }
+        if ( (fact.dc != null) && !isInt(fact.dc, 5, 40) ) { reject("DC out of bounds"); continue; }
+        facts.cast = {
+          name: spell, level: isInt(fact.level, 0, 9) ? fact.level : null, dc: fact.dc ?? null,
+          attack: isInt(fact.bonus, -5, 30) ? fact.bonus : null, charges: isInt(fact.charges, 1, 100) ? fact.charges : null,
+          raw: evidence
+        };
         break;
       }
       case "save": {
@@ -112,9 +133,17 @@ export function toFacts(json, request, keys) {
         if ( needsAmount && !isInt(fact.amount, (fact.effectKind === "abilityScore") ? 1 : -30, 200) ) {
           reject("effect amount missing or out of bounds"); continue;
         }
-        (facts.effects ??= []).push({
-          kind: fact.effectKind, value: fact.amount ?? null, scope: scopes ? fact.scope : null, raw: evidence
-        });
+        // Same shapes as the rules: a bonus is a signed string, "all" is no scope
+        const bonus = BONUS_KINDS.includes(fact.effectKind) && (fact.amount != null);
+        const scope = (scopes && (fact.scope !== "all")) ? fact.scope : null;
+        const effect = {
+          kind: fact.effectKind, scope, raw: evidence,
+          value: bonus ? `${(fact.amount >= 0) ? "+" : ""}${fact.amount}` : (fact.amount ?? null)
+        };
+        if ( ["advantage", "disadvantage"].includes(fact.effectKind) ) {
+          effect.on = has(keys, "skills", scope) ? "skill" : (fact.on === "save" ? "save" : "check");
+        }
+        (facts.effects ??= []).push(effect);
         break;
       }
       case "detail": {
@@ -147,7 +176,7 @@ export function toFacts(json, request, keys) {
  * @param {function} config.fetch       Injected fetch.
  * @param {object} [config.keys]        dnd5e valid keys.
  * @param {function} [config.now]       Clock (tests).
- * @returns {function & { resolveMany: function, lastRun: object|null, ensureModel: function, warmUp: function }}
+ * @returns {function & { resolveMany: function, lastRun: object|null, ensureModel: function, warmUp: function, timeoutMs: number }}
  */
 export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, keys, now = () => Date.now() } = {}) {
   let probe = null; // { at, ok }
@@ -224,6 +253,7 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
   resolver.resolveMany = resolveMany;
   resolver.ensureModel = ensureModel;
   resolver.warmUp = warm;
+  resolver.timeoutMs = timeoutMs;
   resolver.lastRun = null;
   return resolver;
 }
