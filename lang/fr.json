@@ -1,0 +1,13 @@
+{
+  "item-configurator": {
+    "settings": {
+      "enabled": {
+        "name": "Activer Item Configurator",
+        "hint": "Active ou désactive les fonctionnalités du module pour ce monde."
+      }
+    },
+    "errors": {
+      "wrongSystem": "Item Configurator nécessite le système dnd5e."
+    }
+  }
+}
