@@ -1,6 +1,6 @@
 // M2 (recall), M3 (precision, critical fields), M4 (AI timing) on a reference set. Never fails: it only measures.
 // Usage: node tests/metrics/run-reference.mjs [--ai] [--model=llama3.1:8b] [--url=http://localhost:11434]
-//          [--set=reference|control] [--limit=N] [--out=<dir>]
+//          [--set=reference|heldout] [--limit=N] [--out=<dir>]
 // Rules only runs in Node with the real parser; --ai adds the Ollama fallback (no download, same resolver as the module).
 // Truth = the compendium document, restricted to fields the description attests (evidenced).
 import fs from "node:fs";
@@ -115,6 +115,13 @@ const RARITY_WORDS = {
   common: ["common", "commun"], uncommon: ["uncommon", "peu commun"], rare: ["rare"], veryRare: ["very rare", "très rare"],
   legendary: ["legendary", "légendaire"], artifact: ["artifact", "artefact"]
 };
+// English / French words for the values of resistance, immunity and condition effects
+const WORDS = {
+  acid: ["acid", "acide"], bludgeoning: ["bludgeoning", "contondant"], cold: ["cold", "froid"], fire: ["fire", "feu"],
+  force: ["force"], lightning: ["lightning", "foudre"], necrotic: ["necrotic", "nécrotique"], piercing: ["piercing", "perforant"],
+  poison: ["poison"], psychic: ["psychic", "psychique"], radiant: ["radiant"], slashing: ["slashing", "tranchant"],
+  thunder: ["thunder", "tonnerre"]
+};
 const num = (x) => String(x).match(/\d+/)?.[0];
 
 /** Is the field attested by the description (otherwise it cannot be expected from the text)? */
@@ -123,7 +130,7 @@ function evidenced(field, text) {
   const p = field.path;
   if (p === "rarities") return field.value.some((r) => (RARITY_WORDS[r] ?? [r]).some((w) => text.includes(w)));
   if (p === "attunement") return /attunement|attuned|harmonis/.test(text);
-  if (p === "uses.autoDestroy") return /crumble|dust|destroy|consum|vanish|disappear|détruit|poussi|désintègre/.test(text);
+  if (p === "uses.autoDestroy") return /crumble|dust|destroy|consum|vanish|détruit|poussi|désintègre/.test(text);
   if (p === "weight") return new RegExp(`\\b${num(v)}\\s*(lb|pound|livre|kg)`).test(text);
   if (p === "price") return new RegExp(`\\b${num(v)}\\s*(gp|sp|cp|ep|pp|gold|silver|copper|po|pa|pc)\\b`).test(text.replace(/(\d),(\d)/g, "$1$2"));
   if (p === "uses.max") return new RegExp(`\\b${v}\\s+(charges|doses|uses|utilisations)`).test(text) || new RegExp(`(charges|utilisations)[^.]{0,20}\\b${v}\\b`).test(text);
@@ -137,7 +144,12 @@ function evidenced(field, text) {
   if (p === "activity.cast") return /\bcast|spell|lancer|sort\b/.test(text);
   if (p === "activity.heal") return /regain|hit points|heal|récup|regagn|points de vie/.test(text);
   if (p === "activity.save") return /saving throw|jet de sauvegarde|\/save/.test(text);
-  if (p.startsWith("effect.")) return v !== "0" && field.critical && /\d/.test(v) ? text.includes(num(v)) : true;
+  if (p.startsWith("effect.")) {
+    if (v === "" || v === "0") return false;
+    if (/\.mode$/.test(p)) return /advantage|avantage/.test(text);
+    if (/^-?\d+$/.test(v)) return new RegExp(`(^|[^\\d])${num(v)}([^\\d]|$)`).test(text);
+    return (WORDS[v] ?? [v]).some((w) => text.includes(w));
+  }
   return text.includes(v);
 }
 
@@ -192,7 +204,13 @@ async function measure(items, label, resolver) {
     for (const [sig, n] of proposedSet) correct += Math.min(n, truthSet.get(sig) ?? 0);
     const truthPaths = new Set(truthAll.map((x) => x.path));
     const criticalOf = new Map([...proposedAll, ...truthAll].map((x) => [signature(x), x.critical]));
-    const wrong = diff(proposedSet, truthSet).map((sig) => ({ sig, kind: truthPaths.has(sig.split("=")[0]) ? "wrong-value" : "not-in-truth", critical: Boolean(criticalOf.get(sig)) }));
+    // A proposed field absent from the truth is "true-not-in-truth" when the description attests it (incomplete truth),
+    // "unverified" otherwise (invented or over-reading); a field on a path the truth has with another value is "wrong-value".
+    const fieldOf = new Map(proposedAll.map((x) => [signature(x), x]));
+    const wrong = diff(proposedSet, truthSet).map((sig) => {
+      const kind = truthPaths.has(sig.split("=")[0]) ? "wrong-value" : (evidenced(fieldOf.get(sig), text) ? "true-not-in-truth" : "unverified");
+      return { sig, kind, critical: Boolean(criticalOf.get(sig)) };
+    });
     rows.push({
       name: item.name, lang: item.lang ?? "en", type: item.type, stratum: item.stratum, ms: Math.round(ms), ai: proposal.ai.status,
       expected: truthAll.length, proposed: proposedAll.length, hit, correct, missed: diff(truthSet, proposedSet), wrong,
@@ -211,7 +229,9 @@ async function measure(items, label, resolver) {
     recall: sum("expected") ? sum("hit") / sum("expected") : null,
     precision: sum("proposed") ? sum("correct") / sum("proposed") : null,
     criticalErrors: ok.reduce((n, r) => n + r.criticalErrors.length, 0),
-    wrongValue: count((w) => w.kind === "wrong-value"), notInTruth: count((w) => w.kind === "not-in-truth"),
+    wrongValue: count((w) => w.kind === "wrong-value"), trueNotInTruth: count((w) => w.kind === "true-not-in-truth"), unverified: count((w) => w.kind === "unverified"),
+    precisionAdjusted: sum("proposed") ? (sum("correct") + count((w) => w.kind === "true-not-in-truth")) / sum("proposed") : null,
+    criticalErrorsAdjusted: ok.reduce((n, r) => n + r.criticalErrors.filter((w) => w.kind !== "true-not-in-truth").length, 0),
     expectedFields: sum("expected"), proposedFields: sum("proposed"), hits: sum("hit"),
     deductions: { total: ok.reduce((n, r) => n + r.deduced.length, 0), correct: ok.reduce((n, r) => n + r.deduced.filter((d) => d.ok).length, 0) },
     msMedian: ms[Math.floor(ms.length / 2)] ?? null, msP95: ms[Math.floor(ms.length * 0.95)] ?? null, msMax: ms.at(-1) ?? null
@@ -220,7 +240,7 @@ async function measure(items, label, resolver) {
 }
 
 const readSet = (name) => JSON.parse(fs.readFileSync(path.join(REF, name), "utf8"));
-const FILES = { reference: ["srd-items.json", "fr-items.json"], control: ["control-en.json", "control-fr.json"] };
+const FILES = { reference: ["srd-items.json", "fr-items.json"], heldout: ["../heldout/items-en.json", "../heldout/items-fr.json"] };
 const [enFile, frFile] = FILES[SET] ?? [`${SET}-en.json`, `${SET}-fr.json`];
 const en = readSet(enFile).slice(0, LIMIT).map((i) => ({ ...i, lang: "en" }));
 const fr = fs.existsSync(path.join(REF, frFile)) ? readSet(frFile).slice(0, LIMIT).map((i) => ({ ...i, lang: "fr" })) : [];
@@ -241,8 +261,14 @@ if (fr.length) results.push(await measure(fr, `${AI ? "ai" : "rules"}-fr`, resol
 const all = { date: new Date().toISOString(), set: SET, ai: AI, model: AI ? MODEL : null, extra, results: results.map((r) => r.summary) };
 fs.mkdirSync(OUT, { recursive: true });
 const file = path.join(OUT, `${SET}-${AI ? "ai" : "rules"}.json`);
-fs.writeFileSync(file, `${JSON.stringify({ ...all, details: results }, null, 1)}\n`);
+// Per-item details of the held-out set stay out of the reports (they would show which items fail): totals only.
+const detailsDir = SET === "heldout" ? process.env.IC_HELDOUT_DETAILS : null;
+fs.writeFileSync(file, `${JSON.stringify(SET === "heldout" ? all : { ...all, details: results }, null, 1)}\n`);
+if (detailsDir) {
+  fs.mkdirSync(detailsDir, { recursive: true });
+  fs.writeFileSync(path.join(detailsDir, `heldout-${AI ? "ai" : "rules"}.json`), JSON.stringify(results, null, 1));
+}
 for (const s of all.results) {
-  console.log(`${s.label}: ${s.items} items, recall ${(s.recall * 100).toFixed(1)} %, precision ${(s.precision * 100).toFixed(1)} %, critical errors ${s.criticalErrors}, wrong value ${s.wrongValue}, not in truth ${s.notInTruth}, median ${s.msMedian} ms, p95 ${s.msP95} ms`);
+  console.log(`${s.label}: ${s.items} items, recall ${(s.recall * 100).toFixed(1)} %, precision ${(s.precision * 100).toFixed(1)} %, precision adj ${(s.precisionAdjusted * 100).toFixed(1)} %, critical ${s.criticalErrors}/${s.criticalErrorsAdjusted} (strict/adj), wrong value ${s.wrongValue}, true-not-in-truth ${s.trueNotInTruth}, unverified ${s.unverified}, median ${s.msMedian} ms, p95 ${s.msP95} ms`);
 }
 console.log("written", file);
