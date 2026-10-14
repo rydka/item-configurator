@@ -6,7 +6,7 @@
 import { clone, getPath, isPlain, leaves, randomId, setPath } from "./paths.mjs";
 
 /** Consumable types that are used once and destroyed when empty, when the text does not say otherwise. */
-export const SINGLE_USE_TYPES = ["potion", "scroll", "food", "poison"];
+export const SINGLE_USE_TYPES = ["potion", "food", "poison"];
 
 /** Prefix of the placeholder UUID given to a spell that could not be found (keeps activity indices aligned). */
 const MISSING_SPELL = "item-configurator.missing:";
@@ -64,6 +64,52 @@ function baseFragment(baseItem, type, system) {
   return fragment;
 }
 
+const wordsOf = (text) => String(text).toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+/** Is every word of `fragment` in `sentence`, in the same order? */
+function isSubsequence(fragment, sentence) {
+  const words = wordsOf(sentence);
+  let at = 0;
+  for (const word of wordsOf(fragment)) {
+    at = words.indexOf(word, at);
+    if (at < 0) return false;
+    at++;
+  }
+  return true;
+}
+
+/**
+ * Clean the plan of what the library leaves behind (the plan given back is a copy):
+ * - a utility activity with nothing in it (the library keeps the sentence of an extra damage that went to the attack);
+ * - a leftover fragment of a sentence the rules did read (e.g. "The item and is" after the weight and the price).
+ */
+function cleanPlan(plan, parser, html) {
+  const copy = clone(plan);
+  const linked = new Set((copy.effects ?? []).map((effect) => effect.activity).filter(Number.isInteger));
+  const empty = (a) => a.kind === "utility" && !a.activation && !a.attack && !a.save && !a.heal && !a.cast && !a.consume
+    && !a.extraDamage && !a.damage?.length && !a.template && !a.range && !a.target;
+  const kept = (copy.activities ?? []).filter((a) => !empty(a) || linked.has(a.index));
+  if (kept.length !== (copy.activities ?? []).length) {
+    const remap = new Map(kept.map((a, i) => [a.index, i]));
+    kept.forEach((a, i) => { a.index = i; });
+    for (const effect of copy.effects ?? []) effect.activity = remap.get(effect.activity) ?? null;
+    copy.activities = kept;
+  }
+
+  const raws = [
+    copy.details?.weight?.raw, copy.details?.price?.raw, copy.details?.weapon?.raw, copy.details?.armor?.raw,
+    copy.details?.consumable?.raw, ...(copy.activities ?? []).flatMap((a) => [a.raw, a.heal?.raw, a.cast?.raw, a.consume?.raw]),
+    ...(copy.effects ?? []).map((effect) => effect.raw)
+  ].filter(Boolean);
+  const sentences = parser.splitSentences(parser.htmlToText(html)).map((sentence) => sentence.text);
+  copy.unrecognized = (copy.unrecognized ?? []).filter(({ text }) => {
+    if (sentences.includes(text)) return true;
+    const origin = sentences.find((sentence) => isSubsequence(text, sentence));
+    return !(origin && raws.some((raw) => origin.includes(raw)));
+  });
+  return copy;
+}
+
 /** Map the resolver status of the library to the statuses the interface knows. */
 function aiStatus(fallback, plan) {
   if (!fallback) return "off";
@@ -98,11 +144,12 @@ export async function analyze({ name, html, type, value = "", subtype = "" }, {
 } = {}) {
   const started = Date.now();
   const deadline = timeoutMs ?? fallback?.timeoutMs;
-  const plan = fallback
+  const parsed = fallback
     ? await parser.parseItemAsync(name, html, {
       keys, itemType: type, fallback, signal, ...(Number.isFinite(deadline) ? { timeoutMs: deadline } : {})
     })
     : parser.parseItem(name, html, { keys, itemType: type });
+  const plan = cleanPlan(parsed, parser, html);
 
   // Deduction from the chosen type: a potion is used once and destroyed when empty (the library does not invent it)
   const consumable = plan.details?.consumable;

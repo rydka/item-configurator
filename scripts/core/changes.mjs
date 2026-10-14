@@ -89,6 +89,14 @@ const activityLabel = (activity) => ({
 const effectLabel = (effect) => ({ key: "item-configurator.Preview.ExistingEffect", data: { name: effect.name ?? "" } });
 const fieldLabel = (path, value) => ({ key: FIELD_KEY, data: { path, value: summarize(value) } });
 
+/**
+ * The attack the library adds to every weapon, whatever the text says: it carries nothing the text stated, so it must
+ * not count as something recognized (C16).
+ */
+const isDefaultAttack = (activity) => activity?.type === "attack" && !activity.damage?.parts?.length
+  && !activity.attack?.flat && !activity.activation && !activity.range && !activity.target && !activity.effects?.length
+  && !activity.consumption?.targets?.length;
+
 /** Index `n` of a descriptor path such as `activities.2`. */
 const indices = (paths, prefix) => (paths ?? []).filter((p) => p.startsWith(`${prefix}.`)).map((p) => Number(p.slice(prefix.length + 1)));
 
@@ -226,6 +234,7 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     const fresh = targets.filter((n) => !activityDup.has(n));
     push({
       group: "activities", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: d.raw, origin: d.origin,
+      ...(targets.every((n) => isDefaultAttack(proposedActivities[n])) ? { derived: true } : {}),
       ...(fresh.length ? { refs: { activities: fresh.map((n) => proposedActivities[n]._id) } } : {})
     });
   }
@@ -235,8 +244,12 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     const list = tr.effectsAligned ? indices(d.paths, "effects").filter((n) => tr.effects[n]) : tr.effects.map((_, n) => n);
     if (!list.length) continue;
     const fresh = list.filter((n) => !effectDup.has(n));
+    // Several lines of one sentence (+1 AC, +1 saves) cite it once
+    const last = entries.at(-1);
+    const repeated = last?.group === "effects" && last.cited === d.raw;
     push({
-      group: "effects", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: d.raw, origin: d.origin,
+      group: "effects", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: repeated ? "" : d.raw,
+      cited: d.raw, origin: d.origin,
       ...(fresh.length ? { refs: { effects: fresh.map((n) => tr.effects[n]._id) } } : {})
     });
   }
