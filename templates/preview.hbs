@@ -1,0 +1,58 @@
+<div class="item-configurator-body">
+<section class="intro">
+  {{#if typeChange}}<p class="type-change"><i class="fa-solid fa-right-left"></i> {{typeChange}}</p>{{/if}}
+  <p class="ai-status {{#if ai.rulesOnly}}rules-only{{/if}}"><i class="fa-solid fa-robot"></i> {{ai.text}}</p>
+</section>
+
+<div class="groups">
+  {{#each groups}}
+  <section class="group group-{{group}}">
+    <h3>{{title}}</h3>
+    <ul>
+      {{#each entries}}
+      <li class="entry action-{{action}} {{#if keep}}keep{{/if}} {{#if remove}}remove{{/if}}">
+        <div class="entry-line">
+          <span class="badge">{{actionLabel}}</span>
+          <span class="label">{{label}}</span>
+          {{#if ai}}<span class="origin ai-mark">{{localize "item-configurator.Preview.AiMark"}}</span>{{/if}}
+          {{#if base}}<span class="origin base-mark">{{localize "item-configurator.Preview.BaseMark"}}</span>{{/if}}
+        </div>
+        {{#if previous}}<div class="previous">{{localize "item-configurator.Preview.Previous"}} <code>{{previous}}</code></div>{{/if}}
+        {{#if raw}}<blockquote class="source">{{raw}}</blockquote>{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+  {{/each}}
+
+  {{#if empty}}<p class="nothing">{{localize "item-configurator.Messages.NothingRecognized"}}</p>{{/if}}
+
+  {{#if rejected.length}}
+  <section class="group group-rejected">
+    <h3>{{localize "item-configurator.Preview.Rejected"}}</h3>
+    <ul>{{#each rejected}}<li>{{label}}{{#if raw}} <blockquote class="source">{{raw}}</blockquote>{{/if}}</li>{{/each}}</ul>
+  </section>
+  {{/if}}
+
+  {{#if unrecognized.length}}
+  <section class="group group-unrecognized">
+    <h3>{{localize "item-configurator.Preview.Unrecognized"}}</h3>
+    <ul>{{#each unrecognized}}<li><blockquote class="source">{{this}}</blockquote></li>{{/each}}</ul>
+  </section>
+  {{/if}}
+</div>
+
+<footer class="preview-footer">
+  <label class="replace">
+    <input type="checkbox" name="replace" {{checked replace}}>
+    {{localize "item-configurator.Preview.Replace"}}
+  </label>
+  {{#if replace}}
+  <p class="hint warning">{{localize "item-configurator.Preview.ReplaceWarning"}}{{#if removals}} ({{removals}}){{/if}}</p>
+  {{/if}}
+  <div class="buttons">
+    <button type="button" data-action="apply" class="item-configurator-apply" {{#if empty}}disabled{{/if}}><i class="fa-solid fa-check"></i> {{localize "item-configurator.Preview.Apply"}}</button>
+    <button type="button" data-action="cancel"><i class="fa-solid fa-xmark"></i> {{localize "item-configurator.Cancel"}}</button>
+  </div>
+</footer>
+</div>

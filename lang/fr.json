@@ -37,7 +37,77 @@
     },
     "errors": {
       "wrongSystem": "Item Configurator nécessite le système dnd5e.",
-      "notAllowed": "Vous n'avez pas le droit de configurer cet objet."
+      "notAllowed": "Vous n'avez pas le droit de configurer cet objet.",
+      "parserMissing": "Item Configurator nécessite que le module Dnd5e Text Parser soit actif.",
+      "parserVersion": "Version de Dnd5e Text Parser non prise en charge : {version}.",
+      "applyFailed": "La configuration a échoué et l'objet a été restauré : {error}",
+      "analysisFailed": "L'analyse a échoué : {error}"
+    },
+    "Cancel": "Annuler",
+    "Undo": {
+      "Title": "Annuler la dernière configuration",
+      "Modified": "Cet objet a été modifié après sa configuration. Le restaurer supprimera ces modifications. Continuer ?",
+      "Done": "{name} a été restauré dans son état d'avant la configuration."
+    },
+    "TypeDialog": {
+      "Title": "Configurer depuis la description",
+      "Heading": "Configurer {name}",
+      "Hint": "Choisissez le type d'objet. La description sera lue pour proposer ses détails, ses activités et ses effets.",
+      "Type": "Type d'objet",
+      "Subtype": "Sous-type",
+      "AiOn": "L'IA locale aidera pour les phrases que les règles ne comprennent pas.",
+      "Analyzing": "Analyse de la description...",
+      "Analyze": "Analyser"
+    },
+    "Messages": {
+      "EmptyDescription": "Cet objet n'a pas de description à lire.",
+      "NothingRecognized": "Rien n'a pu être reconnu dans la description. L'objet n'a pas été modifié.",
+      "Applied": "{name} a été configuré."
+    },
+    "Preview": {
+      "Title": "Aperçu de la configuration",
+      "Heading": "Aperçu : {name}",
+      "Invalid": "Proposition invalide ignorée ({path}) : {error}",
+      "Action": {
+        "add": "Ajouter",
+        "set": "Définir",
+        "replace": "Remplacer",
+        "remove": "Supprimer",
+        "keep": "Conservé"
+      },
+      "Group": {
+        "details": "Détails",
+        "activities": "Activités",
+        "effects": "Effets"
+      },
+      "TypeChange": "L'objet sera converti de {from} en {to}.",
+      "Ai": {
+        "off": "Règles seules (IA désactivée).",
+        "unreachable": "Règles seules (l'IA n'est pas joignable depuis ce navigateur).",
+        "timeout": "Règles seules (l'IA a été trop lente).",
+        "error": "Règles seules (l'IA a rendu une réponse inutilisable).",
+        "ok": "IA utilisée pour les phrases non reconnues ({model})."
+      },
+      "AiMark": "(IA)",
+      "BaseMark": "(objet de base)",
+      "Previous": "Actuellement :",
+      "Rejected": "Ignorés",
+      "Unrecognized": "Non interprétées",
+      "Replace": "Remplacer l'existant",
+      "ReplaceWarning": "Les valeurs existantes, ainsi que les activités ou effets de chaque groupe ayant une proposition, seront remplacés. Vous pourrez annuler ensuite.",
+      "Apply": "Appliquer"
+    },
+    "AiSettings": {
+      "MenuName": "IA locale",
+      "MenuLabel": "Configurer l'IA",
+      "MenuHint": "Activer l'IA locale, choisir l'adresse d'Ollama, le modèle et le délai maximal.",
+      "Title": "IA locale",
+      "Auto": "Automatique",
+      "NotInstalled": "non installé",
+      "Test": "Tester",
+      "Reachable": "Ollama est joignable. Modèles installés",
+      "Unreachable": "Ollama n'est pas joignable à cette adresse.",
+      "Save": "Enregistrer"
     }
   }
 }

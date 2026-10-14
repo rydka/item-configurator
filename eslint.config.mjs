@@ -13,10 +13,15 @@ const foundryGlobals = {
   fromUuid: "readonly",
   fromUuidSync: "readonly",
   ChatMessage: "readonly",
-  Roll: "readonly"
+  Roll: "readonly",
+  Item: "readonly",
+  ActiveEffect: "readonly",
+  _replace: "readonly",
+  _del: "readonly"
 };
 
 export default [
+  { ignores: [".atelier/**", "node_modules/**"] },
   js.configs.recommended,
   {
     files: ["scripts/**/*.{js,mjs}"],

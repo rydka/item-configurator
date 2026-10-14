@@ -1,3 +1,60 @@
 /* Scope every rule under a module-specific class to avoid clashing with other modules. */
-.item-configurator {
+
+/* Header buttons of the item sheet. */
+.item-configurator-configure.disabled,
+.item-configurator-undo.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
+
+.item-configurator [hidden] { display: none !important; }
+
+.item-configurator .hint { margin: 0 0 0.5rem; font-size: var(--font-size-12); opacity: 0.8; }
+.item-configurator .form-footer,
+.item-configurator .preview-footer .buttons { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem; }
+
+.item-configurator.preview .group h3 { font-size: var(--font-size-16); }
+
+/* Type window. */
+.item-configurator.type-dialog .busy-note { display: none; }
+.item-configurator.type-dialog.busy .busy-note { display: block; }
+.item-configurator.type-dialog .notes { font-size: var(--font-size-12); opacity: 0.8; }
+
+/* Preview window. */
+.item-configurator.preview .intro p { margin: 0 0 0.25rem; }
+.item-configurator.preview .ai-status.rules-only { color: var(--color-warm-2, #a60); }
+.item-configurator.preview .groups { max-height: 55vh; overflow-y: auto; padding-right: 0.25rem; }
+.item-configurator.preview .group h3 { margin: 0.5rem 0 0.25rem; border-bottom: 1px solid var(--color-border-light-2, #999); }
+.item-configurator.preview .group ul { list-style: none; margin: 0; padding: 0; }
+.item-configurator.preview .entry { margin-bottom: 0.4rem; }
+.item-configurator.preview .entry-line { display: flex; gap: 0.4rem; align-items: baseline; flex-wrap: wrap; }
+.item-configurator.preview .badge {
+  font-size: var(--font-size-11);
+  text-transform: uppercase;
+  padding: 0 0.3rem;
+  border-radius: 3px;
+  background: var(--color-cool-4, #468);
+  color: #fff;
+}
+.item-configurator.preview .action-set .badge,
+.item-configurator.preview .action-replace .badge { background: var(--color-warm-2, #a60); }
+.item-configurator.preview .action-keep .badge { background: var(--color-dark-5, #666); }
+.item-configurator.preview .action-remove .badge { background: var(--color-level-error, #b22); }
+.item-configurator.preview .entry.remove .label { text-decoration: line-through; }
+.item-configurator.preview .entry.keep { opacity: 0.7; }
+.item-configurator.preview .origin { font-size: var(--font-size-11); font-weight: bold; }
+.item-configurator.preview .ai-mark { color: var(--color-level-info, #36c); }
+.item-configurator.preview .source {
+  margin: 0.15rem 0 0 0.4rem;
+  padding: 0 0 0 0.5rem;
+  border-left: 2px solid var(--color-border-light-2, #999);
+  font-style: italic;
+  font-size: var(--font-size-12);
+}
+.item-configurator.preview .previous { font-size: var(--font-size-12); margin-left: 0.4rem; }
+.item-configurator.preview .preview-footer { margin-top: 0.5rem; }
+.item-configurator.preview .preview-footer .warning { color: var(--color-warm-2, #a60); }
+
+/* AI settings window. */
+.item-configurator.ai-settings .connection.ok { color: var(--color-level-success, #2a2); }
+.item-configurator.ai-settings .connection.ko { color: var(--color-level-error, #b22); }

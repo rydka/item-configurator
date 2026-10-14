@@ -1,0 +1,34 @@
+<div class="item-configurator-body">
+<div class="form-group">
+  <label>{{localize "item-configurator.settings.aiEnabled.name"}}</label>
+  <div class="form-fields"><input type="checkbox" name="aiEnabled" {{checked enabled}}></div>
+  <p class="hint">{{localize "item-configurator.settings.aiEnabled.hint"}}</p>
+</div>
+<div class="form-group">
+  <label>{{localize "item-configurator.settings.ollamaUrl.name"}}</label>
+  <div class="form-fields"><input type="text" name="ollamaUrl" value="{{url}}"></div>
+  <p class="hint">{{localize "item-configurator.settings.ollamaUrl.hint"}}</p>
+</div>
+<div class="form-group">
+  <label>{{localize "item-configurator.settings.ollamaModel.name"}}</label>
+  <div class="form-fields">
+    <select name="ollamaModel">
+      <option value="" {{#unless model}}selected{{/unless}}>{{localize "item-configurator.AiSettings.Auto"}}</option>
+      {{#each models}}<option value="{{name}}" {{#if selected}}selected{{/if}}>{{name}}{{#if missing}} ({{localize "item-configurator.AiSettings.NotInstalled"}}){{/if}}</option>{{/each}}
+    </select>
+    <button type="button" data-action="test"><i class="fa-solid fa-plug"></i> {{localize "item-configurator.AiSettings.Test"}}</button>
+  </div>
+  <p class="hint">{{localize "item-configurator.settings.ollamaModel.hint"}}</p>
+  <p class="connection {{#if reachable}}ok{{else}}ko{{/if}}">
+    {{#if reachable}}{{localize "item-configurator.AiSettings.Reachable"}} ({{modelCount}}){{else}}{{localize "item-configurator.AiSettings.Unreachable"}}{{/if}}
+  </p>
+</div>
+<div class="form-group">
+  <label>{{localize "item-configurator.settings.aiTimeout.name"}}</label>
+  <div class="form-fields"><input type="number" name="aiTimeout" value="{{timeout}}" min="{{min}}" max="{{max}}" step="1"></div>
+  <p class="hint">{{localize "item-configurator.settings.aiTimeout.hint"}}</p>
+</div>
+<footer class="form-footer">
+  <button type="submit"><i class="fa-solid fa-floppy-disk"></i> {{localize "item-configurator.AiSettings.Save"}}</button>
+</footer>
+</div>

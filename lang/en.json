@@ -37,7 +37,77 @@
     },
     "errors": {
       "wrongSystem": "Item Configurator requires the dnd5e system.",
-      "notAllowed": "You are not allowed to configure this item."
+      "notAllowed": "You are not allowed to configure this item.",
+      "parserMissing": "Item Configurator requires the Dnd5e Text Parser module to be active.",
+      "parserVersion": "Unsupported Dnd5e Text Parser version: {version}.",
+      "applyFailed": "The configuration failed and the item was restored: {error}",
+      "analysisFailed": "The analysis failed: {error}"
+    },
+    "Cancel": "Cancel",
+    "Undo": {
+      "Title": "Undo last configuration",
+      "Modified": "This item was modified after it was configured. Restoring it will discard those changes. Continue?",
+      "Done": "{name} was restored to its state before the configuration."
+    },
+    "TypeDialog": {
+      "Title": "Configure from description",
+      "Heading": "Configure {name}",
+      "Hint": "Choose what kind of item this is. The description will be read to propose its details, activities and effects.",
+      "Type": "Item type",
+      "Subtype": "Subtype",
+      "AiOn": "The local AI will help with the sentences the rules do not understand.",
+      "Analyzing": "Analyzing the description...",
+      "Analyze": "Analyze"
+    },
+    "Messages": {
+      "EmptyDescription": "This item has no description to read.",
+      "NothingRecognized": "Nothing could be recognized in the description. The item was not modified.",
+      "Applied": "{name} was configured."
+    },
+    "Preview": {
+      "Title": "Configuration preview",
+      "Heading": "Preview: {name}",
+      "Invalid": "Invalid proposal ignored ({path}): {error}",
+      "Action": {
+        "add": "Add",
+        "set": "Set",
+        "replace": "Replace",
+        "remove": "Remove",
+        "keep": "Kept"
+      },
+      "Group": {
+        "details": "Details",
+        "activities": "Activities",
+        "effects": "Effects"
+      },
+      "TypeChange": "The item will be converted from {from} to {to}.",
+      "Ai": {
+        "off": "Rules only (AI disabled).",
+        "unreachable": "Rules only (the AI is not reachable from this browser).",
+        "timeout": "Rules only (the AI took too long).",
+        "error": "Rules only (the AI returned an unusable answer).",
+        "ok": "AI used for unrecognized sentences ({model})."
+      },
+      "AiMark": "(AI)",
+      "BaseMark": "(base item)",
+      "Previous": "Currently:",
+      "Rejected": "Ignored",
+      "Unrecognized": "Not interpreted",
+      "Replace": "Replace existing",
+      "ReplaceWarning": "Existing values and the activities or effects of any group with a proposal will be replaced. You can undo afterwards.",
+      "Apply": "Apply"
+    },
+    "AiSettings": {
+      "MenuName": "Local AI",
+      "MenuLabel": "Configure the AI",
+      "MenuHint": "Enable the local AI, choose the Ollama address, the model and the time limit.",
+      "Title": "Local AI",
+      "Auto": "Automatic",
+      "NotInstalled": "not installed",
+      "Test": "Test",
+      "Reachable": "Ollama is reachable. Installed models",
+      "Unreachable": "Ollama is not reachable at this address.",
+      "Save": "Save"
     }
   }
 }
