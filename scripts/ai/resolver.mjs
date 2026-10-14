@@ -4,7 +4,7 @@
  */
 import * as ollama from "./ollama.mjs";
 import {
-  ACTIVATIONS, ATTUNEMENTS, BONUS_KINDS, EFFECT_KINDS, PERIODS, buildMessages, buildSchema, enumFor, isQuoted
+  ACTIVATIONS, BONUS_KINDS, EFFECT_KINDS, FACT_KINDS, PERIODS, buildMessages, buildSchema, enumFor, evidenceProblem, isQuoted, worthAsking
 } from "./prompt.mjs";
 
 const PROBE_CACHE_MS = 60000;
@@ -20,7 +20,6 @@ function effectScopes(kind, keys) {
     case "vulnerability": return enumFor(keys, "damageTypes");
     case "immunity": return [...enumFor(keys, "damageTypes"), ...enumFor(keys, "conditionTypes")];
     case "save": case "check": return [...enumFor(keys, "abilities"), "all"];
-    case "advantage": case "disadvantage": return [...enumFor(keys, "abilities"), ...enumFor(keys, "skills"), "all"];
     case "abilityScore": return enumFor(keys, "abilities");
     case "speed": return ["walk", "fly", "swim", "climb", "burrow"];
     case "attack": case "damage": return ["mwak", "rwak", "msak", "rsak", "all"];
@@ -60,6 +59,11 @@ export function toFacts(json, request, keys) {
     const reject = reason => rejected.push({ kind: String(kind), evidence, reason });
     if ( !fact || (typeof fact !== "object") ) { reject("not an object"); continue; }
     if ( !isQuoted(evidence, request.sentence) ) { reject("evidence not found in the sentence"); continue; }
+    if ( ["detail", "advantage", "disadvantage"].includes(kind) || ["advantage", "disadvantage"].includes(fact.effectKind) ) {
+      reject("kind not allowed for the model (rarity, attunement, advantage, disadvantage)"); continue;
+    }
+    if ( !FACT_KINDS.includes(kind) ) { reject("unsupported kind"); continue; }
+    const before = structuredClone(facts);
     const single = name => (facts[name] ? (reject(`duplicate ${name}`), false) : true);
 
     switch ( kind ) {
@@ -140,30 +144,23 @@ export function toFacts(json, request, keys) {
           kind: fact.effectKind, scope, raw: evidence,
           value: bonus ? `${(fact.amount >= 0) ? "+" : ""}${fact.amount}` : (fact.amount ?? null)
         };
-        if ( ["advantage", "disadvantage"].includes(fact.effectKind) ) {
-          effect.on = has(keys, "skills", scope) ? "skill" : (fact.on === "save" ? "save" : "check");
-        }
         (facts.effects ??= []).push(effect);
-        break;
-      }
-      case "detail": {
-        const details = (facts.details ??= {});
-        if ( fact.rarity ) {
-          if ( !has(keys, "itemRarity", fact.rarity) ) { reject("unknown rarity"); continue; }
-          details.rarity = fact.rarity;
-        } else if ( fact.attunement ) {
-          if ( !ATTUNEMENTS.includes(fact.attunement) ) { reject("unknown attunement"); continue; }
-          details.attunement = fact.attunement;
-        } else { reject("empty detail"); continue; }
         break;
       }
       default:
         reject("unsupported kind");
         continue;
     }
+    // The quote must justify the fact (key word of its kind, every number it reports)
+    const problem = evidenceProblem(fact, evidence);
+    if ( problem ) {
+      for ( const key of Object.keys(facts) ) delete facts[key];
+      Object.assign(facts, before);
+      reject(problem);
+      continue;
+    }
     accepted++;
   }
-  if ( facts.details && !Object.keys(facts.details).length ) delete facts.details;
   return { facts, rejected, accepted };
 }
 
@@ -217,7 +214,9 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
       return results;
     };
     try {
-      if ( !list.length ) return finish("ok");
+      // Only a sentence with a number or a key word can hold a mechanic the rules missed
+      const asked = list.map((request, at) => ({ request, at })).filter(({ request }) => worthAsking(request.sentence));
+      if ( !asked.length ) return finish("ok");
       if ( signal?.aborted ) return finish("aborted");
       if ( !(await reachable(signal)) ) return finish(signal?.aborted ? "aborted" : "unreachable");
       const name = await ensureModel(signal);
@@ -225,7 +224,7 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
       run.model = name;
 
       const answer = await ollama.chat(url, {
-        model: name, format: buildSchema(keys), options: MODEL_OPTIONS, messages: buildMessages(list)
+        model: name, format: buildSchema(keys), options: MODEL_OPTIONS, messages: buildMessages(asked.map(({ request }) => request))
       }, { fetch, signal, timeoutMs });
       if ( !answer.ok ) {
         if ( answer.status === "unreachable" ) probe = null;
@@ -236,11 +235,13 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
 
       for ( const entry of entries ) {
         const index = entry?.index;
-        if ( !isInt(index, 0, list.length - 1) || results[index] ) continue;
-        const { facts, rejected, accepted } = toFacts(entry, list[index], keys);
-        for ( const r of rejected ) run.rejected.push({ index, sentence: list[index].sentence, ...r });
+        if ( !isInt(index, 0, asked.length - 1) ) continue;
+        const { at, request } = asked[index];
+        if ( results[at] ) continue;
+        const { facts, rejected, accepted } = toFacts(entry, request, keys);
+        for ( const r of rejected ) run.rejected.push({ index: at, sentence: request.sentence, ...r });
         if ( !accepted ) continue;
-        results[index] = { facts, confidence: accepted / (accepted + rejected.length) };
+        results[at] = { facts, confidence: accepted / (accepted + rejected.length) };
       }
       return finish("ok");
     } catch(err) {
