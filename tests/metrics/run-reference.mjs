@@ -244,7 +244,7 @@ async function measure(items, label, resolver) {
 const readSet = (name) => JSON.parse(fs.readFileSync(path.join(REF, name), "utf8"));
 const FILES = { reference: ["srd-items.json", "fr-items.json"], heldout: ["../heldout/items-en.json", "../heldout/items-fr.json"],
   "set-b": ["../set-b/items-en.json", "../set-b/items-fr.json"] };
-const [enFile, frFile] = FILES[SET] ?? [`${SET}-en.json`, `${SET}-fr.json`];
+const [enFile, frFile] = FILES[SET] ?? [`../${SET}/items-en.json`, `../${SET}/items-fr.json`];
 const en = readSet(enFile).slice(0, LIMIT).map((i) => ({ ...i, lang: "en" }));
 const fr = fs.existsSync(path.join(REF, frFile)) ? readSet(frFile).slice(0, LIMIT).map((i) => ({ ...i, lang: "fr" })) : [];
 
