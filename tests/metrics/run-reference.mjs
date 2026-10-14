@@ -240,7 +240,8 @@ async function measure(items, label, resolver) {
 }
 
 const readSet = (name) => JSON.parse(fs.readFileSync(path.join(REF, name), "utf8"));
-const FILES = { reference: ["srd-items.json", "fr-items.json"], heldout: ["../heldout/items-en.json", "../heldout/items-fr.json"] };
+const FILES = { reference: ["srd-items.json", "fr-items.json"], heldout: ["../heldout/items-en.json", "../heldout/items-fr.json"],
+  "set-b": ["../set-b/items-en.json", "../set-b/items-fr.json"] };
 const [enFile, frFile] = FILES[SET] ?? [`${SET}-en.json`, `${SET}-fr.json`];
 const en = readSet(enFile).slice(0, LIMIT).map((i) => ({ ...i, lang: "en" }));
 const fr = fs.existsSync(path.join(REF, frFile)) ? readSet(frFile).slice(0, LIMIT).map((i) => ({ ...i, lang: "fr" })) : [];
@@ -262,11 +263,11 @@ const all = { date: new Date().toISOString(), set: SET, ai: AI, model: AI ? MODE
 fs.mkdirSync(OUT, { recursive: true });
 const file = path.join(OUT, `${SET}-${AI ? "ai" : "rules"}.json`);
 // Per-item details of the held-out set stay out of the reports (they would show which items fail): totals only.
-const detailsDir = SET === "heldout" ? process.env.IC_HELDOUT_DETAILS : null;
-fs.writeFileSync(file, `${JSON.stringify(SET === "heldout" ? all : { ...all, details: results }, null, 1)}\n`);
+const detailsDir = SET !== "reference" ? process.env.IC_HELDOUT_DETAILS : null;
+fs.writeFileSync(file, `${JSON.stringify(SET !== "reference" ? all : { ...all, details: results }, null, 1)}\n`);
 if (detailsDir) {
   fs.mkdirSync(detailsDir, { recursive: true });
-  fs.writeFileSync(path.join(detailsDir, `heldout-${AI ? "ai" : "rules"}.json`), JSON.stringify(results, null, 1));
+  fs.writeFileSync(path.join(detailsDir, `${SET}-${AI ? "ai" : "rules"}.json`), JSON.stringify(results, null, 1));
 }
 for (const s of all.results) {
   console.log(`${s.label}: ${s.items} items, recall ${(s.recall * 100).toFixed(1)} %, precision ${(s.precision * 100).toFixed(1)} %, precision adj ${(s.precisionAdjusted * 100).toFixed(1)} %, critical ${s.criticalErrors}/${s.criticalErrorsAdjusted} (strict/adj), wrong value ${s.wrongValue}, true-not-in-truth ${s.trueNotInTruth}, unverified ${s.unverified}, median ${s.msMedian} ms, p95 ${s.msP95} ms`);
