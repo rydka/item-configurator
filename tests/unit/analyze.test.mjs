@@ -217,7 +217,9 @@ describe("AI fallback (C9, C10)", () => {
   const SENTENCE = "The blade glows with an eerie light whenever orcs are within 60 feet of you.";
   const html = p("Weapon (any sword), rare", SENTENCE);
   const answer = (facts) => ({ message: { content: JSON.stringify({ results: [{ index: 0, facts }] }) } });
-  const fact = { kind: "effect", evidence: "glows with an eerie light", effectKind: "resistance", scope: "cold" };
+  const fact = { kind: "effect", evidence: "within 60 feet of you", effectKind: "speed", scope: "fly", amount: 60 };
+  // The quote does not contain the key word of a resistance: rejected by the hardened validation
+  const unjustified = { kind: "effect", evidence: "glows with an eerie light", effectKind: "resistance", scope: "cold" };
   const resolverFor = (fetch, timeoutMs = 300) => createOllamaResolver({ url: "http://x", fetch, keys: K, timeoutMs });
 
   it("the rules alone leave the sentence unrecognized", async () => {
@@ -235,8 +237,15 @@ describe("AI fallback (C9, C10)", () => {
     expect(proposal.ai).toMatchObject({ status: "ok", model: "llama3.1:8b" });
     expect(proposal.ai.calls).toBeGreaterThan(0);
     expect(cs.entries.some((e) => e.origin === "fallback")).toBe(true);
-    expect(changesOf(cs)).toContain("system.traits.dr.value=cold");
-    expect(cs.entries.find((e) => e.origin === "fallback").raw).toContain("glows with an eerie light");
+    expect(cs.effects.add).toHaveLength(1);
+    expect(cs.entries.find((e) => e.origin === "fallback").raw).toContain("within 60 feet of you");
+  });
+  it("a fact whose quote does not justify it is rejected with its reason", async () => {
+    const resolver = resolverFor(fakeFetch({ chat: answer([unjustified]) }));
+    const { changeSet: cs } = await run({ html, type: "weapon", value: "martialM" }, { fallback: resolver });
+    expect(cs.effects.add).toEqual([]);
+    expect(resolver.lastRun.rejected[0].reason).toMatch(/key word of a resistance/);
+    expect(cs.unrecognized.map((u) => u.text)).toContain(SENTENCE);
   });
   it("rules are never replaced by the AI: rule entries are identical with and without it", async () => {
     const rules = await run({ html, type: "weapon", value: "martialM" });

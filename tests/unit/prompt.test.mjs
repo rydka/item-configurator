@@ -19,7 +19,12 @@ describe("buildSchema (C9)", () => {
     expect(fact.properties.damageType.enum).toContain("necrotic");
     expect(fact.properties.damageType.enum).not.toContain("vorpal");
     expect(fact.properties.ability.enum.sort()).toEqual(["cha", "con", "dex", "int", "str", "wis"]);
-    expect(fact.properties.rarity.enum).toContain("veryRare");
+    // rarity and attunement are read by the rules only: the model cannot report them
+    expect(fact.properties.rarity).toBeUndefined();
+    expect(fact.properties.attunement).toBeUndefined();
+    expect(fact.properties.kind.enum).not.toContain("detail");
+    expect(fact.properties.effectKind.enum).not.toContain("advantage");
+    expect(fact.properties.effectKind.enum).not.toContain("disadvantage");
     expect(fact.properties.scope.enum).toEqual(expect.arrayContaining(["fire", "str", "ste", "mwak", "walk", "all"]));
   });
   it("falls back to the defaults without keys", () => {

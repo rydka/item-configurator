@@ -4,12 +4,12 @@
   "Vous pouvez utiliser une action bonus pour lancer boule de feu (DD 15) une fois par repos long."
  ],
  "requestModel": "llama3.1:8b",
- "elapsedMs": 1460,
+ "elapsedMs": 1311,
  "response": {
   "model": "llama3.1:8b",
   "message": {
    "role": "assistant",
-   "content": "{\"results\":[{\"index\":0,\"facts\":[{\"kind\":\"activation\",\"evidence\":\"une action bonus\",\"number\":1,\"period\":\"lr\"}]}]}"
+   "content": "{\"results\":[{\"index\":0,\"facts\":[{\"kind\":\"activation\",\"evidence\":\"une action bonus\",\"number\":1,\"period\":\"dawn\"}]}]}"
   },
   "done": true
  }

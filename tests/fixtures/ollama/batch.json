@@ -6,12 +6,12 @@
   "The cloak smells faintly of lavender."
  ],
  "requestModel": "llama3.1:8b",
- "elapsedMs": 4205,
+ "elapsedMs": 3960,
  "response": {
   "model": "llama3.1:8b",
   "message": {
    "role": "assistant",
-   "content": "{\n  \"results\": [\n    {\"index\":0,\"facts\":[{\"kind\":\"heal\",\"evidence\":\"2d4 + 2 hit points\",\"number\":2,\"denomination\":4,\"damageType\":\"bludgeoning\"}]},\n    {\"index\":1,\"facts\":[{\"kind\":\"save\",\"evidence\":\"DC 12 Constitution saving throw\",\"ability\":\"con\",\"dc\":12,\"onSave\":\"none\"},{\"kind\":\"damage\",\"evidence\":\"3d6 poison damage\",\"number\":3,\"denomination\":6,\"damageType\":\"poison\"}]},\n    {\"index\":2,\"facts\":[]}\n  ]\n}"
+   "content": "{\n  \"results\": [\n    {\"index\":0,\"facts\":[{\"kind\":\"heal\",\"evidence\":\"2d4 + 2 hit points\",\"number\":2,\"denomination\":4,\"damageType\":\"bludgeoning\"}]},\n    {\"index\":1,\"facts\":[{\"kind\":\"save\",\"evidence\":\"DC 12 Constitution saving throw\",\"ability\":\"con\",\"dc\":12},{\"kind\":\"damage\",\"evidence\":\"3d6 poison damage\",\"number\":3,\"denomination\":6,\"damageType\":\"poison\"}]},\n    {\"index\":2,\"facts\":[]}\n  ]\n}"
   },
   "done": true
  }

@@ -13,7 +13,7 @@ describe("settings (C10, C11)", () => {
     const defs = Object.fromEntries([...game.settings.settings].map(([k, d]) => [k.replace("item-configurator.", ""), d]));
     expect(Object.keys(defs).sort()).toEqual(["aiEnabled", "aiTimeout", "allowPlayers", "ollamaModel", "ollamaUrl"]);
     expect(defs.allowPlayers).toMatchObject({ default: true, scope: "world", config: true });
-    expect(defs.aiEnabled.default).toBe(true);
+    expect(defs.aiEnabled.default).toBe(false); // the local AI is opt-in
     expect(defs.ollamaUrl.default).toBe("http://localhost:11434");
     expect(defs.ollamaModel.default).toBe("");
     expect(defs.aiTimeout.default).toBe(20);
@@ -23,7 +23,7 @@ describe("settings (C10, C11)", () => {
     const { registerSettings, getAiConfig } = await load();
     registerSettings();
     const set = (k, v) => game.settings.set("item-configurator", k, v);
-    expect(getAiConfig()).toEqual({ enabled: true, url: "http://localhost:11434", model: "", timeoutMs: 20000 });
+    expect(getAiConfig()).toEqual({ enabled: false, url: "http://localhost:11434", model: "", timeoutMs: 20000 });
     await set("aiTimeout", 1);
     expect(getAiConfig().timeoutMs).toBe(3000);
     await set("aiTimeout", 9999);
@@ -34,8 +34,8 @@ describe("settings (C10, C11)", () => {
     expect(getAiConfig().url).toBe("http://host:1234");
     await set("ollamaUrl", "");
     expect(getAiConfig().url).toBe("http://localhost:11434");
-    await set("aiEnabled", false);
-    expect(getAiConfig().enabled).toBe(false);
+    await set("aiEnabled", true);
+    expect(getAiConfig().enabled).toBe(true);
   });
   it("playersAllowed follows the setting", async () => {
     const { registerSettings, playersAllowed } = await load();

@@ -89,13 +89,34 @@ describe("toFacts (C9)", () => {
       rejects({ kind: "effect", evidence: "extra 2d6", effectKind: "resistance", scope: "str" }, /scope/);
       rejects({ kind: "effect", evidence: "extra 2d6", effectKind: "ac", scope: undefined }, /amount|scope/);
     });
-    it("detail: unknown rarity, empty detail", () => {
-      rejects({ kind: "detail", evidence: "extra 2d6", rarity: "mythic" }, /rarity/);
-      rejects({ kind: "detail", evidence: "extra 2d6" }, /empty detail/);
+    it("the model may not report rarity, attunement, advantage or disadvantage", () => {
+      rejects({ kind: "detail", evidence: "extra 2d6", rarity: "rare" }, /not allowed/);
+      rejects({ kind: "detail", evidence: "extra 2d6", attunement: "required" }, /not allowed/);
+      rejects({ kind: "effect", evidence: "extra 2d6", effectKind: "advantage", scope: "all" }, /not allowed/);
+      rejects({ kind: "effect", evidence: "extra 2d6", effectKind: "disadvantage", scope: "all" }, /not allowed/);
+    });
+    it("the quote must contain the key word of the kind of fact", () => {
+      rejects(dmg({ evidence: "extra 2d6 necrotic" }), /key word/);
+      rejects({ kind: "save", evidence: "extra 2d6 necrotic", ability: "wis", dc: 15 }, /key word/);
+      rejects({ kind: "uses", evidence: "Once per turn, a hit", max: 3, period: "day" }, /number 3/);
+    });
+    it("the quote must contain every number the fact reports", () => {
+      const sentence = "Make a DC 15 Wisdom saving throw or take 3d6 poison damage.";
+      rejects({ kind: "save", evidence: "Wisdom saving throw", ability: "wis", dc: 15 }, /number 15/, sentence);
+      rejects({ kind: "damage", evidence: "3d6 poison damage", number: 2, denomination: 6, damageType: "poison" }, /dice 2d6/, sentence);
+      rejects({ kind: "consume", evidence: "take 3d6 poison damage", amount: 2 }, /key word|number 2/, sentence);
+      const ok = toFacts([{ kind: "save", evidence: "DC 15 Wisdom saving throw", ability: "wis", dc: 15 }], { sentence }, K);
+      expect(ok.accepted).toBe(1);
+    });
+    it("a rejected fact leaves no trace in the accepted facts", () => {
+      const r = toFacts([dmg({ number: 3 })], req, K);
+      expect(r.facts).toEqual({});
+      expect(r.rejected[0].reason).toMatch(/dice 3d6/);
     });
     it("a second single fact (save) is rejected as duplicate", () => {
-      const save = { kind: "save", evidence: "extra 2d6", ability: "wis", dc: 15 };
-      const r = toFacts([save, save], req, K);
+      const sentence = "Make a DC 15 Wisdom saving throw.";
+      const save = { kind: "save", evidence: "DC 15 Wisdom saving throw", ability: "wis", dc: 15 };
+      const r = toFacts([save, save], { sentence }, K);
       expect(r.accepted).toBe(1);
       expect(r.rejected[0].reason).toMatch(/duplicate/);
     });
@@ -133,16 +154,14 @@ describe("toFacts (C9)", () => {
       expect(r.facts.extraDamage).toMatchObject({ number: 2, denomination: 6, type: "fire" });
       expect(r.facts.damage).toBeUndefined();
     });
-    it("effects and details", () => {
-      const sentence = "You have resistance to cold damage. Rare, requires attunement.";
+    it("effects", () => {
+      const sentence = "You have resistance to cold damage.";
       const r = toFacts([
-        { kind: "effect", evidence: "resistance to cold damage", effectKind: "resistance", scope: "cold" },
-        { kind: "detail", evidence: "Rare", rarity: "rare" },
-        { kind: "detail", evidence: "requires attunement", attunement: "required" }
+        { kind: "effect", evidence: "resistance to cold damage", effectKind: "resistance", scope: "cold" }
       ], { sentence }, K);
       expect(r.rejected).toEqual([]);
       expect(r.facts.effects).toEqual([{ kind: "resistance", value: null, scope: "cold", raw: "resistance to cold damage" }]);
-      expect(r.facts.details).toEqual({ rarity: "rare", attunement: "required" });
+      expect(r.facts.details).toBeUndefined();
     });
   });
 });
@@ -186,12 +205,22 @@ describe("createOllamaResolver on recorded and handwritten answers (C9, C10)", (
   it("sends one chat request for all sentences with schema and options", async () => {
     const { resolver, requests, fetch } = make("batch");
     expect(requests).toHaveLength(3);
-    await resolver.resolveMany(requests);
+    const out = await resolver.resolveMany(requests);
     const chats = fetch.calls.filter((c) => c.url.endsWith("/api/chat"));
     expect(chats).toHaveLength(1);
     expect(chats[0].body).toMatchObject({ model: "llama3.1:8b", stream: false, options: { temperature: 0, seed: 0 } });
     expect(chats[0].body.format.properties.results).toBeDefined();
-    expect(chats[0].body.messages[1].content).toContain("[2] The cloak smells faintly of lavender.");
+    // The flavor sentence has no number nor key word: it is not sent (and the others keep their own index)
+    expect(chats[0].body.messages[1].content).not.toContain("lavender");
+    expect(chats[0].body.messages[1].content).toContain("[1] A creature must make a DC 12");
+    expect(out[2]).toBeNull();
+  });
+  it("no request at all when no sentence has a number or a key word", async () => {
+    const r = replay("no-mechanics");
+    const resolver = createOllamaResolver({ url: "http://x", fetch: r.fetch, keys: K });
+    const out = await resolver.resolveMany(r.requests);
+    expect(out.status).toBe("ok");
+    expect(r.fetch.calls).toHaveLength(0);
   });
   it("recorded answers: only validated facts come out, flawed ones are reported", async () => {
     for (const name of ["single-damage", "save-condition", "uses-recharge", "french", "no-mechanics", "batch"]) {

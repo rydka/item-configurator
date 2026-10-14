@@ -26,8 +26,7 @@
           "activation",
           "consume",
           "cast",
-          "effect",
-          "detail"
+          "effect"
          ]
         },
         "evidence": {
@@ -68,13 +67,6 @@
         },
         "charges": {
          "type": "integer"
-        },
-        "on": {
-         "type": "string",
-         "enum": [
-          "save",
-          "check"
-         ]
         },
         "attackType": {
          "type": "string",
@@ -148,8 +140,6 @@
           "resistance",
           "immunity",
           "vulnerability",
-          "advantage",
-          "disadvantage",
           "abilityScore",
           "speed"
          ]
@@ -222,24 +212,6 @@
           "climb",
           "burrow",
           "all"
-         ]
-        },
-        "rarity": {
-         "type": "string",
-         "enum": [
-          "common",
-          "uncommon",
-          "rare",
-          "veryRare",
-          "legendary",
-          "artifact"
-         ]
-        },
-        "attunement": {
-         "type": "string",
-         "enum": [
-          "required",
-          "optional"
          ]
         }
        },

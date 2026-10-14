@@ -4,7 +4,7 @@
   "Once per turn, a hit with this weapon deals an extra 2d6 necrotic damage."
  ],
  "requestModel": "llama3.1:8b",
- "elapsedMs": 6372,
+ "elapsedMs": 16677,
  "response": {
   "model": "llama3.1:8b",
   "message": {
