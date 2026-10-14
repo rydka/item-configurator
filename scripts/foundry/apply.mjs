@@ -1,5 +1,7 @@
 /** Validation against the dnd5e data model, and application of a change set. */
 import { MODULE_ID } from "../constants.mjs";
+import { pruneChangeSet } from "../core/changes.mjs";
+import { ID_PATTERN } from "../core/paths.mjs";
 import { UNDO_FLAG, makeSnapshot } from "../core/snapshot.mjs";
 import { restoreItem } from "./undo.mjs";
 
@@ -21,7 +23,8 @@ function check(fn) {
 
 /**
  * Dry-run the change set against the dnd5e data model (strict). Whatever is invalid is removed from the change set
- * and reported in `rejected` (it is never applied).
+ * and reported in `rejected` (it is never applied), and the preview entries that described it are dropped.
+ * Document ids are checked here too: `item.validate` does not notice an invalid activity `_id`.
  * @param {Item} item
  * @param {object} changeSet
  * @returns {Promise<object>}  A new change set.
@@ -34,24 +37,34 @@ export async function validateChangeSet(item, changeSet) {
     ? new Item.implementation({ name: item.name, type: result.typeChange.to, system: foundry.utils.deepClone(result.typeChange.system) })
     : item;
 
+  const removed = { paths: [], activities: [], effects: [] };
+  const badId = (id) => (ID_PATTERN.test(String(id ?? "")) ? null : `invalid document id "${id}"`);
+
   for (const [path, value] of Object.entries(result.systemPatch ?? {})) {
     const error = check(() => model.validate({ changes: { [path]: value }, strict: true }));
     if (!error) continue;
     delete result.systemPatch[path];
+    removed.paths.push(path);
     result.rejected.push(invalidEntry("details", path, error));
   }
   result.activities.add = (result.activities?.add ?? []).filter((activity) => {
     const path = `system.activities.${activity._id}`;
-    const error = check(() => model.validate({ changes: { [path]: activity }, strict: true }));
-    if (error) result.rejected.push(invalidEntry("activities", path, error));
+    const error = badId(activity._id) ?? check(() => model.validate({ changes: { [path]: activity }, strict: true }));
+    if (error) {
+      removed.activities.push(activity._id);
+      result.rejected.push(invalidEntry("activities", path, error));
+    }
     return !error;
   });
   result.effects.add = (result.effects?.add ?? []).filter((effect) => {
-    const error = check(() => new ActiveEffect.implementation(effect, { parent: item, strict: true }));
-    if (error) result.rejected.push(invalidEntry("effects", effect.name ?? effect._id ?? "effect", error));
+    const error = badId(effect._id) ?? check(() => new ActiveEffect.implementation(effect, { parent: item, strict: true }));
+    if (error) {
+      removed.effects.push(effect._id);
+      result.rejected.push(invalidEntry("effects", effect.name ?? effect._id ?? "effect", error));
+    }
     return !error;
   });
-  return result;
+  return pruneChangeSet(result, removed);
 }
 
 const created = (data) => ({ ...data, flags: { ...data.flags, [MODULE_ID]: { ...data.flags?.[MODULE_ID], created: true } } });

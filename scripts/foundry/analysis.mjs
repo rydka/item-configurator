@@ -82,6 +82,31 @@ async function guessBaseItem(item, type) {
   }
 }
 
+const SPELL_PACKS = ["dnd5e.spells24", "dnd5e.spells"];
+let spellIndex = null;
+
+/**
+ * Name -> UUID lookup for the spells an item can cast ("you can cast fireball from it"), built from the dnd5e spell
+ * compendiums. The index is only loaded when the description talks about casting. English names only.
+ * @returns {Promise<function(string): (string|null)|undefined>}
+ */
+async function spellResolver(parser, html) {
+  if (!/\b(cast|lanc|incant)/i.test(descriptionText(html))) return undefined;
+  if (!spellIndex) {
+    const map = new Map();
+    for (const id of SPELL_PACKS) {
+      const pack = game.packs.get(id);
+      if (!pack) continue;
+      for (const entry of await pack.getIndex()) {
+        const key = parser.nameKey(entry.name);
+        if (!map.has(key)) map.set(key, entry.uuid);
+      }
+    }
+    spellIndex = map;
+  }
+  return (name) => spellIndex.get(parser.nameKey(name)) ?? null;
+}
+
 /**
  * Analyze an item's description.
  * @param {Item} item
@@ -107,7 +132,10 @@ export async function runAnalysis(item, { type, value = "", subtype = "", replac
 
   const proposal = await analyze(
     { name: item.name, html: item.system?.description?.value ?? "", type, value, subtype, source },
-    { parser, keys, fallback, signal, idGen: () => foundry.utils.randomID(), baseItem: await guessBaseItem(item, type) }
+    {
+      parser, keys, fallback, signal, idGen: () => foundry.utils.randomID(), baseItem: await guessBaseItem(item, type),
+      resolveSpell: await spellResolver(parser, item.system?.description?.value ?? "")
+    }
   );
   proposal.durationMs = performance.now() - started;
 
