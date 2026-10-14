@@ -4,12 +4,12 @@
   "The staff has 7 charges and regains 1d6 + 1 expended charges daily at dawn."
  ],
  "requestModel": "llama3.1:8b",
- "elapsedMs": 1616,
+ "elapsedMs": 3791,
  "response": {
   "model": "llama3.1:8b",
   "message": {
    "role": "assistant",
-   "content": "{ \"results\": [ { \"index\": 0, \"facts\": [ { \"kind\": \"consume\", \"evidence\": \"expended charges\" } ] } ] }"
+   "content": "{\n  \"results\": [\n    {\n      \"index\": 0,\n      \"facts\": [\n        {\n          \"kind\": \"uses\",\n          \"evidence\": \"7 charges\",\n          \"max\": 7,\n          \"period\": \"dawn\"\n        },\n        {\n          \"kind\": \"consume\",\n          \"evidence\": \"1d6 + 1 expended charges\",\n          \"amount\": 1,\n          \"scope\": \"exhaustion\"\n        }\n      ]\n    }\n  ]\n}"
   },
   "done": true
  }

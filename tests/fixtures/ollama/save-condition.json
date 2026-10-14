@@ -4,12 +4,12 @@
   "A creature hit must succeed on a DC 15 Wisdom saving throw or be frightened."
  ],
  "requestModel": "llama3.1:8b",
- "elapsedMs": 1743,
+ "elapsedMs": 2485,
  "response": {
   "model": "llama3.1:8b",
   "message": {
    "role": "assistant",
-   "content": "{ \"results\": [ { \"index\": 0, \"facts\": [ { \"kind\": \"save\", \"evidence\": \"Wisdom saving throw\", \"ability\": \"wis\", \"dc\": 15 } ] } ] }"
+   "content": "{\n  \"results\": [\n    {\n      \"index\": 0,\n      \"facts\": [\n        {\n          \"kind\": \"save\",\n          \"evidence\": \"DC 15 Wisdom saving throw\",\n          \"ability\": \"wis\",\n          \"dc\": 15,\n          \"onSave\": \"none\"\n        }\n      ]\n    }\n  ]\n}"
   },
   "done": true
  }

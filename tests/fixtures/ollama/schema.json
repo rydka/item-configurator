@@ -19,6 +19,7 @@
          "enum": [
           "attack",
           "damage",
+          "extraDamage",
           "save",
           "heal",
           "uses",
@@ -32,8 +33,14 @@
         "evidence": {
          "type": "string"
         },
-        "dice": {
-         "type": "string"
+        "number": {
+         "type": "integer"
+        },
+        "denomination": {
+         "type": "integer"
+        },
+        "bonus": {
+         "type": "integer"
         },
         "damageType": {
          "type": "string",
@@ -53,6 +60,36 @@
           "thunder"
          ]
         },
+        "spell": {
+         "type": "string"
+        },
+        "level": {
+         "type": "integer"
+        },
+        "charges": {
+         "type": "integer"
+        },
+        "on": {
+         "type": "string",
+         "enum": [
+          "save",
+          "check"
+         ]
+        },
+        "attackType": {
+         "type": "string",
+         "enum": [
+          "melee",
+          "ranged"
+         ]
+        },
+        "classification": {
+         "type": "string",
+         "enum": [
+          "weapon",
+          "spell"
+         ]
+        },
         "ability": {
          "type": "string",
          "enum": [
@@ -67,21 +104,24 @@
         "dc": {
          "type": "integer"
         },
-        "uses": {
+        "onSave": {
+         "type": "string",
+         "enum": [
+          "half",
+          "none"
+         ]
+        },
+        "max": {
          "type": "integer"
         },
         "period": {
          "type": "string",
          "enum": [
-          "lr",
-          "sr",
           "day",
           "dawn",
           "dusk",
-          "initiative",
-          "turnStart",
-          "turnEnd",
-          "turn"
+          "sr",
+          "lr"
          ]
         },
         "activation": {
@@ -90,38 +130,116 @@
           "action",
           "bonus",
           "reaction",
-          "minute",
-          "hour",
-          "day",
-          "longRest",
-          "shortRest",
-          "encounter",
-          "turnStart",
-          "turnEnd",
           "legendary",
-          "mythic",
-          "lair",
-          "crew",
           "special"
          ]
         },
-        "condition": {
+        "cost": {
+         "type": "integer"
+        },
+        "effectKind": {
          "type": "string",
          "enum": [
-          "burrowing",
-          "concentrating",
-          "coverHalf",
-          "coverThreeQuarters",
-          "coverTotal",
-          "dead",
-          "dodging",
-          "ethereal",
-          "flying",
-          "hiding",
-          "hovering",
-          "marked",
-          "sleeping",
-          "stable"
+          "ac",
+          "attack",
+          "damage",
+          "save",
+          "check",
+          "resistance",
+          "immunity",
+          "vulnerability",
+          "advantage",
+          "disadvantage",
+          "abilityScore",
+          "speed"
+         ]
+        },
+        "amount": {
+         "type": "integer"
+        },
+        "scope": {
+         "type": "string",
+         "enum": [
+          "str",
+          "dex",
+          "con",
+          "int",
+          "wis",
+          "cha",
+          "acr",
+          "ani",
+          "arc",
+          "ath",
+          "dec",
+          "his",
+          "ins",
+          "itm",
+          "inv",
+          "med",
+          "nat",
+          "prc",
+          "prf",
+          "per",
+          "rel",
+          "slt",
+          "ste",
+          "sur",
+          "acid",
+          "bludgeoning",
+          "cold",
+          "fire",
+          "force",
+          "lightning",
+          "necrotic",
+          "piercing",
+          "poison",
+          "psychic",
+          "radiant",
+          "slashing",
+          "thunder",
+          "blinded",
+          "charmed",
+          "deafened",
+          "exhaustion",
+          "frightened",
+          "grappled",
+          "incapacitated",
+          "invisible",
+          "paralyzed",
+          "petrified",
+          "poisoned",
+          "prone",
+          "restrained",
+          "stunned",
+          "unconscious",
+          "mwak",
+          "rwak",
+          "msak",
+          "rsak",
+          "walk",
+          "fly",
+          "swim",
+          "climb",
+          "burrow",
+          "all"
+         ]
+        },
+        "rarity": {
+         "type": "string",
+         "enum": [
+          "common",
+          "uncommon",
+          "rare",
+          "veryRare",
+          "legendary",
+          "artifact"
+         ]
+        },
+        "attunement": {
+         "type": "string",
+         "enum": [
+          "required",
+          "optional"
          ]
         }
        },

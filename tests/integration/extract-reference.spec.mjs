@@ -44,7 +44,8 @@ test("extract the reference set and the config snapshots", async ({ foundry }) =
       "lootTypes", "miscEquipmentTypes", "itemProperties", "spellSchools", "scalingModes", "limitedUsePeriods",
       "attackClassifications", "attackModes", "weaponProficiencies", "armorProficiencies", "currencies",
       "timePeriods", "movementTypes", "senses", "damageModifiers", "creatureTypes", "areaTargetTypes",
-      "individualTargetTypes", "distanceUnits", "attackTypes", "itemActionTypes", "saves"]) {
+      "individualTargetTypes", "distanceUnits", "attackTypes", "itemActionTypes", "saves", "attunementTypes",
+      "conditionTypes", "weaponMasteries", "equipmentTypes", "weaponIds", "armorIds", "activityTypes"]) {
       if (C[name]) keys[name] = dict(C[name]);
     }
     const typeConfig = {

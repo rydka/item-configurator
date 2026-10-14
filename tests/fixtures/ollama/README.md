@@ -4,4 +4,4 @@ Recorded or hand-written answers of `POST /api/chat` (envelope `{ description, s
 
 - Recorded with `node tests/metrics/record-ollama.mjs` (model `llama3.1:8b`, temperature 0, seed 0): `single-damage`, `save-condition`, `uses-recharge`, `french`, `no-mechanics`, `batch`. They keep the model's real flaws (missing dice, wrong kind) on purpose: the validator must not trust them.
 - Hand-written (`"handcrafted": true`): `valid`, `citation-absent`, `unknown-key`, `out-of-bounds`, `unknown-kind`, `invalid-json`, `wrong-index`, `empty`.
-- `schema.json` is the JSON schema sent as `format`, built from `../reference/keys.json`. The fact field names (`dice`, `damageType`, `ability`, `dc`...) are the tester's assumption; align them with `scripts/ai/resolver.mjs` once written.
+- `schema.json` is `buildSchema(keys)` of `scripts/ai/prompt.mjs` (keys from `../reference/keys.json`), the `format` sent to Ollama. Fact fields follow `resolver.mjs` (`number`, `denomination`, `bonus`, `damageType`, `ability`, `dc`, `max`, `period`, `activation`, `effectKind`, `amount`, `scope`...). Recorded fixtures use the module prompt (`record-ollama.mjs`).

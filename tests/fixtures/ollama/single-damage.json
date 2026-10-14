@@ -4,12 +4,12 @@
   "Once per turn, a hit with this weapon deals an extra 2d6 necrotic damage."
  ],
  "requestModel": "llama3.1:8b",
- "elapsedMs": 2076,
+ "elapsedMs": 6372,
  "response": {
   "model": "llama3.1:8b",
   "message": {
    "role": "assistant",
-   "content": "{ \"results\": [ { \"index\": 0, \"facts\": [ { \"kind\": \"damage\", \"evidence\": \"extra 2d6 necrotic damage\" } ] } ] }"
+   "content": "{\n  \"results\": [\n    {\n      \"index\": 0,\n      \"facts\": [\n        {\n          \"kind\": \"extraDamage\",\n          \"evidence\": \"2d6 necrotic damage\",\n          \"number\": 2,\n          \"denomination\": 6,\n          \"damageType\": \"necrotic\"\n        }\n      ]\n    }\n  ]\n}"
   },
   "done": true
  }

@@ -8,7 +8,7 @@
   "model": "llama3.1:8b",
   "message": {
    "role": "assistant",
-   "content": "{\"results\":[{\"index\":0,\"facts\":[{\"kind\":\"damage\",\"dice\":\"2d6\",\"damageType\":\"vorpal\",\"evidence\":\"extra 2d6 necrotic damage\"}]}]}"
+   "content": "{\"results\":[{\"index\":0,\"facts\":[{\"kind\":\"damage\",\"number\":2,\"denomination\":6,\"damageType\":\"vorpal\",\"evidence\":\"extra 2d6 necrotic damage\"}]}]}"
   },
   "done": true
  }
