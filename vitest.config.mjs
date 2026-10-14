@@ -7,6 +7,7 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
+      reportOnFailure: true,
       include: ["scripts/core/**", "scripts/ai/**"],
       reporter: ["text-summary", "text"],
       thresholds: { lines: 90 }
