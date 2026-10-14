@@ -47,6 +47,8 @@ export function canonChange(key, value) {
   if ((m = key.match(/^system\.bonuses\.(mwak|rwak|msak|rsak)\.(attack|damage)$/))) return [{ path: `bonus.${m[2]}.${m[1]}`, value: v }];
   if ((m = key.match(/^system\.rolls\.(attack|damage)\.(mwak|rwak|msak|rsak)\.bonus$/))) return [{ path: `bonus.${m[1]}.${m[2]}`, value: v }];
   if ((m = key.match(/^system\.rolls\.(attack|damage)\.bonus$/))) return SCOPES.map((scope) => ({ path: `bonus.${m[1]}.${scope}`, value: v }));
+  // A speed bonus is written as movement.bonus by the parser and as movement.walk (add) by the compendium: same fact.
+  if (key === "system.attributes.movement.bonus") return [{ path: "system.attributes.movement.walk", value: v }];
   return [{ path: key, value: v }];
 }
 
