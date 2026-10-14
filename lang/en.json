@@ -1,13 +1,43 @@
 {
   "item-configurator": {
     "settings": {
-      "enabled": {
-        "name": "Enable Item Configurator",
-        "hint": "Turn the module's features on or off for this world."
+      "allowPlayers": {
+        "name": "Players can configure their items",
+        "hint": "Let players configure the items they own from the item description. The Game Master can always do it."
+      },
+      "aiEnabled": {
+        "name": "Use the local AI",
+        "hint": "Send the sentences the rules do not understand to a local Ollama model."
+      },
+      "ollamaUrl": {
+        "name": "Ollama address",
+        "hint": "Address of the Ollama server, as seen from the Game Master's browser."
+      },
+      "ollamaModel": {
+        "name": "Model",
+        "hint": "Ollama model used for the AI. Leave on automatic to pick the best installed model."
+      },
+      "aiTimeout": {
+        "name": "AI time limit (seconds)",
+        "hint": "After this delay the configuration continues with the rules alone."
       }
     },
+    "Type": {
+      "consumable": "Consumable",
+      "weapon": "Weapon",
+      "equipment": "Armor or equipment",
+      "tool": "Tool",
+      "loot": "Loot",
+      "container": "Container"
+    },
+    "Button": {
+      "Configure": "Configure from description",
+      "Undo": "Undo last configuration",
+      "LockedPack": "This item is in a locked compendium. Unlock the compendium to configure it."
+    },
     "errors": {
-      "wrongSystem": "Item Configurator requires the dnd5e system."
+      "wrongSystem": "Item Configurator requires the dnd5e system.",
+      "notAllowed": "You are not allowed to configure this item."
     }
   }
 }

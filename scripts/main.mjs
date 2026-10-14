@@ -1,22 +1,7 @@
-export const MODULE_ID = "item-configurator";
+import { MODULE_ID } from "./constants.mjs";
+import { registerSettings } from "./settings.mjs";
 
-/**
- * Register module settings. Called on the `init` hook.
- */
-export function registerSettings() {
-  game.settings.register(MODULE_ID, "enabled", {
-    name: `${MODULE_ID}.settings.enabled.name`,
-    hint: `${MODULE_ID}.settings.enabled.hint`,
-    scope: "world",
-    config: true,
-    type: Boolean,
-    default: true
-  });
-}
-
-export function isEnabled() {
-  return game.settings.get(MODULE_ID, "enabled");
-}
+export { MODULE_ID };
 
 Hooks.once("init", () => {
   registerSettings();

@@ -13,6 +13,16 @@
     "verified": "14"
   },
   "relationships": {
+    "requires": [
+      {
+        "id": "dnd5e-text-parser",
+        "type": "module",
+        "compatibility": {
+          "minimum": "1.0.0",
+          "verified": "1.0.0"
+        }
+      }
+    ],
     "systems": [
       {
         "id": "dnd5e",

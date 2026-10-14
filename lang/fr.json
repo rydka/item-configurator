@@ -1,13 +1,43 @@
 {
   "item-configurator": {
     "settings": {
-      "enabled": {
-        "name": "Activer Item Configurator",
-        "hint": "Active ou désactive les fonctionnalités du module pour ce monde."
+      "allowPlayers": {
+        "name": "Les joueurs peuvent configurer leurs objets",
+        "hint": "Permet aux joueurs de configurer les objets qu'ils possèdent à partir de leur description. Le MJ le peut toujours."
+      },
+      "aiEnabled": {
+        "name": "Utiliser l'IA locale",
+        "hint": "Envoie les phrases que les règles ne comprennent pas à un modèle Ollama local."
+      },
+      "ollamaUrl": {
+        "name": "Adresse d'Ollama",
+        "hint": "Adresse du serveur Ollama, vue depuis le navigateur du MJ."
+      },
+      "ollamaModel": {
+        "name": "Modèle",
+        "hint": "Modèle Ollama utilisé pour l'IA. Laisser en automatique pour choisir le meilleur modèle installé."
+      },
+      "aiTimeout": {
+        "name": "Délai maximal de l'IA (secondes)",
+        "hint": "Passé ce délai, la configuration continue avec les règles seules."
       }
     },
+    "Type": {
+      "consumable": "Consommable",
+      "weapon": "Arme",
+      "equipment": "Armure ou équipement",
+      "tool": "Outil",
+      "loot": "Butin",
+      "container": "Contenant"
+    },
+    "Button": {
+      "Configure": "Configurer depuis la description",
+      "Undo": "Annuler la dernière configuration",
+      "LockedPack": "Cet objet est dans un compendium verrouillé. Déverrouillez le compendium pour le configurer."
+    },
     "errors": {
-      "wrongSystem": "Item Configurator nécessite le système dnd5e."
+      "wrongSystem": "Item Configurator nécessite le système dnd5e.",
+      "notAllowed": "Vous n'avez pas le droit de configurer cet objet."
     }
   }
 }

@@ -5,10 +5,15 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "dnd5e-text-parser": "file:../dnd5e-text-parser"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^5.0.4",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
     "vitest": "^5.0.4"
