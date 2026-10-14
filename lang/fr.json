@@ -68,6 +68,12 @@
       "Title": "Aperçu de la configuration",
       "Heading": "Aperçu : {name}",
       "Invalid": "Proposition invalide ignorée ({path}) : {error}",
+      "ExistingActivity": "Activité existante : {name} ({type})",
+      "ExistingEffect": "Effet existant : {name}",
+      "NotApplicable": "{what} : sans objet pour ce type d'objet ({type})",
+      "Deduced": {
+        "SingleUse": "Une seule utilisation, détruit une fois vide (déduit du type : {type})"
+      },
       "Action": {
         "add": "Ajouter",
         "set": "Définir",

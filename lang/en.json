@@ -68,6 +68,12 @@
       "Title": "Configuration preview",
       "Heading": "Preview: {name}",
       "Invalid": "Invalid proposal ignored ({path}): {error}",
+      "ExistingActivity": "Existing activity: {name} ({type})",
+      "ExistingEffect": "Existing effect: {name}",
+      "NotApplicable": "{what}: not applicable to this item type ({type})",
+      "Deduced": {
+        "SingleUse": "Single use, destroyed when empty (deduced from the type: {type})"
+      },
       "Action": {
         "add": "Add",
         "set": "Set",
