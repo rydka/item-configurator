@@ -1,0 +1,16 @@
+{
+ "description": "save-condition",
+ "sentences": [
+  "A creature hit must succeed on a DC 15 Wisdom saving throw or be frightened."
+ ],
+ "requestModel": "llama3.1:8b",
+ "elapsedMs": 1743,
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{ \"results\": [ { \"index\": 0, \"facts\": [ { \"kind\": \"save\", \"evidence\": \"Wisdom saving throw\", \"ability\": \"wis\", \"dc\": 15 } ] } ] }"
+  },
+  "done": true
+ }
+}

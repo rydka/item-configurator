@@ -1,0 +1,16 @@
+{
+ "description": "french",
+ "sentences": [
+  "Vous pouvez utiliser une action bonus pour lancer boule de feu (DD 15) une fois par repos long."
+ ],
+ "requestModel": "llama3.1:8b",
+ "elapsedMs": 1753,
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{ \"results\": [ { \"index\": 0, \"facts\": [ { \"kind\": \"attack\", \"evidence\": \"boule de feu (DD 15)\" } ] } ] }"
+  },
+  "done": true
+ }
+}

@@ -1,0 +1,145 @@
+{
+ "type": "object",
+ "properties": {
+  "results": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "index": {
+      "type": "integer"
+     },
+     "facts": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "kind": {
+         "type": "string",
+         "enum": [
+          "attack",
+          "damage",
+          "save",
+          "heal",
+          "uses",
+          "activation",
+          "consume",
+          "cast",
+          "effect",
+          "detail"
+         ]
+        },
+        "evidence": {
+         "type": "string"
+        },
+        "dice": {
+         "type": "string"
+        },
+        "damageType": {
+         "type": "string",
+         "enum": [
+          "acid",
+          "bludgeoning",
+          "cold",
+          "fire",
+          "force",
+          "lightning",
+          "necrotic",
+          "piercing",
+          "poison",
+          "psychic",
+          "radiant",
+          "slashing",
+          "thunder"
+         ]
+        },
+        "ability": {
+         "type": "string",
+         "enum": [
+          "str",
+          "dex",
+          "con",
+          "int",
+          "wis",
+          "cha"
+         ]
+        },
+        "dc": {
+         "type": "integer"
+        },
+        "uses": {
+         "type": "integer"
+        },
+        "period": {
+         "type": "string",
+         "enum": [
+          "lr",
+          "sr",
+          "day",
+          "dawn",
+          "dusk",
+          "initiative",
+          "turnStart",
+          "turnEnd",
+          "turn"
+         ]
+        },
+        "activation": {
+         "type": "string",
+         "enum": [
+          "action",
+          "bonus",
+          "reaction",
+          "minute",
+          "hour",
+          "day",
+          "longRest",
+          "shortRest",
+          "encounter",
+          "turnStart",
+          "turnEnd",
+          "legendary",
+          "mythic",
+          "lair",
+          "crew",
+          "special"
+         ]
+        },
+        "condition": {
+         "type": "string",
+         "enum": [
+          "burrowing",
+          "concentrating",
+          "coverHalf",
+          "coverThreeQuarters",
+          "coverTotal",
+          "dead",
+          "dodging",
+          "ethereal",
+          "flying",
+          "hiding",
+          "hovering",
+          "marked",
+          "sleeping",
+          "stable"
+         ]
+        }
+       },
+       "required": [
+        "kind",
+        "evidence"
+       ]
+      }
+     }
+    },
+    "required": [
+     "index",
+     "facts"
+    ]
+   }
+  }
+ },
+ "required": [
+  "results"
+ ]
+}

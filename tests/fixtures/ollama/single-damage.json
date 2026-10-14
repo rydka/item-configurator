@@ -1,0 +1,16 @@
+{
+ "description": "single-damage",
+ "sentences": [
+  "Once per turn, a hit with this weapon deals an extra 2d6 necrotic damage."
+ ],
+ "requestModel": "llama3.1:8b",
+ "elapsedMs": 2076,
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{ \"results\": [ { \"index\": 0, \"facts\": [ { \"kind\": \"damage\", \"evidence\": \"extra 2d6 necrotic damage\" } ] } ] }"
+  },
+  "done": true
+ }
+}

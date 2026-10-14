@@ -1,0 +1,18 @@
+{
+ "description": "batch",
+ "sentences": [
+  "When you drink this potion you regain 2d4 + 2 hit points.",
+  "A creature must make a DC 12 Constitution saving throw or take 3d6 poison damage.",
+  "The cloak smells faintly of lavender."
+ ],
+ "requestModel": "llama3.1:8b",
+ "elapsedMs": 5755,
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{ \"results\": [\n  { \"index\": 0, \"facts\": [\n    { \"kind\": \"heal\", \"evidence\": \"regain 2d4 + 2 hit points\" },\n    { \"kind\": \"heal\", \"evidence\": \"2d4 + 2 hit points\" }\n  ] },\n  { \"index\": 1, \"facts\": [\n    { \"kind\": \"save\", \"evidence\": \"DC 12 Constitution saving throw\", \"ability\": \"con\", \"dc\": 12 },\n    { \"kind\": \"damage\", \"evidence\": \"take 3d6 poison damage\", \"dice\": \"3d6\", \"damageType\": \"poison\" }\n  ] },\n  { \"index\": 2, \"facts\": [] }\n] }"
+  },
+  "done": true
+ }
+}

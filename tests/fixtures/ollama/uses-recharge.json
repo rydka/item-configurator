@@ -1,0 +1,16 @@
+{
+ "description": "uses-recharge",
+ "sentences": [
+  "The staff has 7 charges and regains 1d6 + 1 expended charges daily at dawn."
+ ],
+ "requestModel": "llama3.1:8b",
+ "elapsedMs": 1616,
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{ \"results\": [ { \"index\": 0, \"facts\": [ { \"kind\": \"consume\", \"evidence\": \"expended charges\" } ] } ] }"
+  },
+  "done": true
+ }
+}

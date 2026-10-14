@@ -1,0 +1,15 @@
+{
+ "description": "Truncated JSON: whole answer rejected, rules only, no exception",
+ "handcrafted": true,
+ "sentences": [
+  "Once per turn, a hit with this weapon deals an extra 2d6 necrotic damage."
+ ],
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{ \"results\": [ { \"index\": 0, \"facts\": ["
+  },
+  "done": true
+ }
+}

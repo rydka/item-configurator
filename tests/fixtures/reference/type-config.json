@@ -1,0 +1,81 @@
+{
+ "itemTypes": [
+  "container",
+  "consumable",
+  "equipment",
+  "loot",
+  "tool",
+  "weapon"
+ ],
+ "subtypes": {
+  "weapon": [
+   "simpleM",
+   "simpleR",
+   "martialM",
+   "martialR",
+   "natural",
+   "improv",
+   "siege"
+  ],
+  "equipment": [
+   "clothing",
+   "heavy",
+   "light",
+   "medium",
+   "natural",
+   "ring",
+   "rod",
+   "shield",
+   "trinket",
+   "vehicle",
+   "wand",
+   "wondrous"
+  ],
+  "consumable": [
+   "ammo",
+   "food",
+   "poison",
+   "potion",
+   "rod",
+   "scroll",
+   "trinket",
+   "wand",
+   "wondrous"
+  ],
+  "tool": [
+   "art",
+   "game",
+   "music"
+  ],
+  "loot": [
+   "art",
+   "gear",
+   "gem",
+   "junk",
+   "material",
+   "resource",
+   "trade",
+   "treasure"
+  ],
+  "container": []
+ },
+ "activityTypes": [
+  "attack",
+  "cast",
+  "check",
+  "damage",
+  "enchant",
+  "forward",
+  "heal",
+  "order",
+  "save",
+  "summon",
+  "teleport",
+  "transform",
+  "utility"
+ ],
+ "versions": {
+  "foundry": "14.369",
+  "dnd5e": "6.0.6"
+ }
+}
