@@ -23,7 +23,7 @@ export function registerSettings({ aiMenu } = {}) {
     config: true, type: Boolean, default: true
   }));
   game.settings.register(MODULE_ID, "aiEnabled", setting("aiEnabled", {
-    config: false, type: Boolean, default: true
+    config: false, type: Boolean, default: false
   }));
   game.settings.register(MODULE_ID, "ollamaUrl", setting("ollamaUrl", {
     config: false, type: String, default: DEFAULT_OLLAMA_URL
