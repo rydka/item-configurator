@@ -71,6 +71,7 @@
       "ExistingActivity": "Existing activity: {name} ({type})",
       "ExistingEffect": "Existing effect: {name}",
       "NotApplicable": "{what}: not applicable to this item type ({type})",
+      "Chosen": "Type chosen in the window: {value}",
       "Deduced": {
         "SingleUse": "Single use, destroyed when empty (deduced from the type: {type})"
       },

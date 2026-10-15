@@ -12,8 +12,9 @@
  * }
  * Entry = { id, group: "details"|"activities"|"effects", action: "add"|"set"|"replace"|"remove"|"keep",
  *   label: { key, data } | string, value, previous, raw, origin: "rules"|"fallback"|"base",
- *   derived?: boolean, refs?: { paths?, activities?, effects? } }
+ *   derived?: boolean, chosen?: boolean, refs?: { paths?, activities?, effects? } }
  * `derived` entries come from the chosen type, the base item or a deduction, not from a sentence of the text.
+ * `chosen` entries are the type / subtype picked in the type window (`value` and `previous` are dnd5e type keys).
  */
 import { carryOverSystem } from "./convert.mjs";
 import { clone, getPath, leaves, same, setPath } from "./paths.mjs";
@@ -88,6 +89,8 @@ const activityLabel = (activity) => ({
 });
 const effectLabel = (effect) => ({ key: "item-configurator.Preview.ExistingEffect", data: { name: effect.name ?? "" } });
 const fieldLabel = (path, value) => ({ key: FIELD_KEY, data: { path, value: summarize(value) } });
+/** The type / subtype picked in the type window: that explicit choice is the consent to replace the stored one. */
+const chosenLabel = (path, value) => ({ key: "item-configurator.Preview.Chosen", data: { path, value: summarize(value) } });
 
 /**
  * The attack the library adds to every weapon, whatever the text says: it carries nothing the text stated, so it must
@@ -170,7 +173,8 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     if (claimed.length) detailEntry({ key: d.key, data: d.data }, claimed, { raw: d.raw, origin: d.origin });
   }
   for (const c of free) detailEntry(fieldLabel(c.full, c.value), [c]);
-  for (const c of candidates.filter((x) => x.chosen)) detailEntry(fieldLabel(c.full, c.value), [c], { derived: true });
+  // Shown as a change with the previous value, even without "Replace existing" (the choice was explicit)
+  for (const c of candidates.filter((x) => x.chosen)) detailEntry(chosenLabel(c.full, c.value), [c], { derived: true, chosen: true });
   for (const deduction of tr.deduced) {
     const cands = candidates.filter((c) => c.deduced === deduction);
     if (cands.length) detailEntry(deduction.label, cands, { derived: true });

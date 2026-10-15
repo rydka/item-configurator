@@ -18,6 +18,16 @@ function stringify(value) {
   return typeof value === "object" ? JSON.stringify(value) : String(value);
 }
 
+/** Localized label of a dnd5e item subtype key (`martialM`, `heavy`, `potion`...), or the key itself. */
+function subtypeLabel(key) {
+  const config = CONFIG.DND5E ?? {};
+  for (const map of [config.weaponTypes, config.equipmentTypes, config.consumableTypes, config.toolTypes, config.lootTypes]) {
+    const def = map?.[key];
+    if (def) return typeof def === "string" ? def : (def.label ?? String(key));
+  }
+  return stringify(key);
+}
+
 export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: `${MODULE_ID}-preview-{id}`,
@@ -78,9 +88,11 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       id: entry.id,
       action: entry.action,
       actionLabel: game.i18n.localize(`${MODULE_ID}.Preview.Action.${entry.action}`),
-      label: describe(entry.label),
-      value: stringify(entry.value),
-      previous: stringify(entry.previous),
+      label: entry.chosen
+        ? describe({ ...entry.label, data: { ...entry.label.data, value: subtypeLabel(entry.value) } })
+        : describe(entry.label),
+      value: entry.chosen ? subtypeLabel(entry.value) : stringify(entry.value),
+      previous: entry.chosen && entry.previous ? subtypeLabel(entry.previous) : stringify(entry.previous),
       raw: entry.raw,
       ai: entry.origin === "fallback",
       base: entry.origin === "base",

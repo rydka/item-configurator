@@ -71,6 +71,7 @@
       "ExistingActivity": "Activité existante : {name} ({type})",
       "ExistingEffect": "Effet existant : {name}",
       "NotApplicable": "{what} : sans objet pour ce type d'objet ({type})",
+      "Chosen": "Type choisi dans la fenêtre : {value}",
       "Deduced": {
         "SingleUse": "Une seule utilisation, détruit une fois vide (déduit du type : {type})"
       },
