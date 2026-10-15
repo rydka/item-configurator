@@ -1,10 +1,17 @@
-/** Settings menu of the local AI: enable, Ollama address, model (installed models), time limit (C11). */
+/**
+ * Settings menu of the AI (C11): enable, provider (Ollama or Anthropic), Ollama address and model (installed models),
+ * Anthropic model, effort and API key (kept in this browser only), time limit.
+ */
 import { MODULE_ID } from "../constants.mjs";
 import { listModels, ping } from "../ai/ollama.mjs";
-import { DEFAULT_OLLAMA_URL, DEFAULT_TIMEOUT_S, MAX_TIMEOUT_S, MIN_TIMEOUT_S, getAiConfig } from "../settings.mjs";
+import {
+  ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL, DEFAULT_EFFORT, DEFAULT_OLLAMA_URL, DEFAULT_PROVIDER, DEFAULT_TIMEOUT_S,
+  EFFORTS, MAX_TIMEOUT_S, MIN_TIMEOUT_S, PROVIDERS, getAiConfig
+} from "../settings.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const call = (...args) => globalThis.fetch(...args);
+const pick = (value, allowed, fallback) => (allowed.includes(value) ? value : fallback);
 
 export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
@@ -12,7 +19,7 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
     classes: [MODULE_ID, "ai-settings"],
     tag: "form",
     window: { title: `${MODULE_ID}.AiSettings.Title`, icon: "fa-solid fa-robot" },
-    position: { width: 460 },
+    position: { width: 480 },
     form: { handler: AiSettingsApp.#onSubmit, closeOnSubmit: true },
     actions: { test: AiSettingsApp.#onTest }
   };
@@ -26,31 +33,54 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
   async _prepareContext() {
     const saved = getAiConfig();
     const draft = this.#draft ?? {
-      enabled: saved.enabled, url: saved.url, model: saved.model, timeout: saved.timeoutMs / 1000
+      enabled: saved.enabled, provider: saved.provider, url: saved.url, model: saved.model, timeout: saved.timeoutMs / 1000,
+      apiKey: saved.apiKey, anthropicModel: saved.anthropicModel, effort: saved.effort
     };
-    // The only network access: when this window opens (or on "Test").
+    // The only network access: Ollama, when this window opens (or on "Test"). Nothing is sent to Anthropic here.
     const reachable = await ping(draft.url, { fetch: call });
     const installed = reachable ? await listModels(draft.url, { fetch: call }) : [];
     const names = new Set(installed);
     if (draft.model) names.add(draft.model);
+    const option = (list, current, label) => list.map((value) => ({ value, label: label(value), selected: value === current }));
     return {
       ...draft,
       min: MIN_TIMEOUT_S,
       max: MAX_TIMEOUT_S,
       reachable,
       modelCount: installed.length,
-      models: [...names].map((name) => ({ name, selected: name === draft.model, missing: !installed.includes(name) }))
+      models: [...names].map((name) => ({ name, selected: name === draft.model, missing: !installed.includes(name) })),
+      providers: option(PROVIDERS, draft.provider, (p) => game.i18n.localize(`${MODULE_ID}.AiSettings.Provider.${p}`)),
+      anthropicModels: option(ANTHROPIC_MODELS, draft.anthropicModel, (m) => m),
+      efforts: option(EFFORTS, draft.effort, (e) => game.i18n.localize(`${MODULE_ID}.AiSettings.Effort.${e}`)),
+      isAnthropic: draft.provider === "anthropic"
     };
   }
 
   #readForm() {
     const form = this.element;
+    const value = (name) => form.querySelector(`[name="${name}"]`)?.value ?? "";
     return {
       enabled: form.querySelector('[name="aiEnabled"]').checked,
-      url: form.querySelector('[name="ollamaUrl"]').value.trim() || DEFAULT_OLLAMA_URL,
-      model: form.querySelector('[name="ollamaModel"]').value,
-      timeout: Number(form.querySelector('[name="aiTimeout"]').value) || DEFAULT_TIMEOUT_S
+      provider: pick(value("aiProvider"), PROVIDERS, DEFAULT_PROVIDER),
+      url: value("ollamaUrl").trim() || DEFAULT_OLLAMA_URL,
+      model: value("ollamaModel"),
+      timeout: Number(value("aiTimeout")) || DEFAULT_TIMEOUT_S,
+      apiKey: value("anthropicApiKey").trim(),
+      anthropicModel: pick(value("anthropicModel"), ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL),
+      effort: pick(value("anthropicEffort"), EFFORTS, DEFAULT_EFFORT)
     };
+  }
+
+  /** @override */
+  _onRender(context, options) {
+    super._onRender(context, options);
+    const select = this.element.querySelector('[name="aiProvider"]');
+    const toggle = () => {
+      const anthropic = select.value === "anthropic";
+      for (const group of this.element.querySelectorAll(".provider-ollama")) group.hidden = anthropic;
+      for (const group of this.element.querySelectorAll(".provider-anthropic")) group.hidden = !anthropic;
+    };
+    select?.addEventListener("change", toggle);
   }
 
   static async #onTest() {
@@ -59,11 +89,16 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static async #onSubmit(event, form, formData) {
-    const { aiEnabled, ollamaUrl, ollamaModel, aiTimeout } = formData.object;
+    const { aiEnabled, aiProvider, ollamaUrl, ollamaModel, aiTimeout, anthropicApiKey, anthropicModel, anthropicEffort } = formData.object;
     const timeout = Math.min(MAX_TIMEOUT_S, Math.max(MIN_TIMEOUT_S, Number(aiTimeout) || DEFAULT_TIMEOUT_S));
     await game.settings.set(MODULE_ID, "aiEnabled", Boolean(aiEnabled));
+    await game.settings.set(MODULE_ID, "aiProvider", pick(String(aiProvider ?? ""), PROVIDERS, DEFAULT_PROVIDER));
     await game.settings.set(MODULE_ID, "ollamaUrl", String(ollamaUrl || DEFAULT_OLLAMA_URL).trim());
     await game.settings.set(MODULE_ID, "ollamaModel", String(ollamaModel ?? ""));
     await game.settings.set(MODULE_ID, "aiTimeout", timeout);
+    await game.settings.set(MODULE_ID, "anthropicModel", pick(String(anthropicModel ?? ""), ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL));
+    await game.settings.set(MODULE_ID, "anthropicEffort", pick(String(anthropicEffort ?? ""), EFFORTS, DEFAULT_EFFORT));
+    // Client scope: this browser only (never the world settings)
+    await game.settings.set(MODULE_ID, "anthropicApiKey", String(anthropicApiKey ?? "").trim());
   }
 }

@@ -2,6 +2,7 @@
  * Minimal Ollama HTTP client. `fetch` is injected, nothing runs at import, no function throws:
  * failures are returned as values. The module never calls `/api/pull`.
  */
+import { guarded } from "./guard.mjs";
 
 export const DEFAULT_URL = "http://localhost:11434";
 export const PROBE_TIMEOUT_MS = 1500;
@@ -30,32 +31,6 @@ export function pickDefaultModel(installed) {
     if ( found ) return found;
   }
   return null;
-}
-
-/**
- * Run `task(signal)` with a timeout and an optional external signal.
- * @param {number} timeoutMs
- * @param {AbortSignal} [external]
- * @param {function(AbortSignal): Promise<*>} task
- * @returns {Promise<{ value?: *, reason?: "timeout"|"aborted"|"error", error?: string }>}
- */
-async function guarded(timeoutMs, external, task) {
-  const controller = new AbortController();
-  let timedOut = false;
-  const onAbort = () => controller.abort();
-  if ( external?.aborted ) return { reason: "aborted" };
-  external?.addEventListener?.("abort", onAbort, { once: true });
-  const timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
-  try {
-    return { value: await task(controller.signal) };
-  } catch(err) {
-    if ( timedOut ) return { reason: "timeout" };
-    if ( external?.aborted || (err?.name === "AbortError") ) return { reason: "aborted" };
-    return { reason: "error", error: String(err?.message ?? err) };
-  } finally {
-    clearTimeout(timer);
-    external?.removeEventListener?.("abort", onAbort);
-  }
 }
 
 /**

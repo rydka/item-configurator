@@ -1,5 +1,6 @@
 /** Preview of the proposed changes, grouped; nothing is written before "Apply" (C12, C13). */
 import { MODULE_ID } from "../constants.mjs";
+import { AI_STATUSES } from "../core/analyze.mjs";
 import { fingerprint } from "./analysis.mjs";
 import { applyChangeSet } from "./apply.mjs";
 
@@ -108,8 +109,8 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     })).filter((g) => g.entries.length);
 
     const status = this.#proposal.ai?.status ?? "off";
-    const ai = ["off", "unreachable", "timeout", "error"].includes(status)
-      ? { text: game.i18n.localize(`${MODULE_ID}.Preview.Ai.${status}`), rulesOnly: true }
+    const ai = status !== "ok"
+      ? { text: game.i18n.localize(`${MODULE_ID}.Preview.Ai.${AI_STATUSES.includes(status) ? status : "error"}`), rulesOnly: true }
       : { text: game.i18n.format(`${MODULE_ID}.Preview.Ai.ok`, { model: this.#proposal.ai?.model ?? "" }), rulesOnly: false };
 
     const typeChange = cs.typeChange

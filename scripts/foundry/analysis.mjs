@@ -4,7 +4,7 @@
  */
 import { MODULE_ID } from "../constants.mjs";
 import { getAiConfig } from "../settings.mjs";
-import { createOllamaResolver } from "../ai/resolver.mjs";
+import { createResolver } from "../ai/resolver.mjs";
 import { validateChangeSet } from "./apply.mjs";
 
 const PARSER_URL = "/modules/dnd5e-text-parser/scripts/index.mjs";
@@ -32,16 +32,17 @@ export function descriptionText(html) {
 let cached = null;
 
 /**
- * The Ollama resolver for the current settings (shared so the probe and the picked model are reused between the
- * warm-up and the analysis), or null when the AI is disabled.
+ * The AI resolver (Ollama or Anthropic) for the current settings, shared so the Ollama probe and the picked model are
+ * reused between the warm-up and the analysis; null when the AI is disabled. The Anthropic resolver sends nothing
+ * without an API key.
  */
 export function getResolver(parser) {
   const config = getAiConfig();
   if (!config.enabled) return null;
-  const id = `${config.url}|${config.model}|${config.timeoutMs}`;
+  const id = JSON.stringify(config);
   if (cached?.id !== id) {
     const keys = parser.keysFromConfig(CONFIG.DND5E);
-    cached = { id, resolver: createOllamaResolver({ ...config, fetch: (...args) => globalThis.fetch(...args), keys }) };
+    cached = { id, resolver: createResolver({ ...config, fetch: (...args) => globalThis.fetch(...args), keys }) };
   }
   return cached.resolver;
 }

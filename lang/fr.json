@@ -6,8 +6,24 @@
         "hint": "Permet aux joueurs de configurer les objets qu'ils possèdent à partir de leur description. Le MJ le peut toujours."
       },
       "aiEnabled": {
-        "name": "Utiliser l'IA locale",
-        "hint": "Envoie les phrases que les règles ne comprennent pas à un modèle Ollama local."
+        "name": "Utiliser une IA",
+        "hint": "Envoie les phrases que les règles ne comprennent pas à une IA : un modèle Ollama local, ou Claude (Anthropic). Désactivé par défaut."
+      },
+      "aiProvider": {
+        "name": "Fournisseur d'IA",
+        "hint": "Ollama tourne sur votre machine ; Anthropic envoie les descriptions des objets aux serveurs d'Anthropic avec votre clé API."
+      },
+      "anthropicModel": {
+        "name": "Modèle Claude",
+        "hint": "Sonnet est plus rapide et moins cher ; Opus est plus capable."
+      },
+      "anthropicEffort": {
+        "name": "Effort",
+        "hint": "Combien le modèle réfléchit avant de répondre. Faible suffit pour la plupart des descriptions ; plus haut coûte plus de jetons et de temps."
+      },
+      "anthropicApiKey": {
+        "name": "Clé API Anthropic",
+        "hint": "Enregistrée dans ce navigateur seulement, jamais dans les réglages du monde. Rien n'est envoyé sans clé."
       },
       "ollamaUrl": {
         "name": "Adresse d'Ollama",
@@ -56,7 +72,7 @@
       "Hint": "Choisissez le type d'objet. La description sera lue pour proposer ses détails, ses activités et ses effets.",
       "Type": "Type d'objet",
       "Subtype": "Sous-type",
-      "AiOn": "L'IA locale aidera pour les phrases que les règles ne comprennent pas.",
+      "AiOn": "L'IA aidera pour les phrases que les règles ne comprennent pas.",
       "Analyzing": "Analyse de la description...",
       "Analyze": "Analyser"
     },
@@ -96,6 +112,10 @@
         "unreachable": "Règles seules (l'IA n'est pas joignable depuis ce navigateur).",
         "timeout": "Règles seules (l'IA a été trop lente).",
         "error": "Règles seules (l'IA a rendu une réponse inutilisable).",
+        "noKey": "Règles seules (aucune clé API Anthropic dans ce navigateur : rien n'a été envoyé).",
+        "unauthorized": "Règles seules (Anthropic a refusé la clé API : vérifiez-la dans les réglages de l'IA).",
+        "refusal": "Règles seules (l'IA a refusé de répondre ; sa réponse n'a pas été utilisée).",
+        "truncated": "Règles seules (la réponse de l'IA a été coupée ; elle n'a pas été utilisée).",
         "ok": "IA utilisée pour les phrases non reconnues ({model})."
       },
       "AiMark": "(IA)",
@@ -109,15 +129,25 @@
       "Apply": "Appliquer"
     },
     "AiSettings": {
-      "MenuName": "IA locale",
+      "MenuName": "IA",
       "MenuLabel": "Configurer l'IA",
-      "MenuHint": "Activer l'IA locale, choisir l'adresse d'Ollama, le modèle et le délai maximal.",
-      "Title": "IA locale",
+      "MenuHint": "Activer l'IA, choisir le fournisseur (Ollama local ou Claude d'Anthropic), le modèle et le délai maximal.",
+      "Title": "IA",
       "Auto": "Automatique",
       "NotInstalled": "non installé",
       "Test": "Tester",
       "Reachable": "Ollama est joignable. Modèles installés",
       "Unreachable": "Ollama n'est pas joignable à cette adresse.",
+      "Provider": {
+        "ollama": "Ollama (local)",
+        "anthropic": "Anthropic (Claude, en ligne)"
+      },
+      "Effort": {
+        "low": "Faible (par défaut)",
+        "medium": "Moyen",
+        "high": "Élevé"
+      },
+      "AnthropicWarning": "Avec ce fournisseur, les descriptions des objets que vous configurez sont envoyées à Anthropic. Seul le navigateur du MJ fait les appels.",
       "Save": "Enregistrer"
     }
   }

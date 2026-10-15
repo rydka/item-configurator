@@ -5,6 +5,9 @@
  */
 import { clone, getPath, isPlain, leaves, randomId, setPath } from "./paths.mjs";
 
+/** Resolver statuses the preview explains on their own; every other failure reads as "error". */
+export const AI_STATUSES = ["ok", "off", "timeout", "unreachable", "noKey", "unauthorized", "refusal", "truncated", "error"];
+
 /** Consumable types that are used once and destroyed when empty, when the text does not say otherwise. */
 export const SINGLE_USE_TYPES = ["potion", "food", "poison"];
 
@@ -115,7 +118,7 @@ function aiStatus(fallback, plan) {
   if (!fallback) return "off";
   const status = plan.fallback?.status ?? "unused";
   if (status === "unused" || status === "ok") return "ok";
-  if (status === "timeout" || status === "unreachable") return status;
+  if (AI_STATUSES.includes(status)) return status;
   return "error";
 }
 
@@ -219,9 +222,12 @@ export async function analyze({ name, html, type, value = "", subtype = "" }, {
     baseItem,
     ai: {
       status: aiStatus(fallback, plan),
+      provider: fallback?.provider ?? null,
       model: fallback?.lastRun?.model ?? null,
       calls: plan.fallback?.calls ?? 0,
-      ms: fallback ? now - started : 0
+      ms: fallback ? now - started : 0,
+      // Diagnostic for the cost measurement (Anthropic): tokens of the last call, never shown in the preview
+      usage: fallback?.lastRun?.usage ?? null
     },
     durationMs: now - started,
     translation: {

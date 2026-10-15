@@ -1,8 +1,10 @@
 /**
- * Ollama-backed FallbackResolver (contract of dnd5e-text-parser) with `resolveMany`.
+ * FallbackResolver (contract of dnd5e-text-parser) with `resolveMany`, backed by Ollama or by Anthropic's Claude.
+ * Both providers get the same prompt and schema (`prompt.mjs`) and the same hardened validation (`toFacts`).
  * Pure apart from the injected `fetch`. Never throws: any failure gives `null` entries and a status.
  */
 import * as ollama from "./ollama.mjs";
+import * as anthropic from "./anthropic.mjs";
 import {
   ACTIVATIONS, BONUS_KINDS, EFFECT_KINDS, FACT_KINDS, PERIODS, buildMessages, buildSchema, enumFor, evidenceProblem, isQuoted, worthAsking
 } from "./prompt.mjs";
@@ -165,7 +167,48 @@ export function toFacts(json, request, keys) {
 }
 
 /**
- * Create the resolver.
+ * Shared skeleton of a `resolveMany` run: which sentences are worth asking, the run record, and the function that
+ * closes the run with a status.
+ * @param {object[]} requests
+ * @param {{ now: function(): number, resolver: function }} context
+ */
+function startRun(requests, { now, resolver }) {
+  const started = now();
+  const list = Array.isArray(requests) ? requests : [];
+  const results = list.map(() => null);
+  const run = { status: "ok", model: null, durationMs: 0, rejected: [] };
+  const finish = status => {
+    run.status = status;
+    run.durationMs = now() - started;
+    resolver.lastRun = run;
+    results.status = run.status;
+    results.rejected = run.rejected;
+    return results;
+  };
+  // Only a sentence with a number or a key word can hold a mechanic the rules missed
+  const asked = list.map((request, at) => ({ request, at })).filter(({ request }) => worthAsking(request.sentence));
+  return { results, run, finish, asked };
+}
+
+/** Validate the entries of the model (`{ results: [{ index, facts }] }`) and fill `results`; false when malformed. */
+function collect(json, { asked, results, run, keys }) {
+  const entries = Array.isArray(json?.results) ? json.results : null;
+  if ( !entries ) return false;
+  for ( const entry of entries ) {
+    const index = entry?.index;
+    if ( !isInt(index, 0, asked.length - 1) ) continue;
+    const { at, request } = asked[index];
+    if ( results[at] ) continue;
+    const { facts, rejected, accepted } = toFacts(entry, request, keys);
+    for ( const r of rejected ) run.rejected.push({ index: at, sentence: request.sentence, ...r });
+    if ( !accepted ) continue;
+    results[at] = { facts, confidence: accepted / (accepted + rejected.length) };
+  }
+  return true;
+}
+
+/**
+ * Create the Ollama resolver.
  * @param {object} config
  * @param {string} [config.url]         Ollama address.
  * @param {string} [config.model]       Model name, "" or undefined = auto (first installed preferred model).
@@ -173,7 +216,8 @@ export function toFacts(json, request, keys) {
  * @param {function} config.fetch       Injected fetch.
  * @param {object} [config.keys]        dnd5e valid keys.
  * @param {function} [config.now]       Clock (tests).
- * @returns {function & { resolveMany: function, lastRun: object|null, ensureModel: function, warmUp: function, timeoutMs: number }}
+ * @returns {function & { resolveMany: function, lastRun: object|null, ensureModel: function, warmUp: function,
+ *   timeoutMs: number, provider: "ollama" }}
  */
 export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, keys, now = () => Date.now() } = {}) {
   let probe = null; // { at, ok }
@@ -201,21 +245,8 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
   }
 
   async function resolveMany(requests, { signal } = {}) {
-    const started = now();
-    const list = Array.isArray(requests) ? requests : [];
-    const results = list.map(() => null);
-    const run = { status: "ok", model: null, durationMs: 0, rejected: [] };
-    const finish = status => {
-      run.status = status;
-      run.durationMs = now() - started;
-      resolver.lastRun = run;
-      results.status = run.status;
-      results.rejected = run.rejected;
-      return results;
-    };
+    const { results, run, finish, asked } = startRun(requests, { now, resolver });
     try {
-      // Only a sentence with a number or a key word can hold a mechanic the rules missed
-      const asked = list.map((request, at) => ({ request, at })).filter(({ request }) => worthAsking(request.sentence));
       if ( !asked.length ) return finish("ok");
       if ( signal?.aborted ) return finish("aborted");
       if ( !(await reachable(signal)) ) return finish(signal?.aborted ? "aborted" : "unreachable");
@@ -230,19 +261,7 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
         if ( answer.status === "unreachable" ) probe = null;
         return finish(answer.status === "http" ? "error" : answer.status);
       }
-      const entries = Array.isArray(answer.json?.results) ? answer.json.results : null;
-      if ( !entries ) return finish("invalid");
-
-      for ( const entry of entries ) {
-        const index = entry?.index;
-        if ( !isInt(index, 0, asked.length - 1) ) continue;
-        const { at, request } = asked[index];
-        if ( results[at] ) continue;
-        const { facts, rejected, accepted } = toFacts(entry, request, keys);
-        for ( const r of rejected ) run.rejected.push({ index: at, sentence: request.sentence, ...r });
-        if ( !accepted ) continue;
-        results[at] = { facts, confidence: accepted / (accepted + rejected.length) };
-      }
+      if ( !collect(answer.json, { asked, results, run, keys }) ) return finish("invalid");
       return finish("ok");
     } catch(err) {
       run.error = String(err?.message ?? err);
@@ -255,6 +274,74 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
   resolver.ensureModel = ensureModel;
   resolver.warmUp = warm;
   resolver.timeoutMs = timeoutMs;
+  resolver.provider = "ollama";
   resolver.lastRun = null;
   return resolver;
+}
+
+/**
+ * Create the Anthropic (Claude) resolver. Same prompt, schema and validation as the Ollama one; nothing is sent
+ * without an API key (`lastRun.status = "noKey"`). Usable from Node with an explicit configuration (no `game`).
+ * @param {object} config
+ * @param {string} config.apiKey        Anthropic API key (client-scoped setting in Foundry).
+ * @param {string} [config.model]       `claude-sonnet-5-5` (default) or `claude-opus-5-5`.
+ * @param {string} [config.effort]      `low` (default), `medium` or `high`.
+ * @param {number} [config.timeoutMs]   Maximum duration of one call, retry included (default 20 000).
+ * @param {function} [config.fetch]     Injected fetch (defaults to the global one).
+ * @param {object} [config.keys]        dnd5e valid keys.
+ * @param {function} [config.now]       Clock (tests).
+ * @returns {function & { resolveMany: function, lastRun: object|null, ensureModel: function, warmUp: function,
+ *   timeoutMs: number, provider: "anthropic" }}
+ *   `lastRun` also carries `usage` (`{ input, output }` tokens, or null) and `retried`, for the cost measurement.
+ */
+export function createAnthropicResolver({
+  apiKey, model = anthropic.DEFAULT_MODEL, effort = anthropic.DEFAULT_EFFORT, timeoutMs = 20000,
+  fetch = (...args) => globalThis.fetch(...args), keys, now = () => Date.now()
+} = {}) {
+  const name = anthropic.MODELS.includes(model) ? model : anthropic.DEFAULT_MODEL;
+
+  async function resolveMany(requests, { signal } = {}) {
+    const { results, run, finish, asked } = startRun(requests, { now, resolver });
+    run.model = name;
+    run.usage = null;
+    run.retried = false;
+    try {
+      if ( !asked.length ) return finish("ok");
+      if ( signal?.aborted ) return finish("aborted");
+      if ( !String(apiKey ?? "").trim() ) return finish("noKey");
+
+      const [system, ...messages] = buildMessages(asked.map(({ request }) => request));
+      const answer = await anthropic.complete({ apiKey, model: name, effort }, {
+        system: system.content, messages, schema: buildSchema(keys)
+      }, { fetch, signal, timeoutMs, now });
+      run.usage = answer.usage ?? null;
+      run.retried = Boolean(answer.retried);
+      if ( answer.error ) run.error = answer.error;
+      if ( !answer.ok ) return finish(answer.status === "http" ? "error" : answer.status);
+      if ( !collect(answer.json, { asked, results, run, keys }) ) return finish("invalid");
+      return finish("ok");
+    } catch(err) {
+      run.error = String(err?.message ?? err);
+      return finish("error");
+    }
+  }
+
+  const resolver = async (request, options = {}) => (await resolveMany([request], options))[0] ?? null;
+  resolver.resolveMany = resolveMany;
+  resolver.ensureModel = async () => name;
+  resolver.warmUp = async () => false;
+  resolver.timeoutMs = timeoutMs;
+  resolver.provider = "anthropic";
+  resolver.lastRun = null;
+  return resolver;
+}
+
+/**
+ * The resolver of an AI configuration (shape of `getAiConfig()`): Ollama unless `provider` is `anthropic`.
+ * @param {object} config   `{ provider, url, model, timeoutMs, apiKey, anthropicModel, effort, fetch, keys, now }`
+ * @returns {function}
+ */
+export function createResolver(config = {}) {
+  if ( config.provider === "anthropic" ) return createAnthropicResolver({ ...config, model: config.anthropicModel });
+  return createOllamaResolver(config);
 }
