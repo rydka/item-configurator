@@ -7,11 +7,17 @@ import { applyChangeSet } from "./apply.mjs";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const GROUPS = ["details", "activities", "effects"];
 
-/** Localize a library descriptor `{ key, data }` (or a plain string). */
+/**
+ * Localize a library descriptor `{ key, data }` (or a plain string). A `null` / `undefined` placeholder value is an
+ * absent detail ("Weapon: {category} {baseItem}" for a weapon without category), not the word "null": it is blanked
+ * and the spacing collapsed.
+ */
 function describe(label) {
   if (!label) return "";
   if (typeof label === "string") return game.i18n.has(label) ? game.i18n.localize(label) : label;
-  return game.i18n.format(label.key, label.data ?? {});
+  const data = Object.fromEntries(Object.entries(label.data ?? {}).map(([k, v]) => [k, v ?? ""]));
+  return game.i18n.format(label.key, data).replace(/\s{2,}/g, " ").replace(/\s+([,:;)])/g, "$1").trim()
+    .replace(/[,:;]$/, "");
 }
 
 function stringify(value) {
