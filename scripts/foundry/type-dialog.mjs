@@ -2,7 +2,7 @@
 import { MODULE_ID } from "../constants.mjs";
 import { buildTypeChoices, guessType } from "../core/types.mjs";
 import { getAiConfig } from "../settings.mjs";
-import { descriptionText, quickPlan, runAnalysis, warmUpAi } from "./analysis.mjs";
+import { containerNotEmpty, descriptionText, quickPlan, runAnalysis, warmUpAi } from "./analysis.mjs";
 import { PreviewDialog } from "./preview-dialog.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -94,6 +94,10 @@ export class TypeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const item = this.#item;
     if (!descriptionText(item.system?.description?.value)) {
       ui.notifications.warn(game.i18n.localize(`${MODULE_ID}.Messages.EmptyDescription`));
+      return;
+    }
+    if (await containerNotEmpty(item, type)) {
+      ui.notifications.warn(game.i18n.localize(`${MODULE_ID}.Messages.ContainerNotEmpty`));
       return;
     }
     const [value, subtype = ""] = String(encoded).split("|");

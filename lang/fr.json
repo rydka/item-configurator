@@ -62,6 +62,7 @@
     },
     "Messages": {
       "EmptyDescription": "Cet objet n'a pas de description à lire.",
+      "ContainerNotEmpty": "Ce contenant n'est pas vide : la conversion ferait disparaître son contenu. Sortez-en les objets d'abord, ou gardez le type Contenant.",
       "NothingRecognized": "Rien n'a pu être reconnu dans la description. L'objet n'a pas été modifié.",
       "Applied": "{name} a été configuré."
     },

@@ -109,6 +109,19 @@ async function spellResolver(parser, html) {
 }
 
 /**
+ * Would converting the item to `type` orphan its contents? dnd5e 6.0.6 has no handling for a container that changes
+ * type: the contained items keep `system.container` pointing at it and vanish from every view. The conversion of a
+ * non-empty container is refused (the contents can be moved out first).
+ * @param {Item} item
+ * @param {string} type   Target item type.
+ * @returns {Promise<boolean>}
+ */
+export async function containerNotEmpty(item, type) {
+  if (item.type !== "container" || type === "container") return false;
+  return ((await item.system?.contentsCount) ?? 0) > 0;
+}
+
+/**
  * Identity of an item's content (`item.toObject()`), to notice an edit made between the analysis and "Apply".
  * @param {object} source
  * @returns {string}
@@ -132,6 +145,7 @@ export const fingerprint = (source) => JSON.stringify(source);
  */
 export async function runAnalysis(item, { type, value = "", subtype = "", replace = false, useAI, signal } = {}) {
   const started = performance.now();
+  if (await containerNotEmpty(item, type)) throw new Error(game.i18n.localize(`${MODULE_ID}.Messages.ContainerNotEmpty`));
   const parser = await loadParser();
   const [{ analyze }, { buildChangeSet }] = await Promise.all([
     import("../core/analyze.mjs"), import("../core/changes.mjs")

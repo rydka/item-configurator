@@ -62,6 +62,7 @@
     },
     "Messages": {
       "EmptyDescription": "This item has no description to read.",
+      "ContainerNotEmpty": "This container is not empty: its contents would be lost by the conversion. Move them out first, or keep the Container type.",
       "NothingRecognized": "Nothing could be recognized in the description. The item was not modified.",
       "Applied": "{name} was configured."
     },
