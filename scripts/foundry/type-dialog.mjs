@@ -117,6 +117,8 @@ export class TypeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     } catch (err) {
       console.error(`${MODULE_ID} | analysis failed`, err);
       ui.notifications.error(game.i18n.format(`${MODULE_ID}.errors.analysisFailed`, { error: err.message }));
+      // The window may have been closed during the analysis: there is nothing left to re-enable
+      if (!this.element) return;
       this.element.classList.remove("busy");
       for (const control of this.element.querySelectorAll("button, select")) control.disabled = false;
     }
