@@ -38,7 +38,9 @@ export class TypeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   async _prepareContext() {
     this.#choices ??= buildTypeChoices(CONFIG.DND5E, (key) => game.i18n.localize(key));
-    this.#guess ??= guessType(await quickPlan(this.#item), { type: this.#item.type, system: this.#item._source.system });
+    this.#guess ??= guessType(await quickPlan(this.#item), {
+      type: this.#item.type, system: this.#item._source.system, name: this.#item.name
+    });
     const types = this.#choices.map(({ type, label }) => ({ type, label, selected: type === this.#guess.type }));
     return { types, subtypes: this.#subtypeOptions(this.#guess.type), aiEnabled: getAiConfig().enabled };
   }

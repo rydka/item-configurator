@@ -1,3 +1,5 @@
+import { armorTypeOf, wornTypeOf } from "./header.mjs";
+
 /** Item types the module can configure, in the order shown to the user (C3). */
 export const SUPPORTED_TYPES = ["consumable", "weapon", "equipment", "tool", "loot", "container"];
 
@@ -35,19 +37,32 @@ export function buildTypeChoices(config, localize = (key) => key) {
 
 /**
  * Guess the type and subtype to preselect, from the parsed text and the current item (C3).
- * The item's own values win when the text points to the item's current type.
- * @param {object|null} plan                      Plan from the parser (`plan.details.weapon|armor|consumable`).
+ * The item's own values win when the text points to the item's current type. Beyond the library's details, the
+ * header line (`plan.header`, read by `core/header.mjs`) gives:
+ * - "Armor (plate)" in the header, or "Plate Armor +1" as the name -> equipment, `heavy` (the library knows light /
+ *   medium / heavy, not the base armor names);
+ * - "Ring, …" -> equipment, `ring`;
+ * - "Wondrous item, …" with a passive effect (AC, saves…) -> worn equipment: `clothing` (cloak, boots…) or `ring`
+ *   when the name says so, else `wondrous`.
+ * @param {object|null} plan                      Plan from the parser (`plan.details.weapon|armor|consumable`,
+ *                                                `plan.effects`), with `plan.header` when the caller read it.
  * @param {object} current
  * @param {string} current.type                   Current item type.
  * @param {object} [current.system]               Current item system source.
+ * @param {string} [current.name]                 Item name (worn wondrous items).
  * @returns {{ type: string, value: string, subtype: string }}
  */
-export function guessType(plan, { type, system } = {}) {
+export function guessType(plan, { type, system, name = "" } = {}) {
   const details = plan?.details ?? {};
+  const header = plan?.header ?? {};
   let guess = null;
   if (details.weapon) guess = { type: "weapon", value: details.weapon.category ?? "", subtype: "" };
-  else if (details.armor) guess = { type: "equipment", value: details.armor.type ?? "", subtype: "" };
-  else if (details.consumable) guess = { type: "consumable", value: details.consumable.type ?? "", subtype: "" };
+  else if (details.armor) {
+    // "Armor (plate)" in the header, else the base armor in the name ("Plate Armor +1", "Breastplate +3")
+    guess = { type: "equipment", value: details.armor.type || armorTypeOf(header.kindDetail) || armorTypeOf(name), subtype: "" };
+  } else if (details.consumable) guess = { type: "consumable", value: details.consumable.type ?? "", subtype: "" };
+  else if (header.kind === "ring") guess = { type: "equipment", value: "ring", subtype: "" };
+  else if (header.kind === "wondrous" && plan?.effects?.length) guess = { type: "equipment", value: wornTypeOf(name), subtype: "" };
 
   const currentType = SUPPORTED_TYPES.includes(type) ? type : null;
   const own = { value: system?.type?.value ?? "", subtype: system?.type?.subtype ?? "" };

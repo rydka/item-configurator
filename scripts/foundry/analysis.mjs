@@ -5,6 +5,7 @@
 import { MODULE_ID } from "../constants.mjs";
 import { getAiConfig } from "../settings.mjs";
 import { createResolver } from "../ai/resolver.mjs";
+import { readHeader } from "../core/header.mjs";
 import { validateChangeSet } from "./apply.mjs";
 
 const PARSER_URL = "/modules/dnd5e-text-parser/scripts/index.mjs";
@@ -57,12 +58,18 @@ export async function warmUpAi() {
   }
 }
 
-/** Quick synchronous plan used to preselect the type (C3); null when the parser cannot give one. */
+/**
+ * Quick synchronous plan used to preselect the type (C3); null when the parser cannot give one. The header line of
+ * the description ("Armor (plate), rare"), which the library reads but does not keep, is added as `plan.header`.
+ */
 export async function quickPlan(item) {
   try {
     const parser = await loadParser();
     const keys = parser.keysFromConfig(CONFIG.DND5E);
-    return parser.parseItem?.(item.name, item.system?.description?.value ?? "", { itemType: item.type, keys }) ?? null;
+    const html = item.system?.description?.value ?? "";
+    const plan = parser.parseItem?.(item.name, html, { itemType: item.type, keys }) ?? null;
+    if (plan) plan.header = readHeader(parser.htmlToText(html));
+    return plan;
   } catch (err) {
     console.debug(`${MODULE_ID} | quick plan unavailable`, err);
     return null;

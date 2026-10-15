@@ -29,7 +29,7 @@ export async function configure(item, { type, subtype, variant, useAI, replace =
   if (allowed === "hidden") throw new Error(game.i18n.localize(`${MODULE_ID}.errors.notAllowed`));
   if (allowed === "disabled") throw new Error(game.i18n.localize(`${MODULE_ID}.Button.LockedPack`));
 
-  const guess = guessType(await quickPlan(item), { type: item.type, system: item._source.system });
+  const guess = guessType(await quickPlan(item), { type: item.type, system: item._source.system, name: item.name });
   const sameType = !type || type === guess.type;
   const target = {
     type: type ?? guess.type,
