@@ -51,7 +51,8 @@
   font-style: italic;
   font-size: var(--font-size-12);
 }
-.item-configurator.preview .previous { font-size: var(--font-size-12); margin-left: 0.4rem; }
+.item-configurator.preview .previous,
+.item-configurator.preview .proposed { font-size: var(--font-size-12); margin-left: 0.4rem; }
 .item-configurator.preview .preview-footer { margin-top: 0.5rem; }
 .item-configurator.preview .preview-footer .warning,
 .item-configurator.preview .intro .stale { color: var(--color-warm-2, #a60); }

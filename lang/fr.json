@@ -101,6 +101,7 @@
       "AiMark": "(IA)",
       "BaseMark": "(objet de base)",
       "Previous": "Actuellement :",
+      "Proposed": "Lu dans le texte (non appliqué) :",
       "Rejected": "Ignorés",
       "Unrecognized": "Non interprétées",
       "Replace": "Remplacer l'existant",

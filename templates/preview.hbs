@@ -19,6 +19,7 @@
           {{#if base}}<span class="origin base-mark">{{localize "item-configurator.Preview.BaseMark"}}</span>{{/if}}
         </div>
         {{#if previous}}<div class="previous">{{localize "item-configurator.Preview.Previous"}} <code>{{previous}}</code></div>{{/if}}
+        {{#if keep}}{{#if value}}<div class="proposed">{{localize "item-configurator.Preview.Proposed"}} <code>{{value}}</code></div>{{/if}}{{/if}}
         {{#if raw}}<blockquote class="source">{{raw}}</blockquote>{{/if}}
       </li>
       {{/each}}

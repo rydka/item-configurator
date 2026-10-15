@@ -101,6 +101,7 @@
       "AiMark": "(AI)",
       "BaseMark": "(base item)",
       "Previous": "Currently:",
+      "Proposed": "Read in the text (not applied):",
       "Rejected": "Ignored",
       "Unrecognized": "Not interpreted",
       "Replace": "Replace existing",
