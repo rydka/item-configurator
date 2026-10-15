@@ -51,6 +51,8 @@ Liste maintenue par le développeur et lue par le vérificateur : hooks écouté
 - **`fetch` vers Ollama** (`localhost:11434` par défaut) : seulement à l'ouverture du menu IA, à l'ouverture de la fenêtre de type (réchauffage) et à l'analyse. Aucun appel au chargement.
 - **Module requis** `dnd5e-text-parser` : importé de `/modules/dnd5e-text-parser/scripts/index.mjs` (version d'API majeure 1 exigée).
 - **Compendiums de sorts `dnd5e.spells24` / `dnd5e.spells`** (lecture de l'index, `foundry/analysis.mjs`) : seulement quand la description parle d'incantation, pour retrouver le sort d'une activité « lancer un sort » (noms anglais).
+- **Objets de base** (`foundry/analysis.mjs`) : les UUID de `CONFIG.DND5E.weaponIds`, `armorIds`, `shieldIds` sont résolus (`foundry.utils.parseUuid`, index du pack lu une fois, puis `fromUuid` sur l'objet retenu) quand le nom complet de l'objet de base figure dans le nom de l'objet configuré. Un module qui modifie ces tables change les objets de base proposés.
+- **`item.system.contentsCount`** (dnd5e `ContainerData`, `foundry/analysis.mjs`) : lu avant d'analyser un contenant vers un autre type ; la conversion d'un contenant non vide est refusée (dnd5e 6.0.6 ne gère pas le contenu d'un contenant qui change de type).
 - **Hooks personnalisés émis** : `item-configurator.previewReady` (`{ item, proposal, durationMs }`), `item-configurator.applied` (`item`).
 - **API** : `game.modules.get("item-configurator").api.configure(item, { type, subtype, variant, useAI, replace, apply })`.
 - **CSS** : tout sous `.item-configurator`, `.item-configurator-configure`, `.item-configurator-undo`.
