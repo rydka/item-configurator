@@ -100,6 +100,26 @@ const isDefaultAttack = (activity) => activity?.type === "attack" && !activity.d
   && !activity.attack?.flat && !activity.activation && !activity.range && !activity.target && !activity.effects?.length
   && !activity.consumption?.targets?.length;
 
+/**
+ * Descriptors the library may emit without a source passage, and where the fact comes from (C12): the header line
+ * (`proposal.header`, see `core/header.mjs`), or the item name for a weapon / armor the library deduced from the
+ * "+1" of the name ("Plate Armor +1").
+ */
+const HEADER_KEYS = {
+  "dnd5e-text-parser.Describe.Rarity": ["raw"],
+  "dnd5e-text-parser.Describe.Attunement": ["attunementRaw", "raw"],
+  "dnd5e-text-parser.Describe.Armor": ["raw", "name"],
+  "dnd5e-text-parser.Describe.Weapon": ["raw", "name"]
+};
+
+/** Source passage of a header-derived descriptor, or "". */
+function headerRaw(key, { header, name }) {
+  const fields = HEADER_KEYS[key];
+  if (!fields) return "";
+  const sources = { ...(header ?? {}), name: name ?? "" };
+  return fields.map((field) => sources[field]).find(Boolean) ?? "";
+}
+
 /** Index `n` of a descriptor path such as `activities.2`. */
 const indices = (paths, prefix) => (paths ?? []).filter((p) => p.startsWith(`${prefix}.`)).map((p) => Number(p.slice(prefix.length + 1)));
 
@@ -123,7 +143,7 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
   const entries = [];
   let counter = 0;
   const push = (entry) => entries.push({ id: `${entry.group}:${counter++}`, origin: "rules", raw: "", ...entry });
-  const descriptors = parser.describe(plan);
+  const descriptors = parser.describe(plan).map((d) => (d.raw ? d : { ...d, raw: headerRaw(d.key, proposal) }));
 
   // ---- Details -------------------------------------------------------------------------------------------------
   const systemPatch = {};
@@ -172,7 +192,10 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     claimed.forEach((c) => free.delete(c));
     if (claimed.length) detailEntry({ key: d.key, data: d.data }, claimed, { raw: d.raw, origin: d.origin });
   }
-  for (const c of free) detailEntry(fieldLabel(c.full, c.value), [c]);
+  // A leaf no descriptor claims: the "magical" property comes from the rarity of the header line (C12)
+  for (const c of free) {
+    detailEntry(fieldLabel(c.full, c.value), [c], c.full === "system.properties" ? { raw: proposal.header?.raw ?? "" } : {});
+  }
   // Shown as a change with the previous value, even without "Replace existing" (the choice was explicit)
   for (const c of candidates.filter((x) => x.chosen)) detailEntry(chosenLabel(c.full, c.value), [c], { derived: true, chosen: true });
   for (const deduction of tr.deduced) {
@@ -248,12 +271,9 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     const list = tr.effectsAligned ? indices(d.paths, "effects").filter((n) => tr.effects[n]) : tr.effects.map((_, n) => n);
     if (!list.length) continue;
     const fresh = list.filter((n) => !effectDup.has(n));
-    // Several lines of one sentence (+1 AC, +1 saves) cite it once
-    const last = entries.at(-1);
-    const repeated = last?.group === "effects" && last.cited === d.raw;
+    // Every line shows its source sentence, even when several lines (+1 AC, +1 saves) come from the same one (C12)
     push({
-      group: "effects", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: repeated ? "" : d.raw,
-      cited: d.raw, origin: d.origin,
+      group: "effects", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: d.raw, origin: d.origin,
       ...(fresh.length ? { refs: { effects: fresh.map((n) => tr.effects[n]._id) } } : {})
     });
   }

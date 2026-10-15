@@ -3,6 +3,7 @@
  * plan into dnd5e sources (item patch, activities, effects) and gather the type-based deductions. Nothing is compared
  * with the existing item here: that is `changes.mjs`. The parser is injected (`parser`), no Foundry global.
  */
+import { readHeader } from "./header.mjs";
 import { clone, getPath, isPlain, leaves, randomId, setPath } from "./paths.mjs";
 
 /** Resolver statuses the preview explains on their own; every other failure reads as "error". */
@@ -218,6 +219,10 @@ export async function analyze({ name, html, type, value = "", subtype = "" }, {
   const now = Date.now();
   return {
     plan,
+    name,
+    // The header line of the description ("Wondrous item, rare (requires attunement)"): the library reads the
+    // rarity and the attunement from it but keeps no source passage for them (C12)
+    header: readHeader(parser.htmlToText?.(html) ?? String(html ?? "")),
     target: { type, value, subtype },
     baseItem,
     ai: {
