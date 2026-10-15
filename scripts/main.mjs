@@ -1,12 +1,13 @@
 import { MODULE_ID } from "./constants.mjs";
 import { registerSettings } from "./settings.mjs";
-import { onRenderItemSheet } from "./foundry/sheet-button.mjs";
+import { onGetHeaderControls, onRenderItemSheet } from "./foundry/sheet-button.mjs";
 
 export { MODULE_ID };
 
 Hooks.once("init", () => {
   registerSettings();
   Hooks.on("renderItemSheet5e", onRenderItemSheet);
+  Hooks.on("getHeaderControlsItemSheet5e", onGetHeaderControls);
 
   // Public API (C18). Loaded on first call so the module stays light at startup.
   const self = game.modules.get(MODULE_ID);

@@ -1,9 +1,31 @@
 /* Scope every rule under a module-specific class to avoid clashing with other modules. */
 
-/* Header buttons of the item sheet. */
+/* Title bar icons of the item sheet. */
 .item-configurator-configure.disabled,
 .item-configurator-undo.disabled {
   opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Toolbar under the sheet header: explicit "Configure" / "Undo" buttons. */
+.item-configurator-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+.item-configurator-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  flex: 0 1 auto;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.item-configurator-toolbar button.disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 

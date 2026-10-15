@@ -48,6 +48,7 @@
     },
     "Button": {
       "Configure": "Configure from description",
+      "ConfigureLabel": "Configure",
       "Undo": "Undo last configuration",
       "LockedPack": "This item is in a locked compendium. Unlock the compendium to configure it."
     },

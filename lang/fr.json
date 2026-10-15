@@ -48,6 +48,7 @@
     },
     "Button": {
       "Configure": "Configurer depuis la description",
+      "ConfigureLabel": "Configurer",
       "Undo": "Annuler la dernière configuration",
       "LockedPack": "Cet objet est dans un compendium verrouillé. Déverrouillez le compendium pour le configurer."
     },

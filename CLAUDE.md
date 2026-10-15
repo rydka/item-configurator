@@ -44,7 +44,12 @@ npm run lint
 
 Liste maintenue par le développeur et lue par le vérificateur : hooks écoutés, méthodes remplacées, sélecteurs CSS globaux, modules tiers détectés ou adaptés.
 
-- **Hook `renderItemSheet5e`** (`scripts/foundry/sheet-button.mjs`) : insère les boutons « Configurer » et « Annuler » (`.item-configurator-configure`, `.item-configurator-undo`) dans `.window-header`, avant `[data-action="copyUuid"], [data-action="close"]` (même technique que dnd5e). Aucune méthode remplacée. Une autre fiche d'objet (Tidy5e) n'aurait pas le bouton ; `api.configure` reste disponible.
+- **Hook `renderItemSheet5e`** (`scripts/foundry/sheet-button.mjs`, aussi déclenché pour la fiche de contenant) : trois points d'entrée, même règles d'accès (C1, C2, C14).
+  - Barre d'outils `.item-configurator-toolbar` (boutons avec icône et texte `.item-configurator-configure-button` « Configurer » et `.item-configurator-undo-button` « Annuler la dernière configuration »), insérée après la partie `[data-application-part="header"]` (repli : `.sheet-header`) de la fiche dnd5e, donc entre l'en-tête et les onglets. C'est un frère des parties Handlebars : il survit aux re-rendus partiels et n'est que rafraîchi.
+  - Icônes de la barre de titre `.item-configurator-configure` / `.item-configurator-undo` dans `.window-header`, avant `[data-action="copyUuid"], [data-action="close"]` (même technique que dnd5e).
+  - Compendium verrouillé : boutons et icônes `disabled` avec l'infobulle `Button.LockedPack`.
+  - Aucune méthode remplacée. Une autre fiche d'objet (Tidy5e) n'aurait ni la barre ni les icônes ; `api.configure` reste disponible.
+- **Hook `getHeaderControlsItemSheet5e`** (`scripts/foundry/sheet-button.mjs`) : ajoute les entrées « Configurer depuis la description » et « Annuler la dernière configuration » (actions `item-configurator-configure`, `item-configurator-undo`, `onClick` propre) au menu « ⋮ » de la fiche. Le hook est rappelé à chaque ouverture du menu ; sur un compendium verrouillé l'entrée affiche l'avertissement `Button.LockedPack` au lieu d'agir.
 - **`item.update({ type, system: _replace(...) })`** : conversion de type sur place (`foundry/apply.mjs`, `foundry/undo.mjs`). Les `updateItem` tiers (enhancedcombathud) voient `changed.system` en remplacement forcé.
 - **Création / suppression d'effets et d'activités** sur l'objet configuré (`createEmbeddedDocuments("ActiveEffect", …, { keepId: true })`), flag `flags.item-configurator.undo` écrit sur l'objet.
 - **Menu de réglages** `item-configurator.ai` (ApplicationV2, MJ seulement) : fournisseur (`aiProvider` : `ollama` ou `anthropic`), réglages Ollama et Anthropic (`anthropicModel`, `anthropicEffort`, `anthropicApiKey`) ; la liste des modèles est lue sur Ollama à son ouverture. La clé API est en portée **`client`** (navigateur du MJ), jamais dans le monde.
@@ -56,4 +61,4 @@ Liste maintenue par le développeur et lue par le vérificateur : hooks écouté
 - **`item.system.contentsCount`** (dnd5e `ContainerData`, `foundry/analysis.mjs`) : lu avant d'analyser un contenant vers un autre type ; la conversion d'un contenant non vide est refusée (dnd5e 6.0.6 ne gère pas le contenu d'un contenant qui change de type).
 - **Hooks personnalisés émis** : `item-configurator.previewReady` (`{ item, proposal, durationMs }`), `item-configurator.applied` (`item`).
 - **API** : `game.modules.get("item-configurator").api.configure(item, { type, subtype, variant, useAI, replace, apply })`.
-- **CSS** : tout sous `.item-configurator`, `.item-configurator-configure`, `.item-configurator-undo`.
+- **CSS** : tout sous `.item-configurator`, `.item-configurator-toolbar`, `.item-configurator-configure`, `.item-configurator-undo`.
