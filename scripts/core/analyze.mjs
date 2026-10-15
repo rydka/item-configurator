@@ -151,14 +151,15 @@ export async function analyze({ name, html, type, value = "", subtype = "" }, {
     : parser.parseItem(name, html, { keys, itemType: type });
   const plan = cleanPlan(parsed, parser, html);
 
-  // Deduction from the chosen type: a potion is used once and destroyed when empty (the library does not invent it)
+  // Deduction from the chosen type: a potion is used once and destroyed when empty. The library invents neither the
+  // charge nor the destruction (it writes no `uses` for a consumable without charges), so the deduction carries both.
   const consumable = plan.details?.consumable;
   const unlimited = !plan.uses && !plan.recharge && !consumable?.charges && !consumable?.destroyOnEmpty;
   const deduceSingleUse = type === "consumable" && SINGLE_USE_TYPES.includes(value) && unlimited;
   const translated = clone(plan);
   if (deduceSingleUse) {
     translated.details ??= {};
-    translated.details.consumable = { type: value, charges: null, ...translated.details.consumable, destroyOnEmpty: true };
+    translated.details.consumable = { type: value, ...translated.details.consumable, charges: { max: 1 }, destroyOnEmpty: true };
   }
 
   const system = parser.toItemPatch(translated, { keys, item: { type } });
