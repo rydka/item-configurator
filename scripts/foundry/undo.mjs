@@ -2,9 +2,6 @@
 import { MODULE_ID } from "../constants.mjs";
 import { UNDO_FLAG, modifiedSince, restoreOps } from "../core/snapshot.mjs";
 
-/** Tolerance between the end of the configuration and the item's `_stats.modifiedTime` (server vs client clock). */
-const GRACE_MS = 3000;
-
 /** The undo snapshot stored on the item, if any. */
 export const getSnapshot = (item) => item.getFlag(MODULE_ID, UNDO_FLAG) ?? null;
 
@@ -29,7 +26,7 @@ export async function restoreItem(item, snapshot) {
 export async function undoLastConfiguration(item) {
   const snapshot = getSnapshot(item);
   if (!snapshot) return false;
-  if (modifiedSince({ ...snapshot, at: snapshot.at + GRACE_MS }, item.toObject())) {
+  if (modifiedSince(snapshot, item.toObject())) {
     const confirmed = await foundry.applications.api.DialogV2.confirm({
       window: { title: game.i18n.localize(`${MODULE_ID}.Undo.Title`) },
       content: `<p>${game.i18n.localize(`${MODULE_ID}.Undo.Modified`)}</p>`,

@@ -2,7 +2,7 @@
 import { MODULE_ID } from "../constants.mjs";
 import { pruneChangeSet } from "../core/changes.mjs";
 import { ID_PATTERN } from "../core/paths.mjs";
-import { UNDO_FLAG, makeSnapshot } from "../core/snapshot.mjs";
+import { UNDO_FLAG, contentFingerprint, makeSnapshot } from "../core/snapshot.mjs";
 import { restoreItem } from "./undo.mjs";
 
 const flagPath = `flags.${MODULE_ID}.${UNDO_FLAG}`;
@@ -96,8 +96,9 @@ export async function applyChangeSet(item, changeSet) {
     if (changeSet.effects?.add?.length) {
       await item.createEmbeddedDocuments("ActiveEffect", changeSet.effects.add.map(created), { keepId: true });
     }
-    // Reference time for "modified since the configuration" (see undo.mjs).
-    await item.update({ [`${flagPath}.at`]: Date.now() });
+    // Reference for "modified since the configuration" (undo.mjs): the content as written, independent of any
+    // clock. The flag and `_stats` are not part of it, so this last update does not change it.
+    await item.update({ [`${flagPath}.after`]: contentFingerprint(item.toObject()) });
   } catch (err) {
     console.error(`${MODULE_ID} | configuration failed, restoring the item`, err);
     await restoreItem(item, snapshot).catch((e) => console.error(`${MODULE_ID} | restore failed`, e));
