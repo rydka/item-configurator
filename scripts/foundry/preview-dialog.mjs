@@ -51,6 +51,8 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   #fingerprint;
   /** The item changed while the preview was open and the change set was recomputed: shown once. */
   #stale = false;
+  /** A recomputation is running: clicks are ignored until it is done (one at a time). */
+  #busy = false;
 
   /**
    * @param {object} config
@@ -138,8 +140,14 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   _onRender(context, options) {
     super._onRender(context, options);
     this.element.querySelector('[name="replace"]')?.addEventListener("change", async (event) => {
-      this.#replace = event.currentTarget.checked;
-      await this.#recompute();
+      const box = event.currentTarget;
+      if (this.#busy) {
+        box.checked = this.#replace;
+        return;
+      }
+      const previous = this.#replace;
+      this.#replace = box.checked;
+      if (!(await this.#recompute())) this.#replace = previous;
     });
     if (!this.#notified) {
       this.#notified = true;
@@ -149,20 +157,38 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   /**
-   * Recompute the change set against the item as it is now, then render.
+   * Recompute the change set against the item as it is now, then render. One recomputation at a time: the controls
+   * are disabled meanwhile and a click that slips through is ignored. A failure keeps the previous change set.
    * @param {object} [options]
    * @param {object} [options.source]   `item.toObject()` already read by the caller.
    * @param {boolean} [options.stale]   Show the "item modified meanwhile" warning.
+   * @returns {Promise<boolean>}  Whether the change set was recomputed.
    */
   async #recompute({ source = this.#item.toObject(), stale = false } = {}) {
-    this.#changeSet = await this.#rebuild(this.#replace, source);
-    this.#fingerprint = fingerprint(source);
-    this.#stale = stale;
-    this.render();
+    if (this.#busy) return false;
+    this.#busy = true;
+    this.#setDisabled(true);
+    try {
+      this.#changeSet = await this.#rebuild(this.#replace, source);
+      this.#fingerprint = fingerprint(source);
+      this.#stale = stale;
+      return true;
+    } catch (err) {
+      console.error(`${MODULE_ID} | preview recomputation failed`, err);
+      ui.notifications.error(game.i18n.format(`${MODULE_ID}.errors.previewFailed`, { error: err.message }));
+      return false;
+    } finally {
+      this.#busy = false;
+      this.render();
+    }
+  }
+
+  #setDisabled(disabled) {
+    for (const control of this.element?.querySelectorAll("button, input") ?? []) control.disabled = disabled;
   }
 
   static async #onApply() {
-    if (this.#changeSet.empty) return;
+    if (this.#busy || this.#changeSet.empty) return;
     // The item may have been edited while the preview was open (the window is not modal): what the user saw is no
     // longer what would be written. Recompute on the current state and ask again instead of applying (C13).
     const source = this.#item.toObject();
@@ -170,13 +196,17 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       await this.#recompute({ source, stale: true });
       return;
     }
-    for (const button of this.element.querySelectorAll("button")) button.disabled = true;
+    this.#busy = true;
+    this.#setDisabled(true);
     try {
       await applyChangeSet(this.#item, this.#changeSet);
       ui.notifications.info(game.i18n.format(`${MODULE_ID}.Messages.Applied`, { name: this.#item.name }));
       await this.close();
     } catch {
-      for (const button of this.element.querySelectorAll("button")) button.disabled = false;
+      // applyChangeSet already restored the item and notified
+      this.#setDisabled(false);
+    } finally {
+      this.#busy = false;
     }
   }
 

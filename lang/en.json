@@ -41,7 +41,8 @@
       "parserMissing": "Item Configurator requires the Dnd5e Text Parser module to be active.",
       "parserVersion": "Unsupported Dnd5e Text Parser version: {version}.",
       "applyFailed": "The configuration failed and the item was restored: {error}",
-      "analysisFailed": "The analysis failed: {error}"
+      "analysisFailed": "The analysis failed: {error}",
+      "previewFailed": "The preview could not be recomputed: {error}"
     },
     "Cancel": "Cancel",
     "Undo": {
