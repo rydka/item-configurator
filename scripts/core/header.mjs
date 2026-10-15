@@ -65,12 +65,15 @@ export function kindOf(word) {
 /**
  * Read the header line of a description.
  * @param {string} text   Plain text of the description.
- * @returns {{ raw: string, kind: string|null, kindDetail: string|null, rarity: string|null, attunementRaw: string }}
- *   `raw` is the header line ("" when none), `attunementRaw` the passage stating the attunement ("" when none).
+ * @returns {{ raw: string, kind: string|null, kindDetail: string|null, rarity: string|null, rarityRaw: string,
+ *   attunementRaw: string }}
+ *   `raw` is the header line ("" when none), `rarityRaw` the line stating the rarity (the header line, or a rarity
+ *   alone on its line above a header without rarity: "Peu commun" / "Objet merveilleux (anneau), nécessite…"),
+ *   `attunementRaw` the passage stating the attunement ("" when none).
  */
 export function readHeader(text) {
   const source = String(text ?? "");
-  const result = { raw: "", kind: null, kindDetail: null, rarity: null, attunementRaw: "" };
+  const result = { raw: "", kind: null, kindDetail: null, rarity: null, rarityRaw: "", attunementRaw: "" };
   let found = source.match(HEADER);
   // Away from the first line, only a known item kind makes a comma-separated phrase a header
   if (found && found.index > 0 && !kindOf(found[1])) found = null;
@@ -82,17 +85,25 @@ export function readHeader(text) {
     result.kindDetail = found[2]?.trim() || null;
     result.rarity = normalize(found[3]);
     result.raw = found[0].trim();
+    result.rarityRaw = result.raw;
     span = [found.index, found.index + found[0].length];
   } else if (kindOnly) {
     result.kind = kindOf(kindOnly[1]);
     result.kindDetail = kindOnly[2]?.trim() || null;
     result.raw = kindOnly[0].trim();
     span = [kindOnly.index, kindOnly.index + kindOnly[0].length];
+    // The rarity alone on the line above ("Peu commun"), as the library reads it
+    const bare = source.slice(0, kindOnly.index).match(BARE_RARITY);
+    if (bare) {
+      result.rarity = normalize(bare[1]);
+      result.rarityRaw = bare[0].trim();
+    }
   } else {
     const bare = source.match(BARE_RARITY);
     if (bare) {
       result.rarity = normalize(bare[1]);
       result.raw = bare[0].trim();
+      result.rarityRaw = result.raw;
       span = [bare.index, bare.index + bare[0].length];
     }
   }
