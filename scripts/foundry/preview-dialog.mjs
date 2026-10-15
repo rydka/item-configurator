@@ -16,8 +16,34 @@ function describe(label) {
   if (!label) return "";
   if (typeof label === "string") return game.i18n.has(label) ? game.i18n.localize(label) : label;
   const data = Object.fromEntries(Object.entries(label.data ?? {}).map(([k, v]) => [k, v ?? ""]));
-  return game.i18n.format(label.key, data).replace(/\s{2,}/g, " ").replace(/\s+([,:;)])/g, "$1").trim()
+  const suffix = refine(label.key, data);
+  return (game.i18n.format(label.key, data) + suffix).replace(/\s{2,}/g, " ").replace(/\s+([,:;)])/g, "$1").trim()
     .replace(/[,:;]$/, "");
+}
+
+/** Localized label of a dnd5e configuration entry (`{ label }` or a plain string), or null. */
+function configLabel(table, key) {
+  const def = key ? table?.[key] : null;
+  if (!def) return null;
+  const label = typeof def === "string" ? def : def.label;
+  return label ? game.i18n.localize(label) : null;
+}
+
+/**
+ * dnd5e keys the library leaves in a descriptor, shown with the dnd5e label instead ("lr" -> "Long Rest"); the
+ * healing type of a heal line that is not plain healing ("Temporary HP") is appended, so that the preview says it.
+ * @param {string} key    Descriptor key.
+ * @param {object} data   Placeholder values (updated in place).
+ * @returns {string}  Text appended after the formatted label ("" when nothing).
+ */
+function refine(key, data) {
+  const config = CONFIG.DND5E ?? {};
+  if (key === "dnd5e-text-parser.Describe.Uses") data.period = configLabel(config.limitedUsePeriods, data.period) ?? data.period;
+  if (key === "dnd5e-text-parser.Describe.Heal" && data.type && data.type !== "healing") {
+    const type = configLabel(config.healingTypes, data.type);
+    if (type) return ` (${type})`;
+  }
+  return "";
 }
 
 function stringify(value) {
