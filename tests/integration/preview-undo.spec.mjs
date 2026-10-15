@@ -73,7 +73,8 @@ for (const s of SCENARIOS) {
     const withoutSource = [];
     for (const group of groups.filter((g) => /group-(details|activities|effects)/.test(g.cls))) {
       for (const entry of group.entries) {
-        if (entry.base) continue;
+        // The base item's data and the type picked in the window are not read from a sentence.
+        if (entry.base || /^Type chosen/.test(entry.label)) continue;
         if (!entry.source) withoutSource.push(`${group.title}: ${entry.label}`);
         else expect(description, `source of ${entry.label}`).toContain(norm(entry.source).replace(/\s*\.\.\.$/, ""));
       }

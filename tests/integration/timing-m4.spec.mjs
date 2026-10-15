@@ -37,8 +37,18 @@ test("M4: previewReady durations on the reference set, rules only", async ({ fou
       for (const app of [...foundry.applications.instances.values()]) {
         if (app.options?.classes?.includes("item-configurator")) await app.close().catch(() => {});
       }
+      let why = null;
+      if (!payload) {
+        // No preview: ask the API why (nothing recognized, or an error).
+        try {
+          const { changeSet } = await game.modules.get("item-configurator").api.configure(item, { type: entry.type, subtype: entry.value, useAI: false });
+          why = { empty: changeSet.empty, entries: changeSet.entries?.length ?? 0, unrecognized: changeSet.unrecognized?.length ?? 0 };
+        } catch (err) {
+          why = { error: err.message };
+        }
+      }
       await item.delete();
-      return { name: entry.name, lang: entry.lang, previewed: Boolean(payload), durationMs: payload?.durationMs ?? null, wallMs: Math.round(wallMs) };
+      return { name: entry.name, lang: entry.lang, previewed: Boolean(payload), durationMs: payload?.durationMs ?? null, wallMs: Math.round(wallMs), why };
     }, { prefix: PREFIX, entry });
     rows.push(row);
   }

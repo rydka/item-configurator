@@ -1,6 +1,7 @@
 // M8: criteria covered by at least one passing test. Reads result files (it never fails, it only measures).
 // Usage: node tests/metrics/criteria-coverage.mjs <playwright-results.json> [<vitest-results.json>] [--out=<file>]
 //   Playwright: test-env/results/results.json (or the archived one). Vitest: npx vitest run --reporter=json --outputFile=<file>
+// Also reads the archived runs (reports/tests/<id>/<feature>/runs/*/results.json).
 // A test covers criterion Cn when its title (or its describe block) contains "Cn", "Cn/Cm" or "Cn-Cm" / "Cn–Cm" (a range).
 import fs from "node:fs";
 
@@ -36,7 +37,8 @@ function* vitestTests(report) {
 const all = [];
 for (const file of files) {
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
-  if (report.suites) for (const suite of report.suites) all.push(...playwrightTests(suite));
+  if (Array.isArray(report.tests)) all.push(...report.tests.map((t) => ({ title: t.title, status: t.status })));
+  else if (report.suites) for (const suite of report.suites) all.push(...playwrightTests(suite));
   else if (report.testResults) all.push(...vitestTests(report));
 }
 

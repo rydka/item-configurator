@@ -22,7 +22,7 @@ async function configuredOnActor(foundry, { name, text, type, subtype }) {
     const [owned] = await actor.createEmbeddedDocuments("Item", [item.toObject()], { keepId: true });
     return {
       applied, empty: changeSet.empty, actor: actor.uuid, item: owned.uuid,
-      activities: Object.values(owned.system.activities ?? {}).map((a) => ({ id: a.id, type: a.type, name: a.name, activation: a.activation?.type ?? null }))
+      activities: owned.system.activities.map((a) => ({ id: a.id, type: a.type, name: a.name, activation: a.activation?.type ?? null }))
     };
   }, { prefix: PREFIX, name, text, type, subtype });
 }

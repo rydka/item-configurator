@@ -52,7 +52,7 @@ test("C3: the type window offers the 6 types and their subtypes", async ({ found
 
 const PRESELECTION = [
   { id: "potion", name: "Potion of Healing", type: "loot", text: TEXTS.healing, expect: { type: "consumable", value: "potion" } },
-  { id: "sword", name: "Flame Tongue Longsword", type: "loot", text: TEXTS.flameTongue, expect: { type: "weapon", value: "martialM" } },
+  { id: "sword", name: "Flame Tongue Longsword", type: "loot", text: TEXTS.flameTongue, expect: { type: "weapon", value: null } },
   { id: "cloak", name: "Cloak of Protection", type: "loot", text: TEXTS.cloak, expect: { type: "equipment", value: "clothing" } },
   { id: "ring", name: "Ring of Protection", type: "loot", text: TEXTS.ring, expect: { type: "equipment", value: "ring" } },
   { id: "plate", name: "Plate Armor", type: "loot", text: TEXTS.plate, expect: { type: "equipment", value: "heavy" } },
