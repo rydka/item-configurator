@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SNAPSHOT_VERSION, makeSnapshot, modifiedSince, restoreOps } from "../../scripts/core/snapshot.mjs";
+import { SNAPSHOT_VERSION, contentFingerprint, makeSnapshot, modifiedSince, restoreOps } from "../../scripts/core/snapshot.mjs";
 
 const effect = (id, over = {}) => ({ _id: id, name: `e-${id}`, changes: [{ key: "system.attributes.ac.bonus", value: "1", mode: 2 }], _stats: { modifiedTime: 1 }, ...over });
 const source = () => ({
@@ -32,15 +32,37 @@ describe("makeSnapshot (C14)", () => {
 });
 
 describe("modifiedSince", () => {
-  const snap = makeSnapshot(source(), "u1", 1000);
-  it("is true when the item was modified after the snapshot", () => {
-    expect(modifiedSince(snap, { _stats: { modifiedTime: 1001 } })).toBe(true);
+  describe("with the content fingerprint (snapshot.after)", () => {
+    const configured = { ...source(), type: "weapon", system: { rarity: "rare", activities: { a2: { type: "save" } } }, _stats: { modifiedTime: 5000 } };
+    const snap = { ...makeSnapshot(source(), "u1", 1000), after: contentFingerprint(configured) };
+    it("is false when the content is the one written, whatever the clock says", () => {
+      expect(modifiedSince(snap, { ...configured, _stats: { modifiedTime: 99999 } })).toBe(false);
+      expect(modifiedSince(snap, { ...configured, _stats: { modifiedTime: 1 } })).toBe(false);
+    });
+    it("ignores the key order and the effects' stats", () => {
+      const reordered = { effects: configured.effects.map((e) => ({ ...e, _stats: { modifiedTime: 77 } })), system: configured.system, type: "weapon" };
+      expect(modifiedSince(snap, reordered)).toBe(false);
+    });
+    it("is true when the system, the type or an effect changed", () => {
+      expect(modifiedSince(snap, { ...configured, system: { ...configured.system, rarity: "legendary" } })).toBe(true);
+      expect(modifiedSince(snap, { ...configured, type: "loot" })).toBe(true);
+      expect(modifiedSince(snap, { ...configured, effects: [effect("fx1", { name: "renamed" })] })).toBe(true);
+    });
+    it("takes precedence over the timestamps", () => {
+      expect(modifiedSince(snap, { ...configured, _stats: { modifiedTime: 2000 } })).toBe(false);
+    });
   });
-  it("is false at the same time, before, or without stats", () => {
-    expect(modifiedSince(snap, { _stats: { modifiedTime: 1000 } })).toBe(false);
-    expect(modifiedSince(snap, { _stats: { modifiedTime: 5 } })).toBe(false);
-    expect(modifiedSince(snap, {})).toBe(false);
-    expect(modifiedSince(snap, undefined)).toBe(false);
+  describe("without it (older snapshots): fallback on the modification time", () => {
+    const snap = makeSnapshot(source(), "u1", 1000);
+    it("is true when the item was modified after the snapshot", () => {
+      expect(modifiedSince(snap, { _stats: { modifiedTime: 1001 } })).toBe(true);
+    });
+    it("is false at the same time, before, or without stats", () => {
+      expect(modifiedSince(snap, { _stats: { modifiedTime: 1000 } })).toBe(false);
+      expect(modifiedSince(snap, { _stats: { modifiedTime: 5 } })).toBe(false);
+      expect(modifiedSince(snap, {})).toBe(false);
+      expect(modifiedSince(snap, undefined)).toBe(false);
+    });
   });
 });
 

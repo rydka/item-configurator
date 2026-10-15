@@ -77,6 +77,7 @@ for (const c of PRESELECTION) {
 
 // ---- C4 ------------------------------------------------------------------------------------------------------------
 
+// An empty container converts; a container that still holds items is refused (see preview-guards.spec.mjs).
 const CONVERSIONS = [
   { id: "loot-weapon", from: "loot", to: "weapon", subtype: "martialM", text: TEXTS.flameTongue },
   { id: "equipment-consumable", from: "equipment", to: "consumable", subtype: "potion", text: TEXTS.healing },
@@ -91,8 +92,7 @@ for (const c of CONVERSIONS) {
         const name = `${prefix}${c.id}`;
         const data = { name, type: c.from, img: "icons/svg/sword.svg", system: { description: { value: c.text }, quantity: 2 } };
         let item;
-        let content = null;
-        if (place === "world") item = await Item.implementation.create({ ...data, ownership: { default: 2 } });
+                if (place === "world") item = await Item.implementation.create({ ...data, ownership: { default: 2 } });
         if (place === "folder") {
           const folder = await CONFIG.Folder.documentClass.create({ name: `${prefix}folder`, type: "Item" });
           item = await Item.implementation.create({ ...data, folder: folder.id });
@@ -104,12 +104,6 @@ for (const c of CONVERSIONS) {
         if (place === "compendium") {
           const pack = await foundry.documents.collections.CompendiumCollection.createCompendium({ label: `${prefix}pack`, name: "ict-convert", type: "Item" });
           [item] = await Item.implementation.createDocuments([data], { pack: pack.collection });
-        }
-        if (c.from === "container" && place !== "compendium") {
-          const [child] = await Item.implementation.createDocuments(
-            [{ name: `${prefix}content`, type: "loot", system: { container: item.id } }], item.parent ? { parent: item.parent } : {}
-          );
-          content = child.uuid;
         }
         const keep = (i) => ({
           id: i.id, name: i.name, img: i.img, description: i.system.description.value, folder: i.folder?.id ?? null,
@@ -127,7 +121,7 @@ for (const c of CONVERSIONS) {
         await live.sheet.close();
         return {
           before, after, type: live.type, applied: outcome.applied, empty: outcome.changeSet.empty, typeChange: outcome.changeSet.typeChange?.to ?? null,
-          sheetClass, expectedSheet, contentKept: content ? (await fromUuid(content))?.system.container === item.id : null
+          sheetClass, expectedSheet
         };
       }, { prefix: PREFIX, c, place });
       evidence(`C4-${c.id}-${place}.json`, result);
@@ -135,7 +129,37 @@ for (const c of CONVERSIONS) {
       expect(result.type).toBe(c.to);
       expect(result.after).toEqual(result.before);
       expect(result.sheetClass).toBe(result.expectedSheet);
-      if (result.contentKept !== null) expect(result.contentKept).toBe(true);
     });
   }
+}
+
+// ---- Base item: only the full name of a base weapon or armor counts -------------------------------------------------
+
+const BASE_CASES = [
+  { id: "plate", name: "Plate Armor", expected: 18 },
+  { id: "half-plate", name: "Half Plate Armor +1", expected: 15 },
+  { id: "boots", name: "Boots of Leather Striding", expected: null }
+];
+
+for (const c of BASE_CASES) {
+  test(`C4/C6: base item lookup for ${c.name} (${c.expected ?? "no base armor"})`, async ({ foundry }) => {
+    const result = await foundry(async ({ prefix, c }) => {
+      const item = await Item.implementation.create({
+        name: `${prefix}${c.name}`, type: "loot",
+        system: { description: { value: "<p>Wondrous item, rare. While wearing this you gain a +1 bonus to AC.</p>" } }
+      });
+      const { changeSet } = await game.modules.get("item-configurator").api.configure(item, { type: "equipment", subtype: c.id === "boots" ? "clothing" : "heavy", useAI: false });
+      return {
+        armorValue: changeSet.systemPatch["system.armor.value"] ?? null,
+        baseEntries: (changeSet.entries ?? []).filter((e) => e.origin === "base").length
+      };
+    }, { prefix: PREFIX, c });
+    evidence(`C4-base-item-${c.id}.json`, result);
+    if (c.expected === null) {
+      expect(result.baseEntries).toBe(0);
+      expect(result.armorValue).toBeNull();
+    } else {
+      expect(result.armorValue).toBe(c.expected);
+    }
+  });
 }

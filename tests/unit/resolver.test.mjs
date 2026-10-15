@@ -142,10 +142,10 @@ describe("toFacts (C9)", () => {
       expect(r.facts.activation).toMatchObject({ type: "bonus", cost: null });
     });
     it("consume, cast and extraDamage give the facts of the plan", () => {
-      const sentence = "Expend 1 charge to cast fireball (save DC 15) from it. Deals an extra 2d6 fire damage.";
+      const sentence = "Expend 1 charge to cast fireball (save DC 15) as a 3rd-level spell. Deals an extra 2d6 fire damage.";
       const r = toFacts([
         { kind: "consume", evidence: "Expend 1 charge", amount: 1 },
-        { kind: "cast", evidence: "cast fireball (save DC 15)", spell: "fireball", dc: 15, level: 3 },
+        { kind: "cast", evidence: "cast fireball (save DC 15) as a 3rd-level spell", spell: "fireball", dc: 15, level: 3 },
         { kind: "extraDamage", evidence: "extra 2d6 fire damage", number: 2, denomination: 6, damageType: "fire" }
       ], { sentence }, K);
       expect(r.rejected).toEqual([]);
