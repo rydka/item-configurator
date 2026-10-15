@@ -8,7 +8,9 @@
  *   activities: { add: object[], remove: string[] },
  *   effects: { add: object[], remove: string[] },
  *   entries: Entry[],                           // what the preview shows
- *   unrecognized: { text }[], rejected: Entry[], empty: boolean
+ *   unrecognized: { text }[], rejected: Entry[], empty: boolean,
+ *   notAutomated: Entry[],                      // clauses dnd5e cannot apply (`Note.NotAutomated`), with their sentence
+ *   flavor: { text }[]                          // flavor text (`Note.Flavor`): not interpreted, shown apart
  * }
  * Entry = { id, group: "details"|"activities"|"effects", action: "add"|"set"|"replace"|"remove"|"keep",
  *   label: { key, data } | string, value, previous, raw, origin: "rules"|"fallback"|"base",
@@ -24,6 +26,8 @@ export const NO_ACTIVITY_TYPES = ["loot", "container"];
 
 const FIELD_KEY = "dnd5e-text-parser.Describe.Field";
 const NOTE_UNRECOGNIZED = "dnd5e-text-parser.Note.Unrecognized";
+const NOTE_NOT_AUTOMATED = "dnd5e-text-parser.Note.NotAutomated";
+const NOTE_FLAVOR = "dnd5e-text-parser.Note.Flavor";
 /** Fields where a stored 0 is the default, not a value. */
 const ZERO_IS_BLANK = ["weight.value", "price.value"];
 const DAMAGE_PARTS = ["damage.base", "damage.versatile"];
@@ -106,7 +110,7 @@ const isDefaultAttack = (activity) => activity?.type === "attack" && !activity.d
  * "+1" of the name ("Plate Armor +1").
  */
 const HEADER_KEYS = {
-  "dnd5e-text-parser.Describe.Rarity": ["raw"],
+  "dnd5e-text-parser.Describe.Rarity": ["rarityRaw", "raw"],
   "dnd5e-text-parser.Describe.Attunement": ["attunementRaw", "raw"],
   "dnd5e-text-parser.Describe.Armor": ["raw", "name"],
   "dnd5e-text-parser.Describe.Weapon": ["raw", "name"]
@@ -294,12 +298,29 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     }
   }
 
-  // ---- Notes, rejected and unrecognized sentences ------------------------------------------------------------------
+  // ---- Notes, rejected, not automated, flavor and unrecognized sentences -----------------------------------------
+  // A clause dnd5e cannot apply without inventing a rule ("you can't take reactions") is not an ignored proposal:
+  // it is shown in its own group with its sentence, so that the table applies it by hand. Flavor text is not
+  // interpreted either, but it is prose, not a rule: shown apart, never among the unrecognized sentences.
   const seen = new Set();
+  const notAutomated = [];
+  const flavor = [];
   for (const note of [...descriptors.filter((d) => d.group === null && d.key !== NOTE_UNRECOGNIZED), ...tr.notes]) {
     const fingerprint = JSON.stringify([note.key, note.data]);
     if (seen.has(fingerprint)) continue;
     seen.add(fingerprint);
+    if (note.key === NOTE_FLAVOR) {
+      const text = note.data?.text ?? note.raw ?? "";
+      if (text) flavor.push({ text });
+      continue;
+    }
+    if (note.key === NOTE_NOT_AUTOMATED) {
+      notAutomated.push({
+        id: `not-automated:${counter++}`, group: "notAutomated", action: "keep", label: { key: note.key, data: note.data },
+        raw: note.raw ?? note.data?.raw ?? "", origin: note.origin ?? "rules"
+      });
+      continue;
+    }
     rejected.push({
       id: `rejected:${counter++}`, group: null, action: "remove", label: { key: note.key, data: note.data },
       raw: note.raw ?? "", origin: note.origin ?? "rules"
@@ -311,7 +332,7 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     typeChange, systemPatch,
     activities: { add: activityAdd, remove: activityRemove },
     effects: { add: effectAdd, remove: effectRemove },
-    entries, unrecognized, rejected, empty: true
+    entries, unrecognized, rejected, notAutomated, flavor, empty: true
   };
   return refreshEmpty(changeSet);
 }

@@ -104,8 +104,11 @@
       "Group": {
         "details": "Détails",
         "activities": "Activités",
-        "effects": "Effets"
+        "effects": "Effets",
+        "notAutomated": "Non automatisé",
+        "flavor": "Texte d'ambiance"
       },
+      "NotAutomatedHint": "dnd5e n'a pas de mécanisme pour ces clauses : rien n'est écrit pour elles, elles s'appliquent à la main en jeu.",
       "TypeChange": "L'objet sera converti de {from} en {to}.",
       "Stale": "L'objet a été modifié pendant que cet aperçu était ouvert. La proposition a été recalculée sur son état actuel : vérifiez-la, puis appliquez de nouveau.",
       "Ai": {

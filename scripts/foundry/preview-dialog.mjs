@@ -139,6 +139,9 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       removals,
       unrecognized: (cs.unrecognized ?? []).map((u) => u.text ?? u.raw ?? stringify(u)),
       rejected: (cs.rejected ?? []).map((entry) => ({ label: describe(entry.label), raw: entry.raw })),
+      // The clause itself is the information: the library's note text would only repeat it
+      notAutomated: (cs.notAutomated ?? []).map((entry) => ({ raw: entry.raw || describe(entry.label), ai: entry.origin === "fallback" })),
+      flavor: (cs.flavor ?? []).map((f) => f.text),
       empty: Boolean(cs.empty)
     };
   }

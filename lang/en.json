@@ -104,8 +104,11 @@
       "Group": {
         "details": "Details",
         "activities": "Activities",
-        "effects": "Effects"
+        "effects": "Effects",
+        "notAutomated": "Not automated",
+        "flavor": "Flavor text"
       },
+      "NotAutomatedHint": "dnd5e has no mechanism for these clauses: nothing is written for them, they are applied by hand at the table.",
       "TypeChange": "The item will be converted from {from} to {to}.",
       "Stale": "The item was modified while this preview was open. The proposal was recomputed on its current state: check it, then apply again.",
       "Ai": {
