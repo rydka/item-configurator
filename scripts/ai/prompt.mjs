@@ -175,6 +175,19 @@ const EFFECT_KEYWORDS = {
   speed: /speed|vitesse|\bfly|\bwalk|\bswim|\bclimb|feet|\bft\b|pieds|\bvol/
 };
 
+/** Words (normalized) naming a damage type, English and French; a type outside this list is looked up by its key. */
+const DAMAGE_TYPE_WORDS = {
+  acid: /acid/, bludgeoning: /bludgeon|contond/, cold: /\bcold|froid/, fire: /\bfire|\bfeu\b/, force: /\bforce/,
+  lightning: /lightning|foudre/, necrotic: /necrot/, piercing: /pierc|perfor/, poison: /poison/, psychic: /psych/,
+  radiant: /radiant/, slashing: /slash|tranch/, thunder: /thunder|tonnerre/
+};
+
+/** Words (normalized) naming a recovery period. A day and its dawn are the same thing in these texts. */
+const PERIOD_WORDS = {
+  day: /\bday|jour|daily|quotidien|dawn|aube/, dawn: /\bday|jour|daily|quotidien|dawn|aube/,
+  dusk: /dusk|crepuscule|nightfall|tombee de la nuit/, sr: /\brest|repos/, lr: /\brest|repos/
+};
+
 const NUMBER_WORDS = {
   1: ["one", "once", "single", "un", "une"], 2: ["two", "twice", "deux"], 3: ["three", "trois"], 4: ["four", "quatre"],
   5: ["five", "cinq"], 6: ["six"], 7: ["seven", "sept"], 8: ["eight", "huit"], 9: ["nine", "neuf"], 10: ["ten", "dix"]
@@ -189,9 +202,16 @@ function hasNumber(quote, value) {
 
 const hasDice = (quote, number, denomination) => new RegExp(String.raw`(?:^|[^\d])${number}\s?d\s?${denomination}(?!\d)`).test(quote);
 
+/** Does the (normalized) quote name a damage type (by its English or French word, else by its key)? */
+function hasDamageType(quote, type) {
+  const word = DAMAGE_TYPE_WORDS[type] ?? new RegExp(String.raw`\b${normalizeQuote(type)}`);
+  return word.test(quote);
+}
+
 /**
  * Why a quoted passage does not justify a fact, or null when it does: it must contain the key word of the kind of
- * fact and every number the fact reports (dice, bonus, DC, amount, count).
+ * fact, every number the fact reports (dice, bonus, DC, amount, count, level, charges, cost) and the words of what
+ * it names (damage type, recovery period, spell).
  * @param {object} fact       Raw fact of the model.
  * @param {string} evidence   The quote.
  * @returns {string|null}
@@ -211,16 +231,22 @@ export function evidenceProblem(fact, evidence) {
     if ( fact.bonus && !hasNumber(quote.replace(/\d+\s?d\s?\d+/g, " "), fact.bonus) ) {
       return `number ${fact.bonus} not in the quote`;
     }
+    if ( (kind !== "heal") && fact.damageType && !hasDamageType(quote, fact.damageType) ) {
+      return `damage type ${fact.damageType} not in the quote`;
+    }
   } else if ( kind === "attack" ) {
     if ( fact.bonus ) numbers.push(fact.bonus);
   } else if ( kind === "save" ) {
     numbers.push(fact.dc);
   } else if ( kind === "uses" ) {
     numbers.push(fact.max);
+  } else if ( kind === "activation" ) {
+    if ( fact.cost != null ) numbers.push(fact.cost);
   } else if ( kind === "consume" ) {
     numbers.push(fact.amount ?? fact.charges);
   } else if ( kind === "cast" ) {
-    if ( fact.dc != null ) numbers.push(fact.dc);
+    // Level, attack bonus and charges are inventions unless the quote states them, like the DC
+    for ( const value of [fact.dc, fact.level, fact.bonus, fact.charges] ) if ( value != null ) numbers.push(value);
     const spell = normalizeQuote(fact.spell);
     if ( spell && !quote.includes(spell) ) return "spell name not in the quote";
   } else if ( kind === "effect" && fact.amount != null ) {
@@ -228,6 +254,9 @@ export function evidenceProblem(fact, evidence) {
   }
   for ( const value of numbers ) {
     if ( (value != null) && !hasNumber(quote, value) ) return `number ${value} not in the quote`;
+  }
+  if ( (kind === "uses") && fact.period && PERIOD_WORDS[fact.period] && !PERIOD_WORDS[fact.period].test(quote) ) {
+    return `period ${fact.period} not in the quote`;
   }
   return null;
 }
