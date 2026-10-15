@@ -68,16 +68,53 @@ export async function quickPlan(item) {
   }
 }
 
-/** Base item (e.g. longsword) guessed from the item name, to inherit the base weapon / armor data. */
+const wordsOf = (text) => String(text ?? "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase()
+  .split(/[^a-z0-9]+/).filter(Boolean);
+
+/** Is `part` a run of consecutive words of `words`? */
+function hasRun(words, part) {
+  if (!part.length) return false;
+  return words.some((_, at) => part.every((word, i) => words[at + i] === word));
+}
+
+let baseItems = null;
+
+/**
+ * Names of the base weapons, armors and shields of the dnd5e configuration, read once from the compendium indexes.
+ * @returns {Promise<{ uuid: string, type: string, words: string[] }[]>}
+ */
+async function baseItemNames() {
+  if (baseItems) return baseItems;
+  const groups = [["weapon", CONFIG.DND5E.weaponIds], ["equipment", CONFIG.DND5E.armorIds], ["equipment", CONFIG.DND5E.shieldIds]];
+  const list = [];
+  for (const [type, ids] of groups) {
+    for (const uuid of Object.values(ids ?? {})) {
+      const parsed = foundry.utils.parseUuid(uuid);
+      const pack = parsed?.collection;
+      if (!pack?.getIndex) continue;
+      const name = (await pack.getIndex()).get(parsed.documentId ?? parsed.id)?.name;
+      if (name) list.push({ uuid, type, words: wordsOf(name) });
+    }
+  }
+  baseItems = list;
+  return list;
+}
+
+/**
+ * Base item (e.g. longsword) whose full name appears in the item name, to inherit the base weapon / armor data.
+ * A single generic word ("hide", "plate", "leather") is not enough: "Boots of Leather Striding" must not inherit the
+ * AC of the leather armor. The longest matching name wins ("Half Plate Armor" over "Plate Armor").
+ */
 async function guessBaseItem(item, type) {
   if (!["weapon", "equipment"].includes(type)) return null;
-  const ids = { ...CONFIG.DND5E.weaponIds, ...CONFIG.DND5E.armorIds, ...CONFIG.DND5E.shieldIds };
-  const words = String(item.name).toLowerCase().split(/[^a-z]+/);
-  const id = Object.keys(ids).find((key) => words.includes(key.toLowerCase()));
-  if (!id) return null;
+  const words = wordsOf(item.name);
+  const match = (await baseItemNames())
+    .filter((base) => base.type === type && hasRun(words, base.words))
+    .sort((a, b) => b.words.length - a.words.length)[0];
+  if (!match) return null;
   try {
     // `Trait.getBaseItem(id, { fullItem })` returns nothing for these packs in dnd5e 6.0.6; the UUID is in the config
-    return (await fromUuid(ids[id]))?.toObject?.() ?? null;
+    return (await fromUuid(match.uuid))?.toObject?.() ?? null;
   } catch {
     return null;
   }
