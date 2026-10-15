@@ -87,6 +87,7 @@
         "effects": "Effets"
       },
       "TypeChange": "L'objet sera converti de {from} en {to}.",
+      "Stale": "L'objet a été modifié pendant que cet aperçu était ouvert. La proposition a été recalculée sur son état actuel : vérifiez-la, puis appliquez de nouveau.",
       "Ai": {
         "off": "Règles seules (IA désactivée).",
         "unreachable": "Règles seules (l'IA n'est pas joignable depuis ce navigateur).",

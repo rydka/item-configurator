@@ -53,7 +53,8 @@
 }
 .item-configurator.preview .previous { font-size: var(--font-size-12); margin-left: 0.4rem; }
 .item-configurator.preview .preview-footer { margin-top: 0.5rem; }
-.item-configurator.preview .preview-footer .warning { color: var(--color-warm-2, #a60); }
+.item-configurator.preview .preview-footer .warning,
+.item-configurator.preview .intro .stale { color: var(--color-warm-2, #a60); }
 
 /* AI settings window. */
 .item-configurator.ai-settings .connection.ok { color: var(--color-level-success, #2a2); }

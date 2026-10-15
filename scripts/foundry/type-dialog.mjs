@@ -102,14 +102,15 @@ export class TypeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.element.classList.add("busy");
     for (const control of this.element.querySelectorAll("button, select")) control.disabled = true;
     try {
-      const { proposal, changeSet, rebuild } = await runAnalysis(item, {
+      const { proposal, changeSet, rebuild, fingerprint } = await runAnalysis(item, {
         type, value, subtype, replace: Boolean(replace), signal: this.#controller.signal
       });
       if (this.#controller.signal.aborted) return;
       if (changeSet.empty) {
         ui.notifications.info(game.i18n.localize(`${MODULE_ID}.Messages.NothingRecognized`));
       } else {
-        new PreviewDialog({ item, proposal, changeSet, rebuild, replace: Boolean(replace), started }).render({ force: true });
+        new PreviewDialog({ item, proposal, changeSet, rebuild, fingerprint, replace: Boolean(replace), started })
+          .render({ force: true });
       }
       this.#controller = null;
       await this.close();

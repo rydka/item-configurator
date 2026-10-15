@@ -87,6 +87,7 @@
         "effects": "Effects"
       },
       "TypeChange": "The item will be converted from {from} to {to}.",
+      "Stale": "The item was modified while this preview was open. The proposal was recomputed on its current state: check it, then apply again.",
       "Ai": {
         "off": "Rules only (AI disabled).",
         "unreachable": "Rules only (the AI is not reachable from this browser).",

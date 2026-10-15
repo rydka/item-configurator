@@ -2,6 +2,7 @@
 <section class="intro">
   {{#if typeChange}}<p class="type-change"><i class="fa-solid fa-right-left"></i> {{typeChange}}</p>{{/if}}
   <p class="ai-status {{#if ai.rulesOnly}}rules-only{{/if}}"><i class="fa-solid fa-robot"></i> {{ai.text}}</p>
+  {{#if stale}}<p class="hint warning stale"><i class="fa-solid fa-triangle-exclamation"></i> {{localize "item-configurator.Preview.Stale"}}</p>{{/if}}
 </section>
 
 <div class="groups">

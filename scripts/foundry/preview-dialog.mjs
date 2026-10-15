@@ -1,5 +1,6 @@
 /** Preview of the proposed changes, grouped; nothing is written before "Apply" (C12, C13). */
 import { MODULE_ID } from "../constants.mjs";
+import { fingerprint } from "./analysis.mjs";
 import { applyChangeSet } from "./apply.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -36,22 +37,31 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   #replace;
   #started;
   #notified = false;
+  /** Fingerprint of the item source the change set was computed on. */
+  #fingerprint;
+  /** The item changed while the preview was open and the change set was recomputed: shown once. */
+  #stale = false;
 
   /**
    * @param {object} config
    * @param {Item} config.item
    * @param {object} config.proposal
    * @param {object} config.changeSet
-   * @param {(replace: boolean) => Promise<object>} config.rebuild   Recompute the change set for the Replace box.
+   * @param {(replace: boolean, source?: object) => Promise<object>} config.rebuild   Recompute the change set (Replace
+   *   box, or item edited meanwhile) against the item as it is now.
+   * @param {string} [config.fingerprint]   `fingerprint()` of the source the change set was computed on.
    * @param {boolean} [config.replace]
    * @param {number} [config.started]   `performance.now()` when the analysis was requested (M4).
    */
-  constructor({ item, proposal, changeSet, rebuild, replace = false, started = performance.now(), ...options } = {}) {
+  constructor({
+    item, proposal, changeSet, rebuild, fingerprint: seen, replace = false, started = performance.now(), ...options
+  } = {}) {
     super(options);
     this.#item = item;
     this.#proposal = proposal;
     this.#changeSet = changeSet;
     this.#rebuild = rebuild;
+    this.#fingerprint = seen ?? fingerprint(item.toObject());
     this.#replace = replace;
     this.#started = started;
   }
@@ -96,10 +106,14 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       : null;
     const removals = (cs.entries ?? []).filter((entry) => entry.action === "remove").length;
 
+    const stale = this.#stale;
+    this.#stale = false;
+
     return {
       groups,
       typeChange,
       ai,
+      stale,
       replace: this.#replace,
       removals,
       unrecognized: (cs.unrecognized ?? []).map((u) => u.text ?? u.raw ?? stringify(u)),
@@ -113,8 +127,7 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     super._onRender(context, options);
     this.element.querySelector('[name="replace"]')?.addEventListener("change", async (event) => {
       this.#replace = event.currentTarget.checked;
-      this.#changeSet = await this.#rebuild(this.#replace);
-      this.render();
+      await this.#recompute();
     });
     if (!this.#notified) {
       this.#notified = true;
@@ -123,8 +136,28 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     }
   }
 
+  /**
+   * Recompute the change set against the item as it is now, then render.
+   * @param {object} [options]
+   * @param {object} [options.source]   `item.toObject()` already read by the caller.
+   * @param {boolean} [options.stale]   Show the "item modified meanwhile" warning.
+   */
+  async #recompute({ source = this.#item.toObject(), stale = false } = {}) {
+    this.#changeSet = await this.#rebuild(this.#replace, source);
+    this.#fingerprint = fingerprint(source);
+    this.#stale = stale;
+    this.render();
+  }
+
   static async #onApply() {
     if (this.#changeSet.empty) return;
+    // The item may have been edited while the preview was open (the window is not modal): what the user saw is no
+    // longer what would be written. Recompute on the current state and ask again instead of applying (C13).
+    const source = this.#item.toObject();
+    if (fingerprint(source) !== this.#fingerprint) {
+      await this.#recompute({ source, stale: true });
+      return;
+    }
     for (const button of this.element.querySelectorAll("button")) button.disabled = true;
     try {
       await applyChangeSet(this.#item, this.#changeSet);

@@ -109,6 +109,13 @@ async function spellResolver(parser, html) {
 }
 
 /**
+ * Identity of an item's content (`item.toObject()`), to notice an edit made between the analysis and "Apply".
+ * @param {object} source
+ * @returns {string}
+ */
+export const fingerprint = (source) => JSON.stringify(source);
+
+/**
  * Analyze an item's description.
  * @param {Item} item
  * @param {object} options
@@ -118,7 +125,10 @@ async function spellResolver(parser, html) {
  * @param {boolean} [options.replace=false]
  * @param {boolean} [options.useAI]        Defaults to the setting.
  * @param {AbortSignal} [options.signal]
- * @returns {Promise<{ proposal: object, changeSet: object, rebuild: (replace: boolean) => Promise<object> }>}
+ * @returns {Promise<{ proposal: object, changeSet: object, fingerprint: string,
+ *   rebuild: (replace: boolean, source?: object) => Promise<object> }>}
+ *   `fingerprint` is that of the source the change set was computed on; `rebuild` recomputes the change set against
+ *   the item as it is now (or against `source`), so that an edit made meanwhile is never overwritten (C13).
  */
 export async function runAnalysis(item, { type, value = "", subtype = "", replace = false, useAI, signal } = {}) {
   const started = performance.now();
@@ -140,8 +150,8 @@ export async function runAnalysis(item, { type, value = "", subtype = "", replac
   );
   proposal.durationMs = performance.now() - started;
 
-  const rebuild = (replaceExisting) => validateChangeSet(item, buildChangeSet(source, proposal, {
+  const rebuild = (replaceExisting, current = item.toObject()) => validateChangeSet(item, buildChangeSet(current, proposal, {
     replace: replaceExisting, parser
   }));
-  return { proposal, changeSet: await rebuild(replace), rebuild };
+  return { proposal, changeSet: await rebuild(replace, source), rebuild, fingerprint: fingerprint(source) };
 }
