@@ -41,6 +41,19 @@
 .item-configurator.type-dialog .busy-note { display: none; }
 .item-configurator.type-dialog.busy .busy-note { display: block; }
 .item-configurator.type-dialog .notes { font-size: var(--font-size-12); opacity: 0.8; }
+/* Progress line of the Claude first mode: steps active, then done; Cancel aborts the Claude call. */
+.item-configurator.type-dialog .progress { display: none; list-style: none; margin: 0.25rem 0 0; padding: 0 0 0 0.5rem; font-size: var(--font-size-12); }
+.item-configurator.type-dialog.busy.claude-progress .progress { display: block; }
+.item-configurator.type-dialog .progress li { margin: 0.15rem 0; opacity: 0.6; }
+.item-configurator.type-dialog .progress li.active,
+.item-configurator.type-dialog .progress li.done { opacity: 1; }
+.item-configurator.type-dialog .progress .done-mark,
+.item-configurator.type-dialog .progress .active-mark { display: none; width: 1em; }
+.item-configurator.type-dialog .progress li.active .active-mark { display: inline-block; }
+.item-configurator.type-dialog .progress li.done .done-mark { display: inline-block; color: var(--color-level-success, #2a2); }
+.item-configurator.type-dialog .progress li.done .counter { display: none; }
+.item-configurator.type-dialog .progress .progress-cancel { margin-top: 0.3rem; }
+.item-configurator.type-dialog .progress .progress-cancel button { width: auto; font-size: var(--font-size-12); }
 
 /* Preview window. */
 .item-configurator.preview .intro p { margin: 0 0 0.25rem; }
@@ -69,7 +82,26 @@
 .item-configurator.preview .entry.remove .label { text-decoration: line-through; }
 .item-configurator.preview .entry.keep { opacity: 0.7; }
 .item-configurator.preview .origin { font-size: var(--font-size-11); font-weight: bold; }
-.item-configurator.preview .ai-mark { color: var(--color-level-info, #36c); }
+.item-configurator.preview .ai-mark,
+.item-configurator.preview .claude-mark { color: var(--color-level-info, #36c); }
+/* Claude first: checkbox per entry, cross-check marks, "To check" choices. */
+.item-configurator.preview .entry-select { margin: 0; flex: 0 0 auto; }
+.item-configurator.preview .entry.unselected .label { opacity: 0.55; text-decoration: line-through; }
+.item-configurator.preview .check-mark.agree { color: var(--color-level-success, #2a2); }
+.item-configurator.preview .check-mark.conflict,
+.item-configurator.preview .critical-mark { color: var(--color-level-error, #b22); }
+.item-configurator.preview .check-mark.claude-only,
+.item-configurator.preview .check-mark.rules-only,
+.item-configurator.preview .inferred-mark,
+.item-configurator.preview .certainty-mark { color: var(--color-warm-2, #a60); font-weight: normal; font-style: italic; }
+.item-configurator.preview .certainty-mark.low { font-weight: bold; }
+.item-configurator.preview .group-check h3 { color: var(--color-warm-2, #a60); }
+.item-configurator.preview .group-check .check { margin-bottom: 0.5rem; }
+.item-configurator.preview .group-check .choices { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin: 0.15rem 0 0 0.4rem; font-size: var(--font-size-12); }
+.item-configurator.preview .group-check .choices label { display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+.item-configurator.preview .group-check .choices input { margin: 0; }
+.item-configurator.preview .group-corrected li,
+.item-configurator.preview .group-discarded li { font-size: var(--font-size-12); }
 .item-configurator.preview .source {
   margin: 0.15rem 0 0 0.4rem;
   padding: 0 0 0 0.5rem;

@@ -5,6 +5,7 @@
 import { MODULE_ID } from "../constants.mjs";
 import { getAiConfig } from "../settings.mjs";
 import { createResolver } from "../ai/resolver.mjs";
+import * as anthropic from "../ai/anthropic.mjs";
 import { readHeader } from "../core/header.mjs";
 import { validateChangeSet } from "./apply.mjs";
 
@@ -173,6 +174,55 @@ export async function containerNotEmpty(item, type) {
  */
 export const fingerprint = (source) => JSON.stringify(source);
 
+/** Is the "Claude first" mode on: AI enabled, Anthropic provider (the key is checked by the analysis itself)? */
+export function claudeMode(useAI) {
+  const config = getAiConfig();
+  return Boolean(useAI ?? config.enabled) && config.provider === "anthropic";
+}
+
+/** Localized label of a dnd5e configuration entry (`{ label }` or a string), or "". */
+const configLabel = (table, key) => {
+  const def = key ? table?.[key] : null;
+  if (!def) return "";
+  const label = typeof def === "string" ? def : def.label;
+  return label ? game.i18n.localize(label) : "";
+};
+
+/** Localized labels of the chosen type, subtype and consumable subtype, sent to Claude next to their keys. */
+function typeLabels(type, value, subtype) {
+  const config = CONFIG.DND5E ?? {};
+  const tables = [config.weaponTypes, config.equipmentTypes, config.consumableTypes, config.toolTypes, config.lootTypes];
+  return {
+    type: game.i18n.has(`${MODULE_ID}.Type.${type}`) ? game.i18n.localize(`${MODULE_ID}.Type.${type}`) : "",
+    value: tables.map((table) => configLabel(table, value)).find(Boolean) ?? "",
+    subtype: configLabel(config.consumableTypes?.[value]?.subtypes, subtype)
+  };
+}
+
+/** Does the world measure lengths in metres (dnd5e setting)? */
+function metricWorld() {
+  try {
+    return Boolean(game.settings.get("dnd5e", "metricLengthUnits"));
+  } catch {
+    return false;
+  }
+}
+
+let claudeEnums = null;
+
+/**
+ * The single Claude call of the "Claude first" mode, bound to the current settings; undefined without a key in this
+ * browser or for a player (the analysis then reads as "no key": rules alone). Nothing is sent before it is called.
+ */
+function claudeCompletion(config) {
+  if (!game.user?.isGM || !config.apiKey) return undefined;
+  return (request, { signal } = {}) => anthropic.complete(
+    { apiKey: config.apiKey, model: config.anthropicModel, effort: config.effort },
+    request,
+    { fetch: (...args) => globalThis.fetch(...args), signal, timeoutMs: config.anthropicTimeoutMs }
+  );
+}
+
 /**
  * Analyze an item's description.
  * @param {Item} item
@@ -182,13 +232,14 @@ export const fingerprint = (source) => JSON.stringify(source);
  * @param {string} [options.subtype]       Target `system.type.subtype`.
  * @param {boolean} [options.replace=false]
  * @param {boolean} [options.useAI]        Defaults to the setting.
- * @param {AbortSignal} [options.signal]
+ * @param {AbortSignal} [options.signal]   Aborting it cancels the AI call (Claude or Ollama): the rules alone remain.
+ * @param {function(object): void} [options.onProgress]   Claude first: `{ step: "rules"|"claude"|"validate" }`.
  * @returns {Promise<{ proposal: object, changeSet: object, fingerprint: string,
  *   rebuild: (replace: boolean, source?: object) => Promise<object> }>}
  *   `fingerprint` is that of the source the change set was computed on; `rebuild` recomputes the change set against
  *   the item as it is now (or against `source`), so that an edit made meanwhile is never overwritten (C13).
  */
-export async function runAnalysis(item, { type, value = "", subtype = "", replace = false, useAI, signal } = {}) {
+export async function runAnalysis(item, { type, value = "", subtype = "", replace = false, useAI, signal, onProgress } = {}) {
   const started = performance.now();
   if (await containerNotEmpty(item, type)) throw new Error(game.i18n.localize(`${MODULE_ID}.Messages.ContainerNotEmpty`));
   const parser = await loadParser();
@@ -197,16 +248,29 @@ export async function runAnalysis(item, { type, value = "", subtype = "", replac
   ]);
   const keys = parser.keysFromConfig(CONFIG.DND5E);
   const config = getAiConfig();
-  const fallback = (useAI ?? config.enabled) ? getResolver(parser) : null;
+  const aiOn = useAI ?? config.enabled;
   const source = item.toObject();
+  const html = item.system?.description?.value ?? "";
+  const input = { name: item.name, html, type, value, subtype, source };
+  const context = {
+    parser, keys, signal, idGen: () => foundry.utils.randomID(), baseItem: await guessBaseItem(item, type),
+    resolveSpell: await spellResolver(parser, html)
+  };
 
-  const proposal = await analyze(
-    { name: item.name, html: item.system?.description?.value ?? "", type, value, subtype, source },
-    {
-      parser, keys, fallback, signal, idGen: () => foundry.utils.randomID(), baseItem: await guessBaseItem(item, type),
-      resolveSpell: await spellResolver(parser, item.system?.description?.value ?? "")
-    }
-  );
+  let proposal;
+  if (aiOn && config.provider === "anthropic") {
+    // Claude first: the rules and one Claude call in parallel, validation, cross-check; rules alone on any failure
+    const [{ analyzeClaudeFirst }, { schemaEnums }] = await Promise.all([
+      import("../core/analyze-claude.mjs"), import("../ai/claude-schema.mjs")
+    ]);
+    claudeEnums ??= schemaEnums(CONFIG.DND5E, CONST);
+    proposal = await analyzeClaudeFirst(input, {
+      ...context, enums: claudeEnums, complete: claudeCompletion(config), onProgress,
+      labels: typeLabels(type, value, subtype), metric: metricWorld()
+    });
+  } else {
+    proposal = await analyze(input, { ...context, fallback: aiOn ? getResolver(parser) : null });
+  }
   proposal.durationMs = performance.now() - started;
 
   const rebuild = (replaceExisting, current = item.toObject()) => validateChangeSet(item, buildChangeSet(current, proposal, {

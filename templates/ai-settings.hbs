@@ -53,13 +53,18 @@
   <p class="hint">{{localize "item-configurator.settings.anthropicEffort.hint"}}</p>
 </div>
 <div class="form-group provider-anthropic" {{#unless isAnthropic}}hidden{{/unless}}>
+  <label>{{localize "item-configurator.settings.anthropicTimeout.name"}}</label>
+  <div class="form-fields"><input type="number" name="anthropicTimeout" value="{{anthropicTimeout}}" min="{{minAnthropic}}" max="{{maxAnthropic}}" step="1"></div>
+  <p class="hint">{{localize "item-configurator.settings.anthropicTimeout.hint"}}</p>
+</div>
+<div class="form-group provider-anthropic" {{#unless isAnthropic}}hidden{{/unless}}>
   <label>{{localize "item-configurator.settings.anthropicApiKey.name"}}</label>
   <div class="form-fields"><input type="password" name="anthropicApiKey" value="{{apiKey}}" autocomplete="off" spellcheck="false"></div>
   <p class="hint">{{localize "item-configurator.settings.anthropicApiKey.hint"}}</p>
   <p class="hint warning anthropic-warning"><i class="fa-solid fa-triangle-exclamation"></i> {{localize "item-configurator.AiSettings.AnthropicWarning"}}</p>
 </div>
 
-<div class="form-group">
+<div class="form-group provider-ollama" {{#if isAnthropic}}hidden{{/if}}>
   <label>{{localize "item-configurator.settings.aiTimeout.name"}}</label>
   <div class="form-fields"><input type="number" name="aiTimeout" value="{{timeout}}" min="{{min}}" max="{{max}}" step="1"></div>
   <p class="hint">{{localize "item-configurator.settings.aiTimeout.hint"}}</p>

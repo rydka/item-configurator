@@ -129,6 +129,7 @@
         "ClaudeOnly": "Claude seul",
         "RulesOnly": "règles (complément)",
         "Inferred": "déduit",
+        "Critical": "critique",
         "Certainty": {
           "high": "certitude élevée",
           "medium": "certitude moyenne",
@@ -205,8 +206,20 @@
       "Unavailable": "Claude indisponible : {reason}. Les règles seules ont été utilisées.",
       "Corrected": "Corrigé : {what}",
       "Rejected": "Rejeté : {what}",
-      "Uncovered": "Non interprété par Claude",
+      "Uncovered": "Paragraphes que ni Claude ni les règles n'ont interprétés.",
       "TooMany": "Plus de {max} {what} : seuls les {max} premiers ont été gardés.",
+      "Fact": {
+        "Duration": "Durée : {value} {units}",
+        "Check": "Test de caractéristique : {ability} {skill} DD {dc}",
+        "Roll": "Jet : {formula} {name}",
+        "EffectDuration": "Durée de l'effet : {value} {units} {until}"
+      },
+      "Why": {
+        "missing": "absent",
+        "duplicate": "en double",
+        "notAnObject": "pas un objet",
+        "notAnArray": "pas une liste"
+      },
       "Reason": {
         "quoteMissing": "la citation n'est pas dans la description",
         "numberNotQuoted": "le nombre n'est pas dans la citation",
@@ -218,6 +231,7 @@
         "fieldRemoved": "{field} retiré ({why})",
         "notApplicable": "sans objet pour ce type d'objet",
         "effectSkipped": "dnd5e ne sait pas appliquer ce changement ; affiché comme non automatisé",
+        "tooMany": "plus de {max} {what} : seuls les {max} premiers gardés",
         "strict": "refusé par dnd5e : {error}"
       }
     }

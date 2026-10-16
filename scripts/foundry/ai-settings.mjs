@@ -5,8 +5,8 @@
 import { MODULE_ID } from "../constants.mjs";
 import { listModels, ping } from "../ai/ollama.mjs";
 import {
-  ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL, DEFAULT_EFFORT, DEFAULT_OLLAMA_URL, DEFAULT_PROVIDER, DEFAULT_TIMEOUT_S,
-  EFFORTS, MAX_TIMEOUT_S, MIN_TIMEOUT_S, PROVIDERS, getAiConfig
+  ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL, DEFAULT_ANTHROPIC_TIMEOUT_S, DEFAULT_EFFORT, DEFAULT_OLLAMA_URL, DEFAULT_PROVIDER,
+  DEFAULT_TIMEOUT_S, EFFORTS, MAX_ANTHROPIC_TIMEOUT_S, MAX_TIMEOUT_S, MIN_ANTHROPIC_TIMEOUT_S, MIN_TIMEOUT_S, PROVIDERS, getAiConfig
 } from "../settings.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -34,7 +34,8 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const saved = getAiConfig();
     const draft = this.#draft ?? {
       enabled: saved.enabled, provider: saved.provider, url: saved.url, model: saved.model, timeout: saved.timeoutMs / 1000,
-      apiKey: saved.apiKey, anthropicModel: saved.anthropicModel, effort: saved.effort
+      apiKey: saved.apiKey, anthropicModel: saved.anthropicModel, effort: saved.effort,
+      anthropicTimeout: saved.anthropicTimeoutMs / 1000
     };
     // The only network access: Ollama, when this window opens (or on "Test"). Nothing is sent to Anthropic here.
     const reachable = await ping(draft.url, { fetch: call });
@@ -46,6 +47,8 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
       ...draft,
       min: MIN_TIMEOUT_S,
       max: MAX_TIMEOUT_S,
+      minAnthropic: MIN_ANTHROPIC_TIMEOUT_S,
+      maxAnthropic: MAX_ANTHROPIC_TIMEOUT_S,
       reachable,
       modelCount: installed.length,
       models: [...names].map((name) => ({ name, selected: name === draft.model, missing: !installed.includes(name) })),
@@ -67,7 +70,8 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
       timeout: Number(value("aiTimeout")) || DEFAULT_TIMEOUT_S,
       apiKey: value("anthropicApiKey").trim(),
       anthropicModel: pick(value("anthropicModel"), ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL),
-      effort: pick(value("anthropicEffort"), EFFORTS, DEFAULT_EFFORT)
+      effort: pick(value("anthropicEffort"), EFFORTS, DEFAULT_EFFORT),
+      anthropicTimeout: Number(value("anthropicTimeout")) || DEFAULT_ANTHROPIC_TIMEOUT_S
     };
   }
 
@@ -89,8 +93,11 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
   }
 
   static async #onSubmit(event, form, formData) {
-    const { aiEnabled, aiProvider, ollamaUrl, ollamaModel, aiTimeout, anthropicApiKey, anthropicModel, anthropicEffort } = formData.object;
+    const {
+      aiEnabled, aiProvider, ollamaUrl, ollamaModel, aiTimeout, anthropicApiKey, anthropicModel, anthropicEffort, anthropicTimeout
+    } = formData.object;
     const timeout = Math.min(MAX_TIMEOUT_S, Math.max(MIN_TIMEOUT_S, Number(aiTimeout) || DEFAULT_TIMEOUT_S));
+    const claudeTimeout = Math.min(MAX_ANTHROPIC_TIMEOUT_S, Math.max(MIN_ANTHROPIC_TIMEOUT_S, Number(anthropicTimeout) || DEFAULT_ANTHROPIC_TIMEOUT_S));
     await game.settings.set(MODULE_ID, "aiEnabled", Boolean(aiEnabled));
     await game.settings.set(MODULE_ID, "aiProvider", pick(String(aiProvider ?? ""), PROVIDERS, DEFAULT_PROVIDER));
     await game.settings.set(MODULE_ID, "ollamaUrl", String(ollamaUrl || DEFAULT_OLLAMA_URL).trim());
@@ -98,6 +105,7 @@ export class AiSettingsApp extends HandlebarsApplicationMixin(ApplicationV2) {
     await game.settings.set(MODULE_ID, "aiTimeout", timeout);
     await game.settings.set(MODULE_ID, "anthropicModel", pick(String(anthropicModel ?? ""), ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL));
     await game.settings.set(MODULE_ID, "anthropicEffort", pick(String(anthropicEffort ?? ""), EFFORTS, DEFAULT_EFFORT));
+    await game.settings.set(MODULE_ID, "anthropicTimeout", claudeTimeout);
     // Client scope: this browser only (never the world settings)
     await game.settings.set(MODULE_ID, "anthropicApiKey", String(anthropicApiKey ?? "").trim());
   }

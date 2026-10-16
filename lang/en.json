@@ -129,6 +129,7 @@
         "ClaudeOnly": "Claude only",
         "RulesOnly": "rules (complement)",
         "Inferred": "deduced",
+        "Critical": "critical",
         "Certainty": {
           "high": "high certainty",
           "medium": "medium certainty",
@@ -205,8 +206,20 @@
       "Unavailable": "Claude unavailable: {reason}. The rules alone were used.",
       "Corrected": "Corrected: {what}",
       "Rejected": "Rejected: {what}",
-      "Uncovered": "Not interpreted by Claude",
+      "Uncovered": "Paragraphs neither Claude nor the rules interpreted.",
       "TooMany": "More than {max} {what}: only the first {max} were kept.",
+      "Fact": {
+        "Duration": "Duration: {value} {units}",
+        "Check": "Ability check: {ability} {skill} DC {dc}",
+        "Roll": "Roll: {formula} {name}",
+        "EffectDuration": "Effect duration: {value} {units} {until}"
+      },
+      "Why": {
+        "missing": "missing",
+        "duplicate": "duplicate",
+        "notAnObject": "not an object",
+        "notAnArray": "not a list"
+      },
       "Reason": {
         "quoteMissing": "the quote is not in the description",
         "numberNotQuoted": "the number is not in the quote",
@@ -218,6 +231,7 @@
         "fieldRemoved": "{field} removed ({why})",
         "notApplicable": "not applicable to this item type",
         "effectSkipped": "dnd5e cannot apply this change; shown as not automated",
+        "tooMany": "more than {max} {what}: only the first {max} kept",
         "strict": "refused by dnd5e: {error}"
       }
     }

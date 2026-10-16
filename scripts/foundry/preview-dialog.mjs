@@ -1,11 +1,13 @@
 /** Preview of the proposed changes, grouped; nothing is written before "Apply" (C12, C13). */
 import { MODULE_ID } from "../constants.mjs";
-import { AI_STATUSES } from "../core/analyze.mjs";
+import { applySelection } from "../core/changes.mjs";
 import { fingerprint } from "./analysis.mjs";
 import { applyChangeSet } from "./apply.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const GROUPS = ["details", "activities", "effects"];
+/** `why` values of a `fieldRemoved` correction -> `Claude.Why.*` keys. */
+const WHY = { "missing": "missing", "duplicate": "duplicate", "not an object": "notAnObject", "not an array": "notAnArray" };
 
 /**
  * Localize a library descriptor `{ key, data }` (or a plain string). A `null` / `undefined` placeholder value is an
@@ -61,6 +63,20 @@ function subtypeLabel(key) {
   return stringify(key);
 }
 
+const localize = (key, data) => (game.i18n.has(key) ? game.i18n.format(key, data ?? {}) : "");
+
+/**
+ * Text of a correction or rejection of Claude's answer (`{ ref, field, reason, data }`): the element, the field and the
+ * localized reason (`Claude.Reason.<code>`, with its data; the `why` of a removed field is localized too).
+ */
+function reasonText(entry) {
+  const data = { ...(entry.data ?? {}) };
+  if (data.why) data.why = localize(`${MODULE_ID}.Claude.Why.${WHY[data.why] ?? data.why}`) || data.why;
+  const reason = localize(`${MODULE_ID}.Claude.Reason.${entry.reason}`, data) || String(entry.reason ?? "");
+  const where = [entry.ref, entry.field].filter(Boolean).join(".");
+  return where ? `${where}: ${reason}` : reason;
+}
+
 export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
     id: `${MODULE_ID}-preview-{id}`,
@@ -86,6 +102,8 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   #stale = false;
   /** A recomputation is running: clicks are ignored until it is done (one at a time). */
   #busy = false;
+  /** Checkboxes and "to check" choices made in the preview, applied by `applySelection` on "Apply". */
+  #selection = { selected: {}, choices: {} };
 
   /**
    * @param {object} config
@@ -116,9 +134,21 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     return game.i18n.format(`${MODULE_ID}.Preview.Heading`, { name: this.#item.name });
   }
 
+  /** Checkbox state of an entry: the user's choice, else the change set's. */
+  #isSelected(entry) {
+    return this.#selection.selected[entry.id] ?? entry.selected !== false;
+  }
+
+  /** Chosen reading of a "to check" item: the user's choice, else the proposed one. */
+  #choiceOf(item) {
+    return this.#selection.choices[item.id] ?? item.choice;
+  }
+
   /** @override */
   async _prepareContext() {
     const cs = this.#changeSet;
+    const claudeMode = this.#proposal.mode === "claude";
+    const mark = (key) => game.i18n.localize(`${MODULE_ID}.Preview.Check.${key}`);
     const entryView = (entry) => ({
       id: entry.id,
       action: entry.action,
@@ -130,9 +160,21 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       previous: entry.chosen && entry.previous ? subtypeLabel(entry.previous) : stringify(entry.previous),
       raw: entry.raw,
       ai: entry.origin === "fallback",
+      claude: entry.origin === "claude",
       base: entry.origin === "base",
       keep: entry.action === "keep",
-      remove: entry.action === "remove"
+      remove: entry.action === "remove",
+      // One checkbox per proposed change (not for what is kept or removed)
+      selectable: Boolean(entry.refs) && ["add", "set", "replace"].includes(entry.action),
+      selected: this.#isSelected(entry),
+      // Cross-check and reading marks (Claude first)
+      agree: entry.check === "agree",
+      conflict: entry.check === "conflict",
+      claudeOnly: entry.check === "claudeOnly",
+      rulesOnly: entry.check === "rulesOnly",
+      inferred: Boolean(entry.inferred?.length),
+      certainty: ["medium", "low"].includes(entry.certainty) ? mark(`Certainty.${entry.certainty}`) : "",
+      low: entry.certainty === "low"
     });
     const groups = GROUPS.map((group) => ({
       group,
@@ -140,10 +182,33 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       entries: (cs.entries ?? []).filter((entry) => entry.group === group).map(entryView)
     })).filter((g) => g.entries.length);
 
+    // "To check": the facts Claude and the rules read differently, with a choice between the two values
+    const labelOf = new Map((cs.entries ?? []).map((entry) => [entry.id, entry]));
+    const checks = (cs.check ?? []).map((item) => ({
+      id: item.id,
+      family: describe(item.label),
+      entry: labelOf.has(item.entryId) ? entryView(labelOf.get(item.entryId)).label : "",
+      critical: Boolean(item.critical),
+      claude: item.claude?.display ?? "",
+      rules: item.rules?.display ?? "",
+      rulesRaw: item.rules?.raw ?? "",
+      claudeChosen: this.#choiceOf(item) === "claude",
+      rulesChosen: this.#choiceOf(item) === "rules"
+    }));
+
     const status = this.#proposal.ai?.status ?? "off";
-    const ai = status !== "ok"
-      ? { text: game.i18n.localize(`${MODULE_ID}.Preview.Ai.${AI_STATUSES.includes(status) ? status : "error"}`), rulesOnly: true }
-      : { text: game.i18n.format(`${MODULE_ID}.Preview.Ai.ok`, { model: this.#proposal.ai?.model ?? "" }), rulesOnly: false };
+    const model = this.#proposal.ai?.model ?? "";
+    let ai;
+    if (status !== "ok") {
+      const known = game.i18n.has(`${MODULE_ID}.Preview.Ai.${status}`) ? status : "error";
+      ai = { text: game.i18n.localize(`${MODULE_ID}.Preview.Ai.${known}`), rulesOnly: true };
+    } else if (claudeMode) ai = { text: game.i18n.format(`${MODULE_ID}.Preview.Ai.claude`, { model }), rulesOnly: false };
+    else ai = { text: game.i18n.format(`${MODULE_ID}.Preview.Ai.ok`, { model }), rulesOnly: false };
+
+    // What the validation corrected or discarded in Claude's answer, with the reason
+    const claude = this.#proposal.claude;
+    const corrected = (claude?.corrections ?? []).map((c) => game.i18n.format(`${MODULE_ID}.Claude.Corrected`, { what: reasonText(c) }));
+    const discarded = (claude?.rejections ?? []).map((r) => game.i18n.format(`${MODULE_ID}.Claude.Rejected`, { what: reasonText(r) }));
 
     const typeChange = cs.typeChange
       ? game.i18n.format(`${MODULE_ID}.Preview.TypeChange`, {
@@ -158,6 +223,10 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
 
     return {
       groups,
+      checks,
+      claudeMode,
+      corrected,
+      discarded,
       typeChange,
       ai,
       stale,
@@ -166,7 +235,9 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
       unrecognized: (cs.unrecognized ?? []).map((u) => u.text ?? u.raw ?? stringify(u)),
       rejected: (cs.rejected ?? []).map((entry) => ({ label: describe(entry.label), raw: entry.raw })),
       // The clause itself is the information: the library's note text would only repeat it
-      notAutomated: (cs.notAutomated ?? []).map((entry) => ({ raw: entry.raw || describe(entry.label), ai: entry.origin === "fallback" })),
+      notAutomated: (cs.notAutomated ?? []).map((entry) => ({
+        raw: entry.raw || describe(entry.label), ai: entry.origin === "fallback", claude: entry.origin === "claude"
+      })),
       flavor: (cs.flavor ?? []).map((f) => f.text),
       empty: Boolean(cs.empty)
     };
@@ -175,6 +246,18 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
   /** @override */
   _onRender(context, options) {
     super._onRender(context, options);
+    // Checkboxes and "to check" choices: remembered, applied on "Apply" (no recomputation needed)
+    for (const box of this.element.querySelectorAll(".entry-select")) {
+      box.addEventListener("change", () => {
+        this.#selection.selected[box.dataset.entry] = box.checked;
+        box.closest(".entry")?.classList.toggle("unselected", !box.checked);
+      });
+    }
+    for (const radio of this.element.querySelectorAll(".check-choice")) {
+      radio.addEventListener("change", () => {
+        if (radio.checked) this.#selection.choices[radio.dataset.check] = radio.value;
+      });
+    }
     this.element.querySelector('[name="replace"]')?.addEventListener("change", async (event) => {
       const box = event.currentTarget;
       if (this.#busy) {
@@ -235,7 +318,8 @@ export class PreviewDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     this.#busy = true;
     this.#setDisabled(true);
     try {
-      await applyChangeSet(this.#item, this.#changeSet);
+      // Only what is checked, with the chosen reading of each "to check" item
+      await applyChangeSet(this.#item, applySelection(this.#changeSet, this.#selection));
       ui.notifications.info(game.i18n.format(`${MODULE_ID}.Messages.Applied`, { name: this.#item.name }));
       await this.close();
     } catch {

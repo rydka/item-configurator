@@ -17,7 +17,14 @@
   </div>
 </div>
 {{#if aiEnabled}}<p class="notes"><i class="fa-solid fa-robot"></i> {{localize "item-configurator.TypeDialog.AiOn"}}</p>{{/if}}
+{{#if claudeOn}}<p class="notes claude-on"><i class="fa-solid fa-robot"></i> {{localize "item-configurator.TypeDialog.ClaudeOn"}}</p>{{/if}}
 <p class="busy-note"><i class="fa-solid fa-spinner fa-spin"></i> {{localize "item-configurator.TypeDialog.Analyzing"}}</p>
+<ul class="progress">
+  {{#each steps}}
+  <li data-step="{{step}}"><i class="fa-solid fa-check done-mark"></i><i class="fa-solid fa-spinner fa-spin active-mark"></i> <span class="step-label">{{label}}</span>{{#if (eq step "claude")}} <span class="counter"></span>{{/if}}</li>
+  {{/each}}
+  <li class="progress-cancel"><button type="button" data-action="cancelAi" class="item-configurator-cancel-ai" disabled><i class="fa-solid fa-ban"></i> {{localize "item-configurator.Progress.Cancel"}}</button></li>
+</ul>
 <footer class="form-footer">
   <button type="submit" class="item-configurator-analyze"><i class="fa-solid fa-magnifying-glass"></i> {{localize "item-configurator.TypeDialog.Analyze"}}</button>
   <button type="button" data-action="close"><i class="fa-solid fa-xmark"></i> {{localize "item-configurator.Cancel"}}</button>
