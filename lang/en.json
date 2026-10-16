@@ -163,6 +163,7 @@
         "refusal": "Rules only (the AI declined to answer; its answer was not used).",
         "truncated": "Rules only (the AI answer was cut short; it was not used).",
         "invalid": "Rules only (the AI answer could not be read; it was not used).",
+        "http": "Rules only (the Anthropic API answered with an error).",
         "aborted": "Rules only (the AI call was cancelled).",
         "ok": "AI used for unrecognized sentences ({model}).",
         "claude": "Claude read the whole description ({model}); the rules cross-checked its numbers."
@@ -232,6 +233,7 @@
         "notApplicable": "not applicable to this item type",
         "effectSkipped": "dnd5e cannot apply this change; shown as not automated",
         "tooMany": "more than {max} {what}: only the first {max} kept",
+        "instruction": "quoted only from a paragraph that reads like an instruction to the AI",
         "strict": "refused by dnd5e: {error}"
       }
     }

@@ -163,6 +163,7 @@
         "refusal": "Règles seules (l'IA a refusé de répondre ; sa réponse n'a pas été utilisée).",
         "truncated": "Règles seules (la réponse de l'IA a été coupée ; elle n'a pas été utilisée).",
         "invalid": "Règles seules (la réponse de l'IA n'a pas pu être lue ; elle n'a pas été utilisée).",
+        "http": "Règles seules (l'API Anthropic a répondu par une erreur).",
         "aborted": "Règles seules (l'appel à l'IA a été annulé).",
         "ok": "IA utilisée pour les phrases non reconnues ({model}).",
         "claude": "Claude a lu toute la description ({model}) ; les règles ont recoupé ses nombres."
@@ -232,6 +233,7 @@
         "notApplicable": "sans objet pour ce type d'objet",
         "effectSkipped": "dnd5e ne sait pas appliquer ce changement ; affiché comme non automatisé",
         "tooMany": "plus de {max} {what} : seuls les {max} premiers gardés",
+        "instruction": "cité seulement depuis un paragraphe qui ressemble à une instruction adressée à l'IA",
         "strict": "refusé par dnd5e : {error}"
       }
     }
