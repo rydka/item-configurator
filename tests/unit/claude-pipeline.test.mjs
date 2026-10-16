@@ -168,9 +168,15 @@ describe("cross-check: agreement, conflict, Claude only, rules only", () => {
     expect(cs.check).toHaveLength(1);
     expect(cs.check[0]).toMatchObject({ choice: "claude" });
   });
-  it("Claude only: dice that the rules do not read (French infinitive after 'pour')", async () => {
+  it("agreement on the ring: the library now reads the French infinitive after \"pour\" (1d6 + @prof, temporary hit points)", async () => {
     const { proposal } = await fromFixture("ring");
-    expect(proposal.crosscheck.claudeOnly.map((c) => c.family)).toContain("dice");
+    expect(proposal.crosscheck.agree.map((c) => c.family)).toContain("dice");
+    expect(proposal.crosscheck.claudeOnly.map((c) => c.family)).not.toContain("dice");
+    expect(proposal.crosscheck.conflict).toEqual([]);
+  });
+  it("Claude only: the d4 of the compass, which the rules do not read as dice", async () => {
+    const { proposal } = await fromFixture("compass");
+    expect(proposal.crosscheck.claudeOnly.map((c) => `${c.family}:${c.value}`)).toContain("dice:1d4:");
   });
   it("rules only, paragraph untouched by Claude: added, checked, with the origin 'rules'", async () => {
     const answer = { details: [], activities: [], effects: [], notAutomated: [], flavor: [] };
@@ -300,13 +306,13 @@ describe("fall back to the rules alone (C10)", () => {
   const CASES = [
     ["refusal", { response: claudeFixture("refusal").response }, "refusal"],
     ["max-tokens", { response: claudeFixture("max-tokens").response }, "truncated"],
-    ["invalid-json", { response: claudeFixture("invalid-json").response }, "error"],
-    ["fenced-json", { response: claudeFixture("fenced-json").response }, "error"],
+    ["invalid-json", { response: claudeFixture("invalid-json").response }, "invalid"],
+    ["fenced-json", { response: claudeFixture("fenced-json").response }, "invalid"],
     ["http-401", { httpError: claudeFixture("http-401").httpError }, "unauthorized"],
     ["http-403", { httpError: claudeFixture("http-403").httpError }, "unauthorized"],
-    ["http-429", { httpError: claudeFixture("http-429").httpError, headers: { "retry-after": "0" } }, "error"],
-    ["http-500", { httpError: claudeFixture("http-500").httpError, headers: { "retry-after": "0" } }, "error"],
-    ["http-529", { httpError: claudeFixture("http-529").httpError, headers: { "retry-after": "0" } }, "error"],
+    ["http-429", { httpError: claudeFixture("http-429").httpError, headers: { "retry-after": "0" } }, "http"],
+    ["http-500", { httpError: claudeFixture("http-500").httpError, headers: { "retry-after": "0" } }, "http"],
+    ["http-529", { httpError: claudeFixture("http-529").httpError, headers: { "retry-after": "0" } }, "http"],
     ["network-error", { networkError: true }, "unreachable"]
   ];
   for (const [id, reply, status] of CASES) {

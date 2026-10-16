@@ -155,10 +155,10 @@ describe("rejections and corrections (one case each)", () => {
       for (const x of [...r.corrections, ...r.rejections]) expect(codes.has(x.reason), `${id}: ${x.reason}`).toBe(true);
     }
   });
-  it("known gap: on a loot the magical property is refused (reason unknownKey on the field), although dnd5e loot has mgc", () => {
-    // DETAIL_FIELDS.weaponProperty has no path for loot, tool or container: validProperties lists mgc for all three.
+  it("the magical property is accepted on a loot (also tool and container), as dnd5e allows", () => {
     const r = validate("activity-on-loot");
-    expect(r.item.details.some((d) => d.field === "weaponProperty")).toBe(false);
+    expect(r.rejections.map((x) => x.ref)).not.toContain("d3");
+    expect(r.item.details.some((d) => d.field === "weaponProperty" && d.key === "mgc")).toBe(true);
   });
 });
 
