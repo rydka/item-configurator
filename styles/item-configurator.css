@@ -51,7 +51,6 @@
 .item-configurator.type-dialog .progress .active-mark { display: none; width: 1em; }
 .item-configurator.type-dialog .progress li.active .active-mark { display: inline-block; }
 .item-configurator.type-dialog .progress li.done .done-mark { display: inline-block; color: var(--color-level-success, #2a2); }
-.item-configurator.type-dialog .progress li.done .counter { display: none; }
 .item-configurator.type-dialog .progress .progress-cancel { margin-top: 0.3rem; }
 .item-configurator.type-dialog .progress .progress-cancel button { width: auto; font-size: var(--font-size-12); }
 

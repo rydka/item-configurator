@@ -52,12 +52,12 @@ export class TypeDialog extends HandlebarsApplicationMixin(ApplicationV2) {
     const types = this.#choices.map(({ type, label }) => ({ type, label, selected: type === this.#guess.type }));
     const config = getAiConfig();
     const claude = claudeMode();
-    return {
-      types, subtypes: this.#subtypeOptions(this.#guess.type),
-      aiEnabled: config.enabled && !claude, claudeOn: claude,
-      steps: STEPS.map((step) => ({ step, label: game.i18n.localize(`${MODULE_ID}.Progress.${step === "validate" ? "Check" : step.capitalize()}`) })),
-      limit: Math.round(config.anthropicTimeoutMs / 1000)
-    };
+    const limit = Math.round(config.anthropicTimeoutMs / 1000);
+    // The Claude step is its counter line ("Claude is reading... 0 s / 60 s"), updated every second once it starts
+    const steps = STEPS.map((step) => (step === "claude"
+      ? { step, counter: game.i18n.format(`${MODULE_ID}.Progress.Claude`, { elapsed: 0, limit }) }
+      : { step, label: game.i18n.localize(`${MODULE_ID}.Progress.${step === "validate" ? "Check" : "Rules"}`) }));
+    return { types, subtypes: this.#subtypeOptions(this.#guess.type), aiEnabled: config.enabled && !claude, claudeOn: claude, steps, limit };
   }
 
   /** Options of the subtype select for a type, with the guessed one selected. */

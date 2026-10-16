@@ -21,7 +21,7 @@
 <p class="busy-note"><i class="fa-solid fa-spinner fa-spin"></i> {{localize "item-configurator.TypeDialog.Analyzing"}}</p>
 <ul class="progress">
   {{#each steps}}
-  <li data-step="{{step}}"><i class="fa-solid fa-check done-mark"></i><i class="fa-solid fa-spinner fa-spin active-mark"></i> <span class="step-label">{{label}}</span>{{#if (eq step "claude")}} <span class="counter"></span>{{/if}}</li>
+  <li data-step="{{step}}"><i class="fa-solid fa-check done-mark"></i><i class="fa-solid fa-spinner fa-spin active-mark"></i> {{#if counter}}<span class="counter">{{counter}}</span>{{else}}<span class="step-label">{{label}}</span>{{/if}}</li>
   {{/each}}
   <li class="progress-cancel"><button type="button" data-action="cancelAi" class="item-configurator-cancel-ai" disabled><i class="fa-solid fa-ban"></i> {{localize "item-configurator.Progress.Cancel"}}</button></li>
 </ul>
