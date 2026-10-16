@@ -56,7 +56,8 @@ export const DETAIL_FIELDS = {
   stealthDisadvantage: { value: "", path: { equipment: "properties" } },
   weaponDamage: { value: "dice", path: { weapon: "damage.base" } },
   versatileDamage: { value: "dice", path: { weapon: "damage.versatile" } },
-  weaponProperty: { value: "key", key: "validProperties", path: { weapon: "properties", equipment: "properties", consumable: "properties" } },
+  // Every physical item type has `system.properties` (dnd5e gives `mgc` to loot, tools and containers too)
+  weaponProperty: { value: "key", key: "validProperties", path: { weapon: "properties", equipment: "properties", consumable: "properties", loot: "properties", tool: "properties", container: "properties" } },
   weaponRange: { value: "number", path: { weapon: "range" } },
   destroyOnEmpty: { value: "", path: "uses.autoDestroy" }
 };
