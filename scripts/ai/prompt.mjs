@@ -194,13 +194,13 @@ const NUMBER_WORDS = {
 };
 
 /** Does the (normalized) quote contain the number, as digits or as a word? */
-function hasNumber(quote, value) {
+export function hasNumber(quote, value) {
   const n = Math.abs(Number(value));
   if ( new RegExp(String.raw`(?:^|[^\d])${n}(?!\d)`).test(quote) ) return true;
   return (NUMBER_WORDS[n] ?? []).some(word => new RegExp(String.raw`\b${word}\b`).test(quote));
 }
 
-const hasDice = (quote, number, denomination) => new RegExp(String.raw`(?:^|[^\d])${number}\s?d\s?${denomination}(?!\d)`).test(quote);
+export const hasDice = (quote, number, denomination) => new RegExp(String.raw`(?:^|[^\d])${number}\s?d\s?${denomination}(?!\d)`).test(quote);
 
 /** Does the (normalized) quote name a damage type (by its English or French word, else by its key)? */
 function hasDamageType(quote, type) {
