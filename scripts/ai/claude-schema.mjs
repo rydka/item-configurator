@@ -107,7 +107,7 @@ export function schemaEnums(dnd5eConfig, coreConst) {
     effectDurationUnits: sortedKeys(coreConst?.ACTIVE_EFFECT_DURATION_UNITS),
     validProperties: {}
   };
-  if (!enums.weightUnits.length) enums.weightUnits = [...WEIGHT_UNITS];
+  if (!enums.weightUnits.length) enums.weightUnits = [...WEIGHT_UNITS].sort();
   for (const type of ["weapon", "equipment", "consumable"]) {
     enums.validProperties[type] = sortedKeys(config.validProperties?.[type]);
   }
