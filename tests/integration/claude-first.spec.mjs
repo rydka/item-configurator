@@ -26,7 +26,7 @@ async function previewOf(foundry, gamePage, spec, nameSuffix = "") {
 /** A copy of the configured item on a new actor (proficiency +2), with dice forced to their maximum. */
 const onActor = (foundry, uuid) => foundry(async ({ uuid, prefix }) => {
   const item = await fromUuid(uuid);
-  const actor = await CONFIG.Actor.documentClass.create({ name: `${prefix}bearer`, type: "character", system: { attributes: { prof: 2 }, abilities: { wis: { value: 14 } } } });
+  const actor = await CONFIG.Actor.documentClass.create({ name: `${prefix}bearer`, type: "character", system: { attributes: { movement: { walk: 30 } }, abilities: { wis: { value: 14 } } } });
   const [owned] = await actor.createEmbeddedDocuments("Item", [item.toObject()], { keepId: true });
   return { actor: actor.uuid, item: owned.uuid };
 }, { uuid, prefix: PREFIX });
@@ -113,7 +113,8 @@ test("C9/C12/C15: the ring, configured by Claude: preview, apply, temporary hit 
   expect(played.roll.total).toBe(played.roll.max);
   expect(played.uses.before.value).toBe(1);
   expect(played.uses.after.value).toBe(0);
-  expect(played.walk.halved).toBe(played.walk.before / 2);
+  expect(played.walk.before).toBe(30);
+  expect(played.walk.halved).toBe(15);
   expect(played.walk.restored).toBe(played.walk.before);
   expect(played.expiry).toBe("sourceEnd");
 
