@@ -1,0 +1,39 @@
+{
+ "input": {
+  "name": "La Boussole des Chemins Oubliés",
+  "type": "equipment",
+  "value": "wondrous",
+  "subtypeLabel": "Objet merveilleux",
+  "paragraphs": [
+   "Objet merveilleux, peu commun (ne nécessite pas d'harmonisation)",
+   "Le bronze terni de cette boussole est gravé d'une inscription que personne ne sait plus lire ; son aiguille ne désigne jamais le nord.",
+   "Écho des passages. En utilisant une action, vous faites vibrer l'aiguille vers le passage le plus proche dans un rayon de 9 mètres autour de vous, sans révéler comment l'ouvrir. Pendant 1 minute, elle suit ce passage, mais elle reste inefficace contre les passages cachés par une illusion.",
+   "Le chemin le plus sûr. Quand vous faites un test de Sagesse (Survie) pour vous orienter ou éviter de vous perdre, vous pouvez lancer 1d4 et ajouter le résultat à votre test, après avoir lancé le d20 mais avant de connaître le résultat.",
+   "Mémoire des pierres. Une fois par aube, vous pouvez mémoriser le trajet que vous parcourez. Durant les 10 prochaines minutes, la boussole garde en mémoire chaque virage que vous prenez, sans garantir que le trajet reste praticable.",
+   "Fil lumineux. Pendant les 24 heures suivantes, vous pouvez utiliser une action pour faire apparaître un fil lumineux qui retrace votre dernier trajet ; seul vous le voyez."
+  ]
+ },
+ "response": {
+  "id": "msg_sim0006",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-5-5",
+  "content": [
+   {
+    "type": "text",
+    "text": "{\"details\":[{\"field\":\"rarity\",\"quotes\":[\"peu commun\"],\"certainty\":\"high\",\"inferred\":false,\"key\":\"uncommon\"},{\"field\":\"attunement\",\"quotes\":[\"ne nécessite pas d'harmonisation\"],\"certainty\":\"high\",\"inferred\":false,\"key\":\"\"},{\"field\":\"weaponProperty\",\"quotes\":[\"peu commun\"],\"certainty\":\"medium\",\"inferred\":true,\"key\":\"mgc\"}],\"activities\":[{\"ref\":\"a1\",\"type\":\"utility\",\"name\":\"Écho des passages\",\"quotes\":[\"En utilisant une action\",\"dans un rayon de 9 mètres autour de vous\",\"Pendant 1 minute\"],\"certainty\":\"high\",\"inferred\":[],\"activation\":{\"type\":\"action\",\"value\":0,\"condition\":\"\"},\"effects\":[],\"range\":{\"value\":0,\"units\":\"parsec\"},\"target\":{\"template\":{\"type\":\"radius\",\"size\":9,\"units\":\"m\"},\"affects\":{\"type\":\"\",\"count\":0,\"special\":\"\"}},\"duration\":{\"value\":1,\"units\":\"minute\",\"concentration\":false}},{\"ref\":\"a2\",\"type\":\"utility\",\"name\":\"Le chemin le plus sûr\",\"quotes\":[\"Quand vous faites un test de Sagesse (Survie) pour vous orienter ou éviter de vous perdre\",\"vous pouvez lancer 1d4 et ajouter le résultat à votre test\"],\"certainty\":\"high\",\"inferred\":[],\"activation\":{\"type\":\"special\",\"value\":0,\"condition\":\"Test de Sagesse (Survie) pour s'orienter, après le d20, avant le résultat\"},\"effects\":[],\"roll\":{\"formula\":\"1d4\",\"name\":\"Le chemin le plus sûr\"}},{\"ref\":\"a3\",\"type\":\"utility\",\"name\":\"Mémoire des pierres\",\"quotes\":[\"Une fois par aube\",\"Durant les 10 prochaines minutes\"],\"certainty\":\"medium\",\"inferred\":[\"activation\"],\"activation\":{\"type\":\"action\",\"value\":0,\"condition\":\"\"},\"effects\":[],\"duration\":{\"value\":10,\"units\":\"minute\",\"concentration\":false},\"uses\":{\"max\":1,\"period\":\"dawn\"},\"consume\":{\"target\":\"activityUses\",\"amount\":1}},{\"ref\":\"a4\",\"type\":\"utility\",\"name\":\"Fil lumineux\",\"quotes\":[\"Pendant les 24 heures suivantes, vous pouvez utiliser une action\"],\"certainty\":\"high\",\"inferred\":[\"range\"],\"activation\":{\"type\":\"action\",\"value\":0,\"condition\":\"dans les 24 heures suivant la mémorisation\"},\"effects\":[],\"range\":{\"value\":0,\"units\":\"self\"}}],\"effects\":[],\"notAutomated\":[{\"quote\":\"sans révéler comment l'ouvrir\",\"reason\":\"L'aiguille ne révèle pas l'ouverture\"},{\"quote\":\"inefficace contre les passages cachés par une illusion\",\"reason\":\"Exception non automatisée\"},{\"quote\":\"pour vous orienter ou éviter de vous perdre\",\"reason\":\"Condition narrative du d4\"},{\"quote\":\"mémoriser le trajet que vous parcourez\",\"reason\":\"Mémorisation du trajet\"},{\"quote\":\"seul vous le voyez\",\"reason\":\"Visibilité du fil\"},{\"quote\":\"sans garantir que le trajet reste praticable\",\"reason\":\"Trajet non garanti\"}],\"flavor\":[\"Le bronze terni de cette boussole est gravé d'une inscription que personne ne sait plus lire\"]}"
+   }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+   "input_tokens": 612,
+   "output_tokens": 840,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 3104
+  }
+ },
+ "world": {
+  "metric": false
+ }
+}

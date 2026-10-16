@@ -1,0 +1,37 @@
+{
+ "input": {
+  "name": "L'Anneau du Dernier Souffle",
+  "type": "equipment",
+  "value": "ring",
+  "subtypeLabel": "Anneau",
+  "paragraphs": [
+   "Anneau, peu commun (nécessite un lien d'harmonisation)",
+   "Forgé dans l'argent noirci, cet anneau serti d'une pierre grise garde la chaleur de celui qui le porte, même lorsque la vie s'enfuit.",
+   "Le dernier souffle. Une fois par repos long, quand vous tombez à 0 point de vie sans être tué sur le coup, vous pouvez utiliser votre réaction pour tomber à 1 point de vie à la place et gagner 1d6 + votre bonus de maîtrise points de vie temporaires.",
+   "Le prix du sursis. Jusqu'à la fin de votre prochain tour, votre vitesse est réduite de moitié et vous ne pouvez pas effectuer de réactions."
+  ]
+ },
+ "response": {
+  "id": "msg_sim0018",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-5-5",
+  "content": [
+   {
+    "type": "text",
+    "text": "{\"details\":[{\"field\":\"rarity\",\"quotes\":[\"peu commun\"],\"certainty\":\"high\",\"inferred\":false,\"key\":\"uncommon\"},{\"field\":\"attunement\",\"quotes\":[\"nécessite un lien d'harmonisation\"],\"certainty\":\"high\",\"inferred\":false,\"key\":\"required\"},{\"field\":\"weaponProperty\",\"quotes\":[\"peu commun\"],\"certainty\":\"medium\",\"inferred\":true,\"key\":\"mgc\"}],\"uses\":{\"max\":1,\"recovery\":[{\"period\":\"lr\",\"type\":\"recoverAll\",\"formula\":\"\"}],\"autoDestroy\":false,\"quotes\":[\"Une fois par repos long\"],\"certainty\":\"high\",\"inferred\":false},\"activities\":[{\"ref\":\"a1\",\"type\":\"heal\",\"name\":\"Le dernier souffle\",\"quotes\":[\"vous pouvez utiliser votre réaction\",\"1d6 + votre bonus de maîtrise points de vie temporaires\"],\"certainty\":\"low\",\"inferred\":[\"range\",\"target\"],\"activation\":{\"type\":\"reaction\",\"value\":0,\"condition\":\"tomber à 0 point de vie sans être tué sur le coup\"},\"effects\":[\"e1\"],\"range\":{\"value\":0,\"units\":\"self\"},\"target\":{\"template\":{\"type\":\"\",\"size\":0,\"units\":\"ft\"},\"affects\":{\"type\":\"self\",\"count\":0,\"special\":\"\"}},\"consume\":{\"target\":\"itemUses\",\"amount\":1},\"healing\":{\"number\":1,\"denomination\":6,\"bonus\":\"@prof\",\"types\":[\"temphp\"]}}],\"effects\":[{\"ref\":\"e1\",\"name\":\"Le prix du sursis\",\"quotes\":[\"Jusqu'à la fin de votre prochain tour, votre vitesse est réduite de moitié\"],\"certainty\":\"high\",\"inferred\":false,\"transfer\":false,\"changes\":[{\"kind\":\"speedMultiplier\",\"scope\":\"\",\"on\":\"\",\"value\":\"0.5\"}],\"duration\":{\"value\":0,\"units\":\"\",\"until\":\"sourceEnd\"}}],\"notAutomated\":[{\"quote\":\"tomber à 1 point de vie à la place\",\"reason\":\"Les points de vie à 1 ne sont pas automatisés\"},{\"quote\":\"vous ne pouvez pas effectuer de réactions\",\"reason\":\"Restriction d'actions non automatisée\"}],\"flavor\":[\"Forgé dans l'argent noirci, cet anneau serti d'une pierre grise garde la chaleur de celui qui le porte\"]}"
+   }
+  ],
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "usage": {
+   "input_tokens": 612,
+   "output_tokens": 840,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 3104
+  }
+ },
+ "world": {
+  "metric": false
+ }
+}

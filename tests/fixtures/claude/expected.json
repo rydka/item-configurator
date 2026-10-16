@@ -1,0 +1,166 @@
+{
+ "ring": {
+  "world": "imperial",
+  "system": {
+   "type.value": "ring",
+   "rarity": "uncommon",
+   "attunement": "required",
+   "propertiesContain": [
+    "mgc"
+   ],
+   "uses.max": "1",
+   "uses.recovery": [
+    {
+     "period": "lr",
+     "type": "recoverAll"
+    }
+   ]
+  },
+  "activities": [
+   {
+    "type": "heal",
+    "activation.type": "reaction",
+    "activation.condition": "tomber à 0 point de vie sans être tué sur le coup",
+    "healing": {
+     "number": 1,
+     "denomination": 6,
+     "bonus": "@prof",
+     "types": [
+      "temphp"
+     ]
+    },
+    "consumption.targets": [
+     {
+      "type": "itemUses",
+      "value": "1"
+     }
+    ],
+    "range.units": "self",
+    "inferred": [
+     "range",
+     "target"
+    ],
+    "effects": [
+     "E1"
+    ]
+   }
+  ],
+  "effects": [
+   {
+    "id": "E1",
+    "transfer": false,
+    "duration.expiry": [
+     "sourceEnd",
+     "1 turn"
+    ],
+    "changes": [
+     {
+      "key": "system.attributes.movement.multiplier",
+      "type": "multiply",
+      "value": "0.5"
+     }
+    ]
+   }
+  ],
+  "activityCount": 1,
+  "notAutomatedQuotes": [
+   "tomber à 1 point de vie à la place",
+   "vous ne pouvez pas effectuer de réactions"
+  ],
+  "flavorParagraph": "P2",
+  "crosscheckAgree": [
+   "uses 1/lr",
+   "activation reaction",
+   "dice 1d6+@prof temphp",
+   "speedMultiplier 0.5"
+  ],
+  "crosscheckConflicts": 0
+ },
+ "compass": {
+  "world": "imperial",
+  "system": {
+   "type.value": "wondrous",
+   "rarity": "uncommon",
+   "attunement": "",
+   "propertiesContain": [
+    "mgc"
+   ],
+   "uses.max": [
+    "",
+    "1 (only if a3 consumes itemUses)"
+   ]
+  },
+  "activities": [
+   {
+    "type": "utility",
+    "activation.type": "action",
+    "range.units": "self",
+    "target.template": {
+     "type": "radius",
+     "size": "30",
+     "units": "ft"
+    },
+    "duration": {
+     "value": "1",
+     "units": "minute"
+    },
+    "consumption": []
+   },
+   {
+    "type": "utility",
+    "activation.type": "special",
+    "activation.condition": "test de Sagesse (Survie) pour s'orienter, après le d20, avant le résultat",
+    "roll.formula": "1d4",
+    "consumption": [],
+    "noPassiveEffectOn": "system.skills.sur"
+   },
+   {
+    "type": "utility",
+    "activation.type": "action",
+    "inferred": [
+     "activation"
+    ],
+    "duration": {
+     "value": "10",
+     "units": "minute"
+    },
+    "uses": {
+     "max": "1",
+     "recovery": [
+      {
+       "period": "dawn",
+       "type": "recoverAll"
+      }
+     ]
+    },
+    "consumption.targets": [
+     {
+      "type": "activityUses",
+      "value": "1"
+     }
+    ]
+   },
+   {
+    "type": "utility",
+    "activation.type": "action",
+    "activation.condition": "dans les 24 heures suivant la mémorisation",
+    "range.units": "self",
+    "consumption": []
+   }
+  ],
+  "activityCount": 4,
+  "effects": [],
+  "notAutomatedQuotes": [
+   "sans révéler comment l'ouvrir",
+   "inefficace contre les passages cachés par une illusion",
+   "pour vous orienter ou éviter de vous perdre",
+   "mémoriser le trajet que vous parcourez",
+   "seul vous le voyez",
+   "sans garantir que le trajet reste praticable"
+  ],
+  "flavorParagraph": "P2",
+  "criticalFields": [
+   "1d4 (activity 2)"
+  ]
+ }
+}
