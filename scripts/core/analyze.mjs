@@ -36,7 +36,7 @@ const damageOf = (part) => {
  * @param {object} system          Patch built from the text.
  * @returns {object}
  */
-function baseFragment(baseItem, type, system) {
+export function baseFragment(baseItem, type, system) {
   const picks = BASE_PICKS[type];
   if (!picks || !baseItem?.system || baseItem.type !== type) return {};
   const fragment = {};
