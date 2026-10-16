@@ -17,7 +17,9 @@ export function dnd5eConfig() {
     conditionTypes: Object.fromEntries(["blinded", "charmed", "deafened", "exhaustion", "frightened", "grappled",
       "incapacitated", "invisible", "paralyzed", "petrified", "poisoned", "prone", "restrained", "stunned", "unconscious"]
       .map((k) => [k, k])),
-    activityTypes: Object.fromEntries(referenceFile("type-config.json").activityTypes.map((k) => [k, k]))
+    activityTypes: Object.fromEntries(referenceFile("type-config.json").activityTypes.map((k) => [k, k])),
+    // keys.json predates `validProperties`: without it every property (magical...) is refused. Real groups of dnd5e 6.0.6.
+    validProperties: referenceFile("schema-enums.json").dnd5e.validProperties
   };
   return {
     ...supplement,
