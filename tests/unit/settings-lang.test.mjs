@@ -7,29 +7,50 @@ const flat = (obj, prefix = "") => Object.entries(obj).flatMap(([k, v]) =>
   (v && typeof v === "object" ? flat(v, `${prefix}${k}.`) : [`${prefix}${k}`]));
 
 describe("settings (C10, C11)", () => {
-  it("registers the five settings with the documented defaults", async () => {
+  it("registers the ten settings with the documented defaults", async () => {
     const { registerSettings } = await load();
     registerSettings();
     const defs = Object.fromEntries([...game.settings.settings].map(([k, d]) => [k.replace("item-configurator.", ""), d]));
-    expect(Object.keys(defs).sort()).toEqual(["aiEnabled", "aiTimeout", "allowPlayers", "ollamaModel", "ollamaUrl"]);
+    expect(Object.keys(defs).sort()).toEqual(["aiEnabled", "aiProvider", "aiTimeout", "allowPlayers", "anthropicApiKey", "anthropicEffort",
+      "anthropicModel", "anthropicTimeout", "ollamaModel", "ollamaUrl"]);
     expect(defs.allowPlayers).toMatchObject({ default: true, scope: "world", config: true });
     expect(defs.aiEnabled.default).toBe(false); // the local AI is opt-in
     expect(defs.ollamaUrl.default).toBe("http://localhost:11434");
     expect(defs.ollamaModel.default).toBe("");
     expect(defs.aiTimeout.default).toBe(20);
-    for (const d of Object.values(defs)) expect(d.scope).toBe("world");
+    expect(defs.aiProvider.default).toBe("ollama");
+    expect(defs.anthropicEffort.default).toBe("low");
+    expect(defs.anthropicModel.default).toBe("claude-sonnet-5-5");
+    expect(defs.anthropicTimeout.default).toBe(60); // Claude reads the whole description in one call
+    expect(defs.anthropicApiKey).toMatchObject({ default: "", scope: "client" }); // the key never reaches the world
+    for (const [key, d] of Object.entries(defs)) if (key !== "anthropicApiKey") expect(d.scope).toBe("world");
   });
   it("getAiConfig clamps the timeout to 3-120 s and trims the URL", async () => {
     const { registerSettings, getAiConfig } = await load();
     registerSettings();
     const set = (k, v) => game.settings.set("item-configurator", k, v);
-    expect(getAiConfig()).toEqual({ enabled: false, url: "http://localhost:11434", model: "", timeoutMs: 20000 });
+    expect(getAiConfig()).toEqual({
+      enabled: false, provider: "ollama", url: "http://localhost:11434", model: "", timeoutMs: 20000,
+      apiKey: "", anthropicModel: "claude-sonnet-5-5", effort: "low", anthropicTimeoutMs: 60000
+    });
     await set("aiTimeout", 1);
     expect(getAiConfig().timeoutMs).toBe(3000);
     await set("aiTimeout", 9999);
     expect(getAiConfig().timeoutMs).toBe(120000);
     await set("aiTimeout", "abc");
     expect(getAiConfig().timeoutMs).toBe(20000);
+    await set("anthropicTimeout", 1);
+    expect(getAiConfig().anthropicTimeoutMs).toBe(10000);
+    await set("anthropicTimeout", 9999);
+    expect(getAiConfig().anthropicTimeoutMs).toBe(180000);
+    await set("anthropicTimeout", "abc");
+    expect(getAiConfig().anthropicTimeoutMs).toBe(60000);
+    await set("anthropicApiKey", "  sk-test  ");
+    expect(getAiConfig().apiKey).toBe("sk-test");
+    await set("aiProvider", "bogus");
+    expect(getAiConfig().provider).toBe("ollama");
+    await set("aiProvider", "anthropic");
+    expect(getAiConfig().provider).toBe("anthropic");
     await set("ollamaUrl", "http://host:1234//");
     expect(getAiConfig().url).toBe("http://host:1234");
     await set("ollamaUrl", "");

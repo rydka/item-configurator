@@ -176,12 +176,26 @@ describe("French reads like English (C17)", () => {
 });
 
 describe("unrecognized sentences and empty results (C8, C16)", () => {
-  it("a sentence without rule is listed as unrecognized, nothing is invented", async () => {
+  it("an ambiance sentence goes to flavor, not to the unrecognized sentences, and nothing is invented", async () => {
     const { changeSet: cs, proposal } = await run({ html: p("Weapon (any sword), rare", "The hilt is wrapped in dragon leather."), type: "weapon", value: "martialM" });
-    expect(cs.unrecognized).toEqual([{ text: "The hilt is wrapped in dragon leather." }]);
+    expect(cs.flavor).toEqual([{ text: "The hilt is wrapped in dragon leather." }]);
+    expect(cs.unrecognized).toEqual([]);
     expect(cs.activities.add.flatMap((a) => a.damage?.parts ?? [])).toEqual([]);
     expect(cs.effects.add).toEqual([]);
     expect(proposal.ai.status).toBe("off");
+  });
+  it("a sentence that reads like a rule but has none is listed as unrecognized (C8), not as flavor", async () => {
+    for (const sentence of ["The blade hums when goblins are within 60 feet.", "Cette lame murmure quand des gobelins s'approchent à moins de 18 mètres."]) {
+      const { changeSet: cs } = await run({ html: p("Weapon (any sword), rare", sentence), type: "weapon", value: "martialM" });
+      expect(cs.unrecognized).toEqual([{ text: sentence }]);
+      expect(cs.flavor).toEqual([]);
+    }
+  });
+  it("a clause dnd5e cannot apply goes to notAutomated with its sentence", async () => {
+    const { changeSet: cs } = await run({ html: p("Weapon (any sword), rare", "You can't take reactions."), type: "weapon", value: "martialM" });
+    expect(cs.notAutomated.map((n) => n.raw)).toEqual(["You can't take reactions"]);
+    expect(cs.unrecognized).toEqual([]);
+    expect(cs.flavor).toEqual([]);
   });
   it("a description without any mechanic is empty (C16): only the chosen type remains", async () => {
     const { changeSet: cs } = await run({ html: p("A lovingly carved wooden figure that a long-dead sculptor left behind."), type: "loot", value: "art" });

@@ -58,7 +58,9 @@ for (const s of SCENARIOS) {
         label: li.querySelector(".label")?.textContent.trim() ?? "",
         source: li.querySelector("blockquote.source")?.textContent.trim() ?? "",
         base: Boolean(li.querySelector(".base-mark"))
-      }))
+      })),
+      // "Not automated" and "Flavor text" list sentences (no li.entry): kept apart from the entries
+      sentences: [...section.querySelectorAll("li:not(.entry) blockquote.source")].map((q) => q.textContent.trim())
     })));
     evidence(`C12-${s.id}-groups.json`, { titles, groups });
     await gamePage.screenshot({ path: test.info().outputPath(`C12-${s.id}-preview.png`) });
@@ -79,6 +81,10 @@ for (const s of SCENARIOS) {
         else expect(description, `source of ${entry.label}`).toContain(norm(entry.source).replace(/\s*\.\.\.$/, ""));
       }
     }
+    // The sentences of the "Not automated" and "Flavor text" groups are passages of the description too.
+    for (const group of groups.filter((g) => /group-(not-automated|flavor)/.test(g.cls))) {
+      for (const sentence of group.sentences) expect(description, `${group.title}: ${sentence}`).toContain(norm(sentence).replace(/s*...$/, ""));
+    }
     evidence(`C12-${s.id}-without-source.json`, withoutSource);
     expect(withoutSource, "entries without a source sentence").toEqual([]);
 
@@ -91,6 +97,27 @@ for (const s of SCENARIOS) {
     expect(flag).toBeNull();
   });
 }
+
+test("C12: a clause dnd5e cannot apply goes to 'Not automated' and an ambiance sentence to the collapsed 'Flavor text'", async ({ foundry, gamePage }) => {
+  const text = "<p>Weapon (any sword), rare</p><p>The hilt is wrapped in dragon leather.</p><p>You can't take reactions.</p><p>The blade hums when goblins are within 60 feet.</p>";
+  const uuid = await create(foundry, { name: "Ambiance Sword", type: "loot", system: { description: { value: text } } });
+  const preview = await previewFromSheet(foundry, gamePage, uuid, { type: "weapon" });
+  const notAutomated = await preview.locator(".group-not-automated blockquote.source").allTextContents();
+  const flavor = preview.locator("details.group-flavor");
+  const flavorState = { count: await flavor.count(), open: await flavor.evaluate((el) => el.open).catch(() => null),
+    sentences: await flavor.locator("blockquote.source").allTextContents(), title: await flavor.locator("summary h3").textContent().catch(() => "") };
+  const unrecognized = await preview.locator(".group-unrecognized blockquote.source").allTextContents();
+  evidence("C12-not-automated-flavor.json", { notAutomated, flavorState, unrecognized });
+  await gamePage.screenshot({ path: test.info().outputPath("C12-not-automated-flavor.png") });
+  expect(notAutomated.map(norm)).toEqual(["you can't take reactions"]);
+  expect(flavorState.count).toBe(1);
+  expect(flavorState.open, "the flavor group is collapsed").toBe(false);
+  expect(flavorState.sentences.map(norm)).toEqual(["the hilt is wrapped in dragon leather."]);
+  expect(flavorState.title).toContain("(1)");
+  // A sentence that reads like a rule but has none stays among the unrecognized ones, never in flavor
+  expect(unrecognized.map(norm)).toEqual(["the blade hums when goblins are within 60 feet."]);
+  await preview.locator('button[data-action="cancel"]').click();
+});
 
 test("C12: Apply writes what the preview showed", async ({ foundry, gamePage }) => {
   const uuid = await create(foundry, { name: "Cloak of Protection", type: "loot", system: { description: { value: TEXTS.cloak } } });

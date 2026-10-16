@@ -230,7 +230,6 @@ function evidenced(field, text) {
 
 const signature = (f) => `${f.path}=${tidy(f.value)}`;
 const multiset = (list) => list.reduce((m, f) => m.set(signature(f), (m.get(signature(f)) ?? 0) + 1), new Map());
-const diff = (a, b) => [...a].flatMap(([sig, n]) => Array(Math.max(0, n - (b.get(sig) ?? 0))).fill(sig));
 
 async function measure(items, label, resolver) {
   const rows = [];
