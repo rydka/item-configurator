@@ -15,7 +15,8 @@ export const MODELS = ["claude-sonnet-5-5", "claude-opus-5-5"];
 export const DEFAULT_MODEL = MODELS[0];
 export const EFFORTS = ["low", "medium", "high"];
 export const DEFAULT_EFFORT = "low";
-export const MAX_TOKENS = 4000;
+/** Enough for a whole item (details, activities, effects, quotes); `max_tokens` reached means "truncated". */
+export const MAX_TOKENS = 8000;
 /** Wait before the single retry of a 429 / 5xx answer when the server gives no `retry-after`. */
 export const DEFAULT_RETRY_MS = 1000;
 
@@ -39,7 +40,9 @@ export function headers(apiKey) {
  * @param {object} options
  * @param {string} options.model
  * @param {string} options.effort            `low` | `medium` | `high`.
- * @param {string} options.system            System prompt.
+ * @param {string|object[]} options.system   System prompt: a string, or content blocks
+ *                                           (`[{ type: "text", text, cache_control?: { type: "ephemeral" } }]`)
+ *                                           passed as they are, so that a stable prefix is cached by the API.
  * @param {{ role: string, content: string }[]} options.messages
  * @param {object} options.schema            JSON schema of the answer (the same one Ollama gets as `format`).
  * @param {number} [options.maxTokens]
@@ -73,23 +76,33 @@ export function retryAfterMs(value, now = Date.now()) {
   return Number.isNaN(date) ? null : Math.max(0, date - now);
 }
 
-/** Token usage of an answer, when reported. */
-const usageOf = payload => {
+/**
+ * Token usage of an answer, when reported: regular input and output tokens, plus the tokens read from and written
+ * to the prompt cache (`cacheRead > 0` on the second call with the same system blocks proves the cache works).
+ * @param {object} payload   Messages API answer.
+ * @returns {{ input: number|null, output: number|null, cacheRead: number|null, cacheWrite: number|null }|null}
+ */
+export function usageOf(payload) {
   const usage = payload?.usage;
   if ( !usage || (typeof usage !== "object") ) return null;
-  return { input: usage.input_tokens ?? null, output: usage.output_tokens ?? null };
-};
+  const count = value => (Number.isFinite(value) ? value : null);
+  return {
+    input: count(usage.input_tokens), output: count(usage.output_tokens),
+    cacheRead: count(usage.cache_read_input_tokens), cacheWrite: count(usage.cache_creation_input_tokens)
+  };
+}
 
 /**
  * `POST /v1/messages` with a JSON schema output. The first text block of the answer is parsed as JSON.
  * One retry at most on 429 / 5xx, respecting `retry-after` when it fits in the remaining time.
  * @param {{ apiKey: string, model?: string, effort?: string, maxTokens?: number }} config
- * @param {{ system: string, messages: object[], schema: object }} request
+ * @param {{ system: string|object[], messages: object[], schema: object }} request
  * @param {{ fetch: function, signal?: AbortSignal, timeoutMs?: number, now?: function(): number }} options
  * @returns {Promise<{ ok: boolean,
  *   status: "ok"|"noKey"|"unauthorized"|"http"|"refusal"|"truncated"|"invalid"|"unreachable"|"timeout"|"aborted",
  *   json?: *, content?: string, error?: string, httpStatus?: number, stopReason?: string,
- *   usage?: { input: number|null, output: number|null }|null, retried: boolean }>}
+ *   model?: string|null, usage?: ReturnType<typeof usageOf>, retried: boolean }>}
+ *   `model` is the one named by the answer: the server-side fallback may serve another model than the one asked.
  */
 export async function complete({ apiKey, model, effort, maxTokens } = {}, { system, messages, schema } = {},
   { fetch, signal, timeoutMs = 20000, now = () => Date.now() } = {}) {
@@ -120,15 +133,17 @@ export async function complete({ apiKey, model, effort, maxTokens } = {}, { syst
     }
     const payload = await response.json();
     const usage = usageOf(payload);
+    const served = typeof payload?.model === "string" ? payload.model : null;
     const stopReason = payload?.stop_reason;
-    if ( stopReason === "refusal" ) return { ok: false, status: "refusal", stopReason, usage, httpStatus };
-    if ( stopReason === "max_tokens" ) return { ok: false, status: "truncated", stopReason, usage, httpStatus };
+    const meta = { stopReason, usage, httpStatus, model: served };
+    if ( stopReason === "refusal" ) return { ok: false, status: "refusal", ...meta };
+    if ( stopReason === "max_tokens" ) return { ok: false, status: "truncated", ...meta };
     const content = (payload?.content ?? []).find(block => block?.type === "text")?.text;
-    if ( typeof content !== "string" ) return { ok: false, status: "invalid", error: "no text block", stopReason, usage, httpStatus };
+    if ( typeof content !== "string" ) return { ok: false, status: "invalid", error: "no text block", ...meta };
     try {
-      return { ok: true, status: "ok", content, json: JSON.parse(content), stopReason, usage, httpStatus };
+      return { ok: true, status: "ok", content, json: JSON.parse(content), ...meta };
     } catch(err) {
-      return { ok: false, status: "invalid", content, error: String(err.message), stopReason, usage, httpStatus };
+      return { ok: false, status: "invalid", content, error: String(err.message), ...meta };
     }
   });
   if ( run.value ) return { ...run.value, retried };

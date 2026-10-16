@@ -280,8 +280,10 @@ export function createOllamaResolver({ url, model, timeoutMs = 20000, fetch, key
 }
 
 /**
- * Create the Anthropic (Claude) resolver. Same prompt, schema and validation as the Ollama one; nothing is sent
- * without an API key (`lastRun.status = "noKey"`). Usable from Node with an explicit configuration (no `game`).
+ * Create the Anthropic (Claude) sentence-by-sentence resolver. Same prompt, schema and validation as the Ollama one;
+ * nothing is sent without an API key (`lastRun.status = "noKey"`). Usable from Node with an explicit configuration
+ * (no `game`). No longer wired to the interface (`createResolver` never returns it): kept for the comparative
+ * measurement against the Claude-first mode, to be removed afterwards.
  * @param {object} config
  * @param {string} config.apiKey        Anthropic API key (client-scoped setting in Foundry).
  * @param {string} [config.model]       `claude-sonnet-5-5` (default) or `claude-opus-5-5`.
@@ -337,11 +339,13 @@ export function createAnthropicResolver({
 }
 
 /**
- * The resolver of an AI configuration (shape of `getAiConfig()`): Ollama unless `provider` is `anthropic`.
- * @param {object} config   `{ provider, url, model, timeoutMs, apiKey, anthropicModel, effort, fetch, keys, now }`
- * @returns {function}
+ * The sentence-by-sentence fallback resolver of an AI configuration (shape of `getAiConfig()`): Ollama only.
+ * The `anthropic` provider no longer means a fallback resolver but the Claude-first mode (`core/analyze-claude.mjs`,
+ * one call for the whole description): null is returned so that the rules run alone when that mode is not taken.
+ * @param {object} config   `{ provider, url, model, timeoutMs, fetch, keys, now }`
+ * @returns {function|null}
  */
 export function createResolver(config = {}) {
-  if ( config.provider === "anthropic" ) return createAnthropicResolver({ ...config, model: config.anthropicModel });
+  if ( config.provider === "anthropic" ) return null;
   return createOllamaResolver(config);
 }

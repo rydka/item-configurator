@@ -5,6 +5,10 @@ export const DEFAULT_OLLAMA_URL = "http://localhost:11434";
 export const DEFAULT_TIMEOUT_S = 20;
 export const MIN_TIMEOUT_S = 3;
 export const MAX_TIMEOUT_S = 120;
+/** Claude reads the whole description in one call: the answer dominates the delay, hence a longer limit. */
+export const DEFAULT_ANTHROPIC_TIMEOUT_S = 60;
+export const MIN_ANTHROPIC_TIMEOUT_S = 10;
+export const MAX_ANTHROPIC_TIMEOUT_S = 180;
 export const PROVIDERS = ["ollama", "anthropic"];
 export const DEFAULT_PROVIDER = "ollama";
 export { ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL, DEFAULT_EFFORT, EFFORTS };
@@ -48,6 +52,10 @@ export function registerSettings({ aiMenu } = {}) {
   game.settings.register(MODULE_ID, "anthropicEffort", setting("anthropicEffort", {
     config: false, type: String, default: DEFAULT_EFFORT, choices: Object.fromEntries(EFFORTS.map((e) => [e, e]))
   }));
+  // Time limit of the single Claude call (seconds); `aiTimeout` stays Ollama's.
+  game.settings.register(MODULE_ID, "anthropicTimeout", setting("anthropicTimeout", {
+    config: false, type: Number, default: DEFAULT_ANTHROPIC_TIMEOUT_S
+  }));
   // The key stays in the Game Master's browser: client scope, never written in the world settings.
   game.settings.register(MODULE_ID, "anthropicApiKey", setting("anthropicApiKey", {
     config: false, scope: "client", type: String, default: ""
@@ -56,6 +64,11 @@ export function registerSettings({ aiMenu } = {}) {
 }
 
 const pick = (value, allowed, fallback) => (allowed.includes(value) ? value : fallback);
+/** Seconds of a time limit setting, clamped; the default when unreadable. */
+const seconds = (key, { min, max, fallback }) => {
+  const value = Number(game.settings.get(MODULE_ID, key));
+  return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+};
 
 /** Whether players may configure the items they own. */
 export function playersAllowed() {
@@ -63,23 +76,23 @@ export function playersAllowed() {
 }
 
 /**
- * Current AI configuration. `url` and `model` are Ollama's; `apiKey`, `anthropicModel` and `effort` are Anthropic's.
+ * Current AI configuration. `url`, `model` and `timeoutMs` are Ollama's; `apiKey`, `anthropicModel`, `effort` and
+ * `anthropicTimeoutMs` are Anthropic's (Claude-first mode).
  * @returns {{ enabled: boolean, provider: "ollama"|"anthropic", url: string, model: string, timeoutMs: number,
- *   apiKey: string, anthropicModel: string, effort: string }}
+ *   apiKey: string, anthropicModel: string, effort: string, anthropicTimeoutMs: number }}
  */
 export function getAiConfig() {
-  const seconds = Number(game.settings.get(MODULE_ID, "aiTimeout"));
-  const clamped = Number.isFinite(seconds)
-    ? Math.min(MAX_TIMEOUT_S, Math.max(MIN_TIMEOUT_S, seconds))
-    : DEFAULT_TIMEOUT_S;
   return {
     enabled: Boolean(game.settings.get(MODULE_ID, "aiEnabled")),
     provider: pick(game.settings.get(MODULE_ID, "aiProvider"), PROVIDERS, DEFAULT_PROVIDER),
     url: String(game.settings.get(MODULE_ID, "ollamaUrl") || DEFAULT_OLLAMA_URL).replace(/\/+$/, ""),
     model: String(game.settings.get(MODULE_ID, "ollamaModel") ?? ""),
-    timeoutMs: clamped * 1000,
+    timeoutMs: seconds("aiTimeout", { min: MIN_TIMEOUT_S, max: MAX_TIMEOUT_S, fallback: DEFAULT_TIMEOUT_S }) * 1000,
     apiKey: String(game.settings.get(MODULE_ID, "anthropicApiKey") ?? "").trim(),
     anthropicModel: pick(game.settings.get(MODULE_ID, "anthropicModel"), ANTHROPIC_MODELS, DEFAULT_ANTHROPIC_MODEL),
-    effort: pick(game.settings.get(MODULE_ID, "anthropicEffort"), EFFORTS, DEFAULT_EFFORT)
+    effort: pick(game.settings.get(MODULE_ID, "anthropicEffort"), EFFORTS, DEFAULT_EFFORT),
+    anthropicTimeoutMs: seconds("anthropicTimeout", {
+      min: MIN_ANTHROPIC_TIMEOUT_S, max: MAX_ANTHROPIC_TIMEOUT_S, fallback: DEFAULT_ANTHROPIC_TIMEOUT_S
+    }) * 1000
   };
 }
