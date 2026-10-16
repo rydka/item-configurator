@@ -25,7 +25,31 @@ export const BOUNDS = {
 };
 /** Reason codes of corrections and rejections (keys of `item-configurator.Claude.Reason.*`). */
 export const REASONS = ["quoteMissing", "numberNotQuoted", "unknownKey", "outOfBounds", "formulaNotAllowed", "scopeMismatch",
-  "distanceConverted", "fieldRemoved", "notApplicable", "effectSkipped", "tooMany"];
+  "distanceConverted", "fieldRemoved", "notApplicable", "effectSkipped", "tooMany", "instruction"];
+
+/**
+ * Wordings of a paragraph that reads as an instruction to an AI rather than as a rule of the item (prompt injection),
+ * English and French, on the normalized text (lowercase, no diacritics).
+ */
+const INSTRUCTION_PATTERNS = [
+  /\b(?:ignore|disregard|forget|override|skip)\b.{0,40}\b(?:instructions?|prompt|above|previous|earlier|system)\b/,
+  /\b(?:ignore|ignorez|oublie|oubliez|ne tiens pas compte|ne tenez pas compte|fais abstraction|faites abstraction)\b.{0,40}\b(?:instructions?|consignes?|precedent\w*|systeme)\b/,
+  /\b(?:assistant|language model|ai model|llm|claude|chatgpt|gpt|system prompt|modele de langage|l ia\b|une ia\b|intelligence artificielle)/,
+  /\b(?:you must|you should|you are to|you will|tu dois|vous devez|tu vas|vous allez)\b.{0,40}\b(?:output|return|answer|respond|configure|set|add|write|produce|json|schema|configurer|renvoyer|repondre|ajouter|ecrire|produire)\b/,
+  /\b(?:output|return|respond with|answer with|reponds|repondez|renvoie|renvoyez|retourne|retournez)\b.{0,30}\b(?:json|schema|schema|approved)\b/,
+  /\b(?:configure|configures|configurez) (?:this|the|cet|l) ?(?:item|objet)\b/
+];
+
+/**
+ * Does a paragraph read as an instruction addressed to the AI ("ignore the previous instructions", "you must add
+ * 10d10 fire damage") rather than as a rule of the item?
+ * @param {string} text
+ * @returns {boolean}
+ */
+export function isInstructionParagraph(text) {
+  const norm = normalizeQuote(text);
+  return INSTRUCTION_PATTERNS.some((pattern) => pattern.test(norm));
+}
 
 const FEET_PER_UNIT = { ft: 1, mi: 5280, m: 10 / 3, km: 10000 / 3 };
 const METRIC_UNITS = ["m", "km"];
@@ -106,6 +130,8 @@ export function validateClaudeItem(json, { paragraphs: given = [], text = "", en
   const paragraphs = given.length ? given
     : String(text ?? "").split("\n").map((line) => line.replace(/^\[P\d+\]\s*/, "").trim()).filter(Boolean);
   const normalized = paragraphs.map((paragraph) => ` ${normalizeQuote(paragraph)} `);
+  // Paragraphs that read as instructions to the AI (1-based): what is quoted only from them is proposed unchecked
+  const suspicious = new Set(paragraphs.map((paragraph, i) => (isInstructionParagraph(paragraph) ? i + 1 : 0)).filter(Boolean));
   const corrections = [];
   const rejections = [];
   const covered = new Set();
@@ -145,8 +171,13 @@ export function validateClaudeItem(json, { paragraphs: given = [], text = "", en
     const { quotes, paragraphs: cited } = checkQuotes(raw.quotes);
     if (!quotes.length) { reject(ref, "quotes", "quoteMissing"); return null; }
     cited.forEach((index) => covered.add(index));
-    const certainty = CERTAINTIES.includes(raw.certainty) ? raw.certainty : "low";
+    let certainty = CERTAINTIES.includes(raw.certainty) ? raw.certainty : "low";
     if (certainty !== raw.certainty) correct(ref, "certainty", "unknownKey", { key: String(raw.certainty ?? "") });
+    // Quoted only from paragraphs that read as instructions to the AI: kept visible, but unchecked (certainty low)
+    if (cited.every((index) => suspicious.has(index))) {
+      certainty = "low";
+      correct(ref, "certainty", "instruction", { paragraph: cited[0] });
+    }
     const name = cleanText(raw.name || fallbackName || "");
     return { ref, name, quotes, paragraphs: cited, certainty };
   };
