@@ -1,6 +1,10 @@
 // M2 (recall), M3 (precision, critical fields), M4 (AI timing) on a reference set. Never fails: it only measures.
 // Usage: node tests/metrics/run-reference.mjs [--ai] [--model=llama3.1:8b] [--url=http://localhost:11434]
-//          [--set=reference|heldout] [--limit=N] [--out=<dir>]
+//          [--set=reference|heldout|set-b|set-c|<folder of tests/fixtures>] [--limit=N] [--out=<dir>] [--cmp=v1|v2]
+// Comparator v2 (default) adds the families duration, range, area, uses (item or activity), activation and the roll of
+// a utility activity, each filtered by `evidenced`; --cmp=v1 reproduces the figures published before the Claude-first work.
+// A set whose items carry `truth.facts` (hand-written `{ path, value, critical, alternatives }`, optional `truth.forbidden`)
+// is scored against these facts as written (no evidence filter on the truth).
 // Rules only runs in Node with the real parser; --ai adds the Ollama fallback (no download, same resolver as the module).
 // Truth = the compendium document, restricted to fields the description attests (evidenced).
 import fs from "node:fs";
@@ -20,6 +24,8 @@ const MODEL = arg("model", "llama3.1:8b");
 const URL_ = arg("url", "http://localhost:11434");
 const SET = arg("set", "reference");
 const LIMIT = Number(arg("limit", "0")) || Infinity;
+const CMP = arg("cmp", "v2");
+const V2 = CMP === "v2";
 // Spell names of the dnd5e compendia (extracted in Foundry): a spell that does not exist cannot be linked, as in the module.
 const SPELLS_FILE = path.join(REF, "spell-names.json");
 const spellNames = fs.existsSync(SPELLS_FILE) ? new Set(JSON.parse(fs.readFileSync(SPELLS_FILE, "utf8")).map((n) => n.toLowerCase())) : null;
@@ -64,7 +70,9 @@ function canonSystem(system, type) {
   add("attunement", system.attunement || undefined);
   add("weight", system.weight?.value);
   add("price", system.price?.value ? `${system.price.value}${system.price.denomination}` : undefined);
-  add("uses.max", system.uses?.max ? String(system.uses.max) : undefined);
+  // v2: one family "uses" = max/period, wherever the limit sits (item here, activity in canonActivities)
+  if (V2) add("uses", system.uses?.max ? `${system.uses.max}/${system.uses.recovery?.[0]?.period ?? ""}` : undefined);
+  else add("uses.max", system.uses?.max ? String(system.uses.max) : undefined);
   add("uses.autoDestroy", system.uses?.autoDestroy);
   add("magicalBonus", system.magicalBonus ? String(system.magicalBonus).replace(/^\+/, "") : undefined, true);
   if (type === "weapon") {
@@ -80,6 +88,34 @@ function canonSystem(system, type) {
   return f;
 }
 
+// ---- Comparator v2: duration, range, area, activity uses, activation, utility roll ------------------------------------
+const SECONDS = { turn: 6, round: 6, minute: 60, hour: 3600, day: 86400 };
+const feet = (v, units) => {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  if (units === "ft") return n;
+  if (units === "mi") return n * 5280;
+  if (units === "m") return Math.round((n * 10) / 3 / 5) * 5;
+  if (units === "km") return Math.round((n * 3280.84) / 5) * 5;
+  return null;
+};
+/** Facts of the extension for one activity (compendium document or proposed source: same shape). */
+function v2Activity(a) {
+  const f = [];
+  const push = (path, value, critical = false) => f.push({ path, value, critical });
+  if (a.activation?.type) push("activation", a.activation.type);
+  const d = a.duration;
+  if (d?.units && SECONDS[d.units] && Number(d.value) > 0) push("duration", String(Number(d.value) * SECONDS[d.units]));
+  const r = a.range;
+  if (r?.units === "self" || r?.units === "touch") push("range", r.units);
+  else if (r?.units && feet(r.value, r.units)) push("range", String(feet(r.value, r.units)));
+  const t = a.target?.template;
+  if (t?.type && feet(t.size, t.units ?? "ft")) push("area", `${t.type}:${feet(t.size, t.units ?? "ft")}`);
+  if (a.uses?.max) push("uses", `${a.uses.max}/${a.uses.recovery?.[0]?.period ?? ""}`);
+  if (a.type === "utility" && a.roll?.formula) push("dice.roll", String(a.roll.formula).replace(/\s+/g, ""), true);
+  return f;
+}
+
 /** Activities: scored types (save, heal, cast), their critical values, and every damage / healing dice anywhere. */
 function canonActivities(activities) {
   const f = [];
@@ -87,6 +123,7 @@ function canonActivities(activities) {
   for (const a of activities) {
     if (a.type === "enchant") continue;
     for (const p of a.damage?.parts ?? []) if (p.denomination) f.push({ path: "dice.damage", value: partSig(p), critical: true });
+    if (V2) f.push(...v2Activity(a));
     if (a.healing?.denomination) f.push({ path: "dice.heal", value: partSig(a.healing), critical: true });
     if (SCORED_ACTIVITIES.includes(a.type)) {
       f.push({ path: `activity.${a.type}`, value: a.type, critical: false });
@@ -126,6 +163,28 @@ const WORDS = {
 };
 const num = (x) => String(x).match(/\d+/)?.[0];
 
+// Evidence of the v2 families (English and French; numbers as digits or words).
+const NUMBER_WORDS = { 1: ["one", "once", "single", "un", "une"], 2: ["two", "twice", "deux"], 3: ["three", "trois"], 4: ["four", "quatre"],
+  5: ["five", "cinq"], 6: ["six"], 7: ["seven", "sept"], 8: ["eight", "huit"], 9: ["nine", "neuf"], 10: ["ten", "dix"], 12: ["twelve", "douze"],
+  24: ["vingt-quatre", "twenty-four"] };
+const numberAlt = (n) => [String(n), ...(NUMBER_WORDS[n] ?? [])].join("|");
+const numRe = (n, after = "") => new RegExp(String.raw`(?:^|[^\p{L}\d])(?:${numberAlt(n)})${after}(?![\p{L}\d])`, "u");
+const DURATION_UNITS = [[86400, "jours?|days?"], [3600, "heures?|hours?|h"], [60, "minutes?|min"], [6, "rounds?|tours?|turns?"]];
+const PERIOD_RE = { dawn: /dawn|aube/, day: /\bday|jour|daily|quotidien|dawn|aube/, dusk: /dusk|cr[ée]puscule|tomb[ée]e de la nuit|nightfall/,
+  sr: /short rest|repos court|\brest|repos/, lr: /long rest|repos long|\brest|repos/ };
+const ACTIVATION_RE = { action: /\baction\b/, bonus: /bonus action|action bonus/, reaction: /reaction|r[ée]action/, minute: /minutes?/,
+  hour: /heures?|hours?/, legendary: /legendary|l[ée]gendaire/ };
+/** Distances written in the text, in feet (m and km converted as the module does). */
+function distancesIn(text) {
+  const out = new Set();
+  for (const m of text.matchAll(/(\d+(?:[.,]\d+)?)\s*(ft|feet|foot|pieds?|mi|miles?|km|kilom[èe]tres?|m|m[èe]tres?|meters?|metres?)(?![\p{L}])/gu)) {
+    const unit = /^(ft|feet|foot|pieds?)$/.test(m[2]) ? "ft" : /^(mi|miles?)$/.test(m[2]) ? "mi" : /^k/.test(m[2]) ? "km" : "m";
+    const v = feet(m[1].replace(",", "."), unit);
+    if (v) out.add(v);
+  }
+  return out;
+}
+
 /** Is the field attested by the description (otherwise it cannot be expected from the text)? */
 function evidenced(field, text) {
   const v = String(field.value).toLowerCase();
@@ -152,6 +211,20 @@ function evidenced(field, text) {
     if (/^-?\d+$/.test(v)) return new RegExp(`(^|[^\\d])${num(v)}([^\\d]|$)`).test(text);
     return (WORDS[v] ?? [v]).some((w) => text.includes(w));
   }
+  if (p === "uses") {
+    const [max, period] = v.split("/");
+    return numRe(max).test(text) && (!period || (PERIOD_RE[period] ?? /./).test(text));
+  }
+  if (p === "activation") return v === "special" ? false : (ACTIVATION_RE[v] ?? /^$/).test(text);
+  if (p === "duration") {
+    const s = Number(v);
+    return DURATION_UNITS.some(([unit, words]) => s % unit === 0 && numRe(s / unit, String.raw`\s*(?:-|\s)?(?:${words})`).test(text));
+  }
+  if (p === "range") {
+    return v === "self" ? /self|vous-m[êe]me|\bsoi\b|sur vous|autour de vous/.test(text)
+      : v === "touch" ? /touch|toucher|contact/.test(text) : distancesIn(text).has(Number(v));
+  }
+  if (p === "area") return distancesIn(text).has(Number(v.split(":")[1]));
   return text.includes(v);
 }
 
@@ -164,10 +237,14 @@ async function measure(items, label, resolver) {
   for (const item of items) {
     const text = textOf(`${item.description} ${item.name}`);
     const enchantEffectIds = new Set((item.truth.activities ?? []).filter((a) => a.type === "enchant").flatMap((a) => (a.effects ?? []).map((e) => e._id)));
+    const handWritten = Boolean(item.truth.facts);
     const truthAct = canonActivities(item.truth.activities ?? []);
-    const truthAll = [
+    const truthAll = handWritten ? item.truth.facts.map((f) => ({ ...f, critical: Boolean(f.critical) })) : [
       ...canonSystem(item.truth.system, item.type), ...truthAct.fields, ...canonEffects(item.truth.effects ?? [], enchantEffectIds)
     ].filter((f) => evidenced(f, text));
+    // Each expected fact may be met by one of its alternatives (equivalent shapes written by hand).
+    const altsOf = (f) => (f.alternatives ?? []).map((a) => ({ path: a.path ?? f.path, value: a.value, critical: f.critical }));
+    const forbidden = new Set((item.truth.forbidden ?? []).map(signature));
     const source = { type: item.type, system: {}, effects: [] };
     const t0 = performance.now();
     let proposal;
@@ -194,28 +271,33 @@ async function measure(items, label, resolver) {
     }
     const proposedAct = canonActivities(changeSet.activities.add);
     const proposedAll = [...canonSystem(patch, item.type), ...proposedAct.fields, ...canonEffects(changeSet.effects.add)];
-    const isDeduction = (f) => f.path === "uses.autoDestroy" || f.path === "uses.max";
-    const truthDeduced = new Set(canonSystem(item.truth.system, item.type).filter(isDeduction).map(signature));
+    const isDeduction = (f) => f.path === "uses.autoDestroy" || f.path === (V2 ? "uses" : "uses.max");
+    const truthDeduced = new Set(canonSystem(item.truth.system ?? {}, item.type).filter(isDeduction).map(signature));
     const deduced = canonSystem(derivedPatch, item.type).filter(isDeduction);
 
-    const truthSet = multiset(truthAll);
     const proposedSet = multiset(proposedAll);
+    // Greedy matching: each expected fact consumes one proposed fact among [fact, ...alternatives].
+    const remaining = new Map(proposedSet);
+    const missed = [];
     let hit = 0;
-    let correct = 0;
-    for (const [sig, n] of truthSet) hit += Math.min(n, proposedSet.get(sig) ?? 0);
-    for (const [sig, n] of proposedSet) correct += Math.min(n, truthSet.get(sig) ?? 0);
-    const truthPaths = new Set(truthAll.map((x) => x.path));
-    const criticalOf = new Map([...proposedAll, ...truthAll].map((x) => [signature(x), x.critical]));
+    for (const f of truthAll) {
+      const sig = [f, ...altsOf(f)].map(signature).find((s) => (remaining.get(s) ?? 0) > 0);
+      if (sig) { remaining.set(sig, remaining.get(sig) - 1); hit++; } else missed.push(signature(f));
+    }
+    const correct = hit;
+    const truthPaths = new Set(truthAll.flatMap((f) => [f, ...altsOf(f)].map((x) => x.path)));
+    const criticalOf = new Map([...proposedAll, ...truthAll, ...truthAll.flatMap(altsOf)].map((x) => [signature(x), x.critical]));
     // A proposed field absent from the truth is "true-not-in-truth" when the description attests it (incomplete truth),
     // "unverified" otherwise (invented or over-reading); a field on a path the truth has with another value is "wrong-value".
     const fieldOf = new Map(proposedAll.map((x) => [signature(x), x]));
-    const wrong = diff(proposedSet, truthSet).map((sig) => {
+    const wrong = [...remaining].flatMap(([sig, n]) => Array(n).fill(sig)).map((sig) => {
+      if (forbidden.has(sig)) return { sig, kind: "forbidden", critical: true };
       const kind = truthPaths.has(sig.split("=")[0]) ? "wrong-value" : (evidenced(fieldOf.get(sig), text) ? "true-not-in-truth" : "unverified");
       return { sig, kind, critical: Boolean(criticalOf.get(sig)) };
     });
     rows.push({
       name: item.name, lang: item.lang ?? "en", type: item.type, stratum: item.stratum, ms: Math.round(ms), ai: proposal.ai.status,
-      expected: truthAll.length, proposed: proposedAll.length, hit, correct, missed: diff(truthSet, proposedSet), wrong,
+      expected: truthAll.length, proposed: proposedAll.length, hit, correct, missed, wrong,
       criticalErrors: wrong.filter((w) => w.critical),
       deduced: deduced.map((d) => ({ sig: signature(d), ok: truthDeduced.has(signature(d)) })),
       unscored: { truth: truthAct.unscored, proposed: proposedAct.unscored },
@@ -261,9 +343,9 @@ if (AI) {
 
 const results = [await measure(en, `${AI ? "ai" : "rules"}-en`, resolver)];
 if (fr.length) results.push(await measure(fr, `${AI ? "ai" : "rules"}-fr`, resolver));
-const all = { date: new Date().toISOString(), set: SET, ai: AI, model: AI ? MODEL : null, extra, results: results.map((r) => r.summary) };
+const all = { date: new Date().toISOString(), set: SET, comparator: CMP, ai: AI, model: AI ? MODEL : null, extra, results: results.map((r) => r.summary) };
 fs.mkdirSync(OUT, { recursive: true });
-const file = path.join(OUT, `${SET}-${AI ? "ai" : "rules"}.json`);
+const file = path.join(OUT, `${SET}-${AI ? "ai" : "rules"}${V2 ? "-v2" : ""}.json`);
 // Per-item details of the held-out set stay out of the reports (they would show which items fail): totals only.
 const detailsDir = SET !== "reference" ? process.env.IC_HELDOUT_DETAILS : null;
 fs.writeFileSync(file, `${JSON.stringify(SET !== "reference" ? all : { ...all, details: results }, null, 1)}\n`);
