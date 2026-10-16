@@ -8,15 +8,24 @@
  *   activities: { add: object[], remove: string[] },
  *   effects: { add: object[], remove: string[] },
  *   entries: Entry[],                           // what the preview shows
+ *   check: Check[],                             // "To check": the facts the rules and Claude disagree on
  *   unrecognized: { text }[], rejected: Entry[], empty: boolean,
  *   notAutomated: Entry[],                      // clauses dnd5e cannot apply (`Note.NotAutomated`), with their sentence
  *   flavor: { text }[]                          // flavor text (`Note.Flavor`): not interpreted, shown apart
  * }
  * Entry = { id, group: "details"|"activities"|"effects", action: "add"|"set"|"replace"|"remove"|"keep",
- *   label: { key, data } | string, value, previous, raw, origin: "rules"|"fallback"|"base",
+ *   label: { key, data } | string, value, previous, raw, origin: "rules"|"fallback"|"base"|"claude",
+ *   selected: boolean, certainty?: "high"|"medium"|"low", inferred?: string[],
+ *   check?: "agree"|"conflict"|"claudeOnly"|"rulesOnly"|null, alternatives?: { claude: string, rules: string },
  *   derived?: boolean, chosen?: boolean, refs?: { paths?, activities?, effects? } }
  * `derived` entries come from the chosen type, the base item or a deduction, not from a sentence of the text.
  * `chosen` entries are the type / subtype picked in the type window (`value` and `previous` are dnd5e type keys).
+ * `selected` is the checkbox of the preview: an unselected entry is not applied (`applySelection`). It starts
+ * unchecked when the descriptor says so (`selected: false`) or when Claude's certainty is `low`.
+ * Check = { id, group: "check", entryId, family, critical, paragraph, label: { key, data },
+ *   claude: { display, raw }, rules: { display, raw }, choice: "claude"|"rules",
+ *   target: { kind: "system"|"activity"|"effect", id? }, patch: { claude: [{ field, data }], rules: [...] } }
+ * Choosing `rules` writes `patch.rules` into the target element at apply time, without any new call.
  */
 import { carryOverSystem } from "./convert.mjs";
 import { clone, getPath, leaves, same, setPath } from "./paths.mjs";
@@ -127,10 +136,36 @@ function headerRaw(key, { header, name }) {
 /** Index `n` of a descriptor path such as `activities.2`. */
 const indices = (paths, prefix) => (paths ?? []).filter((p) => p.startsWith(`${prefix}.`)).map((p) => Number(p.slice(prefix.length + 1)));
 
+/** Does a fact path (`activities.1`, `system.uses`) fall under one of the descriptor paths, or the reverse? */
+const underPaths = (path, paths) => (paths ?? []).some((p) => p === path || path.startsWith(`${p}.`) || p.startsWith(`${path}.`));
+
+/**
+ * What a descriptor carries about its reading (Claude-first mode): origin, certainty, deduced fields, the result of
+ * the cross-check and the initial state of its checkbox. `check` is derived from the cross-check facts of the
+ * proposal when the descriptor does not state it (rules-only complements must state it: their facts are indexed in
+ * the rules' plan, not in the proposal).
+ */
+function readingOf(descriptor, crosscheck) {
+  const meta = { origin: descriptor.origin ?? "rules" };
+  if (descriptor.certainty) meta.certainty = descriptor.certainty;
+  if (descriptor.inferred?.length) meta.inferred = [...descriptor.inferred];
+  let check = descriptor.check;
+  if (check === undefined && crosscheck) {
+    const hits = (facts) => facts.some((f) => underPaths(f.path, descriptor.paths));
+    if (hits((crosscheck.conflict ?? []).map((c) => c.claude))) check = "conflict";
+    else if (hits((crosscheck.agree ?? []).map((a) => a.claude))) check = "agree";
+    else if (meta.origin === "claude" && hits(crosscheck.claudeOnly ?? [])) check = "claudeOnly";
+    else check = null;
+  }
+  if (check !== undefined) meta.check = check;
+  meta.selected = descriptor.selected ?? (descriptor.certainty !== "low");
+  return meta;
+}
+
 /**
  * Compare the proposal with the existing item.
  * @param {object} source          `item.toObject()`.
- * @param {object} proposal        Result of `analyze()`.
+ * @param {object} proposal        Result of `analyze()` or `analyzeClaudeFirst()`.
  * @param {object} options
  * @param {boolean} [options.replace=false]   "Replace existing": overwrite, group by group.
  * @param {object} options.parser            The `dnd5e-text-parser` API (`describe`, `isEmpty`).
@@ -146,8 +181,11 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
   const prior = normalizedPrior(existingSystem);
   const entries = [];
   let counter = 0;
-  const push = (entry) => entries.push({ id: `${entry.group}:${counter++}`, origin: "rules", raw: "", ...entry });
-  const descriptors = parser.describe(plan).map((d) => (d.raw ? d : { ...d, raw: headerRaw(d.key, proposal) }));
+  const push = (entry) => entries.push({ id: `${entry.group}:${counter++}`, origin: "rules", raw: "", selected: true, ...entry });
+  // Claude-first mode gives its own descriptors (with origin, certainty, check...); the rules alone use the library's
+  const described = proposal.descriptors ?? parser.describe(plan);
+  const descriptors = described.map((d) => (d.raw ? d : { ...d, raw: headerRaw(d.key, proposal) }));
+  const reading = (d) => readingOf(d, proposal.crosscheck);
 
   // ---- Details -------------------------------------------------------------------------------------------------
   const systemPatch = {};
@@ -194,7 +232,7 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
   for (const d of descriptors.filter((descriptor) => descriptor.group === "details")) {
     const claimed = [...free].filter((c) => d.paths.some((p) => c.full === p || c.full.startsWith(`${p}.`)));
     claimed.forEach((c) => free.delete(c));
-    if (claimed.length) detailEntry({ key: d.key, data: d.data }, claimed, { raw: d.raw, origin: d.origin });
+    if (claimed.length) detailEntry({ key: d.key, data: d.data }, claimed, { raw: d.raw, ...reading(d) });
   }
   // A leaf no descriptor claims: the "magical" property comes from the rarity of the header line (C12)
   for (const c of free) {
@@ -264,7 +302,7 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     if (!targets.length) continue;
     const fresh = targets.filter((n) => !activityDup.has(n));
     push({
-      group: "activities", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: d.raw, origin: d.origin,
+      group: "activities", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: d.raw, ...reading(d),
       ...(targets.every((n) => isDefaultAttack(proposedActivities[n])) ? { derived: true } : {}),
       ...(fresh.length ? { refs: { activities: fresh.map((n) => proposedActivities[n]._id) } } : {})
     });
@@ -277,8 +315,39 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     const fresh = list.filter((n) => !effectDup.has(n));
     // Every line shows its source sentence, even when several lines (+1 AC, +1 saves) come from the same one (C12)
     push({
-      group: "effects", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: d.raw, origin: d.origin,
+      group: "effects", action: fresh.length ? "add" : "keep", label: { key: d.key, data: d.data }, raw: d.raw, ...reading(d),
       ...(fresh.length ? { refs: { effects: fresh.map((n) => tr.effects[n]._id) } } : {})
+    });
+  }
+
+  // ---- To check: the facts the two readings disagree on, attached to the entry that carries Claude's value --------
+  const check = [];
+  for (const conflict of proposal.crosscheck?.conflict ?? []) {
+    const path = conflict.claude?.path ?? "";
+    let target = null;
+    if (path.startsWith("activities.")) {
+      const id = proposedActivities[Number(path.slice("activities.".length))]?._id;
+      if (id && activityAdd.some((a) => a._id === id)) target = { kind: "activity", id };
+    } else if (path.startsWith("effects.")) {
+      const id = tr.effects[Number(path.slice("effects.".length))]?._id;
+      if (id && effectAdd.some((e) => e._id === id)) target = { kind: "effect", id };
+    } else if (path.startsWith("system.")) target = { kind: "system" };
+    if (!target) continue;
+    const entry = entries.find((e) => e.refs && (
+      (target.kind === "activity" && e.refs.activities?.includes(target.id))
+      || (target.kind === "effect" && e.refs.effects?.includes(target.id))
+      || (target.kind === "system" && e.refs.paths?.some((p) => underPaths(path, [p])))
+    ));
+    if (!entry) continue;
+    entry.check = "conflict";
+    entry.alternatives ??= { claude: conflict.claude.display, rules: conflict.rules.display };
+    check.push({
+      id: `check:${counter++}`, group: "check", entryId: entry.id, family: conflict.family, critical: Boolean(conflict.critical),
+      paragraph: conflict.paragraph ?? null, label: { key: `item-configurator.Preview.Check.Family.${conflict.family}`, data: {} },
+      claude: { display: conflict.claude.display, raw: conflict.claude.raw ?? "" },
+      rules: { display: conflict.rules.display, raw: conflict.rules.raw ?? "" },
+      choice: conflict.proposed === "rules" ? "rules" : "claude", target,
+      patch: { claude: clone(conflict.patch?.claude ?? []), rules: clone(conflict.patch?.rules ?? []) }
     });
   }
 
@@ -317,7 +386,7 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     if (note.key === NOTE_NOT_AUTOMATED) {
       notAutomated.push({
         id: `not-automated:${counter++}`, group: "notAutomated", action: "keep", label: { key: note.key, data: note.data },
-        raw: note.raw ?? note.data?.raw ?? "", origin: note.origin ?? "rules"
+        raw: note.raw ?? note.data?.raw ?? "", origin: note.origin ?? "rules", ...(note.certainty ? { certainty: note.certainty } : {})
       });
       continue;
     }
@@ -332,7 +401,7 @@ export function buildChangeSet(source, proposal, { replace = false, parser } = {
     typeChange, systemPatch,
     activities: { add: activityAdd, remove: activityRemove },
     effects: { add: effectAdd, remove: effectRemove },
-    entries, unrecognized, rejected, notAutomated, flavor, empty: true
+    entries, check, unrecognized, rejected, notAutomated, flavor, empty: true
   };
   return refreshEmpty(changeSet);
 }
@@ -345,7 +414,8 @@ function refreshEmpty(changeSet) {
 
 /**
  * Remove from a change set what the validation refused: the entries that only described those changes disappear
- * from the preview, and the activities no longer point to refused effects.
+ * from the preview, the activities no longer point to refused effects, and the "to check" items of a refused element
+ * go with it.
  * @param {object} changeSet
  * @param {{ paths?: string[], activities?: string[], effects?: string[] }} removed  Refused `system.*` paths, activity
  *   ids and effect ids (already taken out of `systemPatch`, `activities.add` and `effects.add` by the caller).
@@ -373,5 +443,58 @@ export function pruneChangeSet(changeSet, removed = {}) {
       if (activity.effects) activity.effects = activity.effects.filter((e) => !gone.effects.has(e._id));
     }
   }
+  if (changeSet.check?.length) {
+    const live = new Set(changeSet.entries.map((e) => e.id));
+    changeSet.check = changeSet.check.filter((item) => {
+      if (!live.has(item.entryId)) return false;
+      if (item.target.kind === "activity") return !gone.activities.has(item.target.id);
+      if (item.target.kind === "effect") return !gone.effects.has(item.target.id);
+      return !item.patch.claude.some((p) => gone.paths.has(p.field));
+    });
+  }
   return refreshEmpty(changeSet);
+}
+
+/**
+ * The change set as the preview's checkboxes and "to check" choices leave it, ready to apply: unselected entries
+ * lose their changes (an activity, effect or field shared by several entries goes only when all of them are
+ * unselected), and each "to check" item writes the chosen reading's value into its element. The given change set is
+ * not modified: the preview keeps it to re-render.
+ * @param {object} changeSet
+ * @param {object} [selection]
+ * @param {Object<string, boolean>} [selection.selected]  Entry id -> checked; entries not listed keep their state.
+ * @param {Object<string, "claude"|"rules">} [selection.choices]  Check id -> chosen reading; others keep theirs.
+ * @returns {object}  A new change set.
+ */
+export function applySelection(changeSet, { selected = {}, choices = {} } = {}) {
+  const result = clone(changeSet);
+  for (const entry of result.entries) if (typeof selected[entry.id] === "boolean") entry.selected = selected[entry.id];
+  for (const item of result.check ?? []) if (["claude", "rules"].includes(choices[item.id])) item.choice = choices[item.id];
+
+  // The chosen reading of each conflict, written into the element that carries it
+  for (const item of result.check ?? []) {
+    const patch = item.patch?.[item.choice] ?? [];
+    const element = item.target.kind === "activity" ? result.activities.add.find((a) => a._id === item.target.id)
+      : (item.target.kind === "effect" ? result.effects.add.find((e) => e._id === item.target.id) : null);
+    for (const { field, data } of patch) {
+      if (item.target.kind === "system") {
+        if (field in result.systemPatch) result.systemPatch[field] = clone(data);
+      } else if (element) setPath(element, field, clone(data));
+    }
+  }
+
+  // What the unselected entries described, unless a selected entry still needs it
+  const wanted = { paths: new Set(), activities: new Set(), effects: new Set() };
+  const unwanted = { paths: new Set(), activities: new Set(), effects: new Set() };
+  for (const entry of result.entries) {
+    if (!entry.refs) continue;
+    const bucket = entry.selected === false ? unwanted : wanted;
+    for (const kind of ["paths", "activities", "effects"]) for (const ref of entry.refs[kind] ?? []) bucket[kind].add(ref);
+  }
+  const removed = {};
+  for (const kind of ["paths", "activities", "effects"]) removed[kind] = [...unwanted[kind]].filter((ref) => !wanted[kind].has(ref));
+  for (const path of removed.paths) delete result.systemPatch[path];
+  result.activities.add = result.activities.add.filter((a) => !removed.activities.includes(a._id));
+  result.effects.add = result.effects.add.filter((e) => !removed.effects.includes(e._id));
+  return pruneChangeSet(result, removed);
 }

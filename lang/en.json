@@ -7,11 +7,15 @@
       },
       "aiEnabled": {
         "name": "Use an AI",
-        "hint": "Send the sentences the rules do not understand to an AI: a local Ollama model, or Claude (Anthropic). Off by default."
+        "hint": "Have an AI read the description: Claude (Anthropic) reads the whole of it and the rules cross-check its numbers, or a local Ollama model helps with the sentences the rules do not understand. Off by default."
       },
       "aiProvider": {
         "name": "AI provider",
-        "hint": "Ollama runs on your machine; Anthropic sends the item descriptions to Anthropic's servers with your API key."
+        "hint": "Ollama runs on your machine; Anthropic sends the item descriptions to Anthropic's servers with your API key, in a single call per item."
+      },
+      "anthropicTimeout": {
+        "name": "Claude time limit (seconds)",
+        "hint": "Claude reads the whole description in one call. After this delay the preview shows the rules alone."
       },
       "anthropicModel": {
         "name": "Claude model",
@@ -74,8 +78,16 @@
       "Type": "Item type",
       "Subtype": "Subtype",
       "AiOn": "The AI will help with the sentences the rules do not understand.",
+      "ClaudeOn": "Claude will read the whole description; the rules will cross-check its numbers.",
       "Analyzing": "Analyzing the description...",
       "Analyze": "Analyze"
+    },
+    "Progress": {
+      "Rules": "Rules",
+      "Claude": "Claude is reading the description... {elapsed} s / {limit} s",
+      "Check": "Validation and cross-check",
+      "Done": "done",
+      "Cancel": "Cancel and show the rules alone"
     },
     "Messages": {
       "EmptyDescription": "This item has no description to read.",
@@ -102,11 +114,40 @@
         "keep": "Kept"
       },
       "Group": {
+        "check": "To check",
         "details": "Details",
         "activities": "Activities",
         "effects": "Effects",
         "notAutomated": "Not automated",
         "flavor": "Flavor text"
+      },
+      "Check": {
+        "Hint": "Claude and the rules read these values differently. Claude's value is proposed; pick the rules' value to write it instead.",
+        "Claude": "Claude",
+        "Rules": "Rules",
+        "Agree": "✓ rules",
+        "ClaudeOnly": "Claude only",
+        "RulesOnly": "rules (complement)",
+        "Inferred": "deduced",
+        "Certainty": {
+          "high": "high certainty",
+          "medium": "medium certainty",
+          "low": "low certainty"
+        },
+        "Family": {
+          "dice": "Dice",
+          "dc": "Save DC",
+          "attackBonus": "Attack bonus",
+          "magicalBonus": "Magical bonus",
+          "ac": "Armor class",
+          "effectBonus": "Effect bonus",
+          "uses": "Uses",
+          "activation": "Activation",
+          "duration": "Duration",
+          "distance": "Distance",
+          "rarity": "Rarity",
+          "attunement": "Attunement"
+        }
       },
       "NotAutomatedHint": "dnd5e has no mechanism for these clauses: nothing is written for them, they are applied by hand at the table.",
       "TypeChange": "The item will be converted from {from} to {to}.",
@@ -120,13 +161,19 @@
         "unauthorized": "Rules only (Anthropic refused the API key: check it in the AI settings).",
         "refusal": "Rules only (the AI declined to answer; its answer was not used).",
         "truncated": "Rules only (the AI answer was cut short; it was not used).",
-        "ok": "AI used for unrecognized sentences ({model})."
+        "invalid": "Rules only (the AI answer could not be read; it was not used).",
+        "aborted": "Rules only (the AI call was cancelled).",
+        "ok": "AI used for unrecognized sentences ({model}).",
+        "claude": "Claude read the whole description ({model}); the rules cross-checked its numbers."
       },
       "AiMark": "(AI)",
+      "ClaudeMark": "(Claude)",
       "BaseMark": "(base item)",
       "Previous": "Currently:",
       "Proposed": "Read in the text (not applied):",
       "Rejected": "Ignored",
+      "Corrected": "Corrected",
+      "Discarded": "Discarded",
       "Unrecognized": "Not interpreted",
       "Replace": "Replace existing",
       "ReplaceWarning": "Existing values and the activities or effects of any group with a proposal will be replaced. You can undo afterwards.",
@@ -143,8 +190,8 @@
       "Reachable": "Ollama is reachable. Installed models",
       "Unreachable": "Ollama is not reachable at this address.",
       "Provider": {
-        "ollama": "Ollama (local)",
-        "anthropic": "Anthropic (Claude, online)"
+        "ollama": "Ollama (local, helps with unrecognized sentences)",
+        "anthropic": "Anthropic (Claude reads the whole description)"
       },
       "Effort": {
         "low": "Low (default)",
@@ -153,6 +200,26 @@
       },
       "AnthropicWarning": "With this provider, the descriptions of the items you configure are sent to Anthropic. Only the Game Master's browser makes the calls.",
       "Save": "Save"
+    },
+    "Claude": {
+      "Unavailable": "Claude unavailable: {reason}. The rules alone were used.",
+      "Corrected": "Corrected: {what}",
+      "Rejected": "Rejected: {what}",
+      "Uncovered": "Not interpreted by Claude",
+      "TooMany": "More than {max} {what}: only the first {max} were kept.",
+      "Reason": {
+        "quoteMissing": "the quote is not in the description",
+        "numberNotQuoted": "the number is not in the quote",
+        "unknownKey": "unknown dnd5e key \"{key}\"",
+        "outOfBounds": "value out of bounds ({value})",
+        "formulaNotAllowed": "formula not allowed ({formula})",
+        "scopeMismatch": "scope \"{scope}\" does not fit \"{kind}\"",
+        "distanceConverted": "{from} → {to}",
+        "fieldRemoved": "{field} removed ({why})",
+        "notApplicable": "not applicable to this item type",
+        "effectSkipped": "dnd5e cannot apply this change; shown as not automated",
+        "strict": "refused by dnd5e: {error}"
+      }
     }
   }
 }

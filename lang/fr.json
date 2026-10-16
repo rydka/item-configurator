@@ -7,11 +7,15 @@
       },
       "aiEnabled": {
         "name": "Utiliser une IA",
-        "hint": "Envoie les phrases que les règles ne comprennent pas à une IA : un modèle Ollama local, ou Claude (Anthropic). Désactivé par défaut."
+        "hint": "Fait lire la description par une IA : Claude (Anthropic) la lit en entier et les règles recoupent ses nombres, ou un modèle Ollama local aide pour les phrases que les règles ne comprennent pas. Désactivé par défaut."
       },
       "aiProvider": {
         "name": "Fournisseur d'IA",
-        "hint": "Ollama tourne sur votre machine ; Anthropic envoie les descriptions des objets aux serveurs d'Anthropic avec votre clé API."
+        "hint": "Ollama tourne sur votre machine ; Anthropic envoie les descriptions des objets aux serveurs d'Anthropic avec votre clé API, en un seul appel par objet."
+      },
+      "anthropicTimeout": {
+        "name": "Délai maximal de Claude (secondes)",
+        "hint": "Claude lit toute la description en un appel. Passé ce délai, l'aperçu montre les règles seules."
       },
       "anthropicModel": {
         "name": "Modèle Claude",
@@ -74,8 +78,16 @@
       "Type": "Type d'objet",
       "Subtype": "Sous-type",
       "AiOn": "L'IA aidera pour les phrases que les règles ne comprennent pas.",
+      "ClaudeOn": "Claude lira toute la description ; les règles recouperont ses nombres.",
       "Analyzing": "Analyse de la description...",
       "Analyze": "Analyser"
+    },
+    "Progress": {
+      "Rules": "Règles",
+      "Claude": "Claude lit la description... {elapsed} s / {limit} s",
+      "Check": "Validation et recoupement",
+      "Done": "terminé",
+      "Cancel": "Annuler et montrer les règles seules"
     },
     "Messages": {
       "EmptyDescription": "Cet objet n'a pas de description à lire.",
@@ -102,11 +114,40 @@
         "keep": "Conservé"
       },
       "Group": {
+        "check": "À vérifier",
         "details": "Détails",
         "activities": "Activités",
         "effects": "Effets",
         "notAutomated": "Non automatisé",
         "flavor": "Texte d'ambiance"
+      },
+      "Check": {
+        "Hint": "Claude et les règles ont lu ces valeurs différemment. La valeur de Claude est proposée ; choisissez celle des règles pour l'écrire à la place.",
+        "Claude": "Claude",
+        "Rules": "Règles",
+        "Agree": "✓ règles",
+        "ClaudeOnly": "Claude seul",
+        "RulesOnly": "règles (complément)",
+        "Inferred": "déduit",
+        "Certainty": {
+          "high": "certitude élevée",
+          "medium": "certitude moyenne",
+          "low": "certitude faible"
+        },
+        "Family": {
+          "dice": "Dés",
+          "dc": "DD de sauvegarde",
+          "attackBonus": "Bonus d'attaque",
+          "magicalBonus": "Bonus magique",
+          "ac": "Classe d'armure",
+          "effectBonus": "Bonus d'effet",
+          "uses": "Utilisations",
+          "activation": "Activation",
+          "duration": "Durée",
+          "distance": "Distance",
+          "rarity": "Rareté",
+          "attunement": "Harmonisation"
+        }
       },
       "NotAutomatedHint": "dnd5e n'a pas de mécanisme pour ces clauses : rien n'est écrit pour elles, elles s'appliquent à la main en jeu.",
       "TypeChange": "L'objet sera converti de {from} en {to}.",
@@ -120,13 +161,19 @@
         "unauthorized": "Règles seules (Anthropic a refusé la clé API : vérifiez-la dans les réglages de l'IA).",
         "refusal": "Règles seules (l'IA a refusé de répondre ; sa réponse n'a pas été utilisée).",
         "truncated": "Règles seules (la réponse de l'IA a été coupée ; elle n'a pas été utilisée).",
-        "ok": "IA utilisée pour les phrases non reconnues ({model})."
+        "invalid": "Règles seules (la réponse de l'IA n'a pas pu être lue ; elle n'a pas été utilisée).",
+        "aborted": "Règles seules (l'appel à l'IA a été annulé).",
+        "ok": "IA utilisée pour les phrases non reconnues ({model}).",
+        "claude": "Claude a lu toute la description ({model}) ; les règles ont recoupé ses nombres."
       },
       "AiMark": "(IA)",
+      "ClaudeMark": "(Claude)",
       "BaseMark": "(objet de base)",
       "Previous": "Actuellement :",
       "Proposed": "Lu dans le texte (non appliqué) :",
       "Rejected": "Ignorés",
+      "Corrected": "Corrigé",
+      "Discarded": "Écartés",
       "Unrecognized": "Non interprétées",
       "Replace": "Remplacer l'existant",
       "ReplaceWarning": "Les valeurs existantes, ainsi que les activités ou effets de chaque groupe ayant une proposition, seront remplacés. Vous pourrez annuler ensuite.",
@@ -143,8 +190,8 @@
       "Reachable": "Ollama est joignable. Modèles installés",
       "Unreachable": "Ollama n'est pas joignable à cette adresse.",
       "Provider": {
-        "ollama": "Ollama (local)",
-        "anthropic": "Anthropic (Claude, en ligne)"
+        "ollama": "Ollama (local, aide pour les phrases non reconnues)",
+        "anthropic": "Anthropic (Claude lit toute la description)"
       },
       "Effort": {
         "low": "Faible (par défaut)",
@@ -153,6 +200,26 @@
       },
       "AnthropicWarning": "Avec ce fournisseur, les descriptions des objets que vous configurez sont envoyées à Anthropic. Seul le navigateur du MJ fait les appels.",
       "Save": "Enregistrer"
+    },
+    "Claude": {
+      "Unavailable": "Claude indisponible : {reason}. Les règles seules ont été utilisées.",
+      "Corrected": "Corrigé : {what}",
+      "Rejected": "Rejeté : {what}",
+      "Uncovered": "Non interprété par Claude",
+      "TooMany": "Plus de {max} {what} : seuls les {max} premiers ont été gardés.",
+      "Reason": {
+        "quoteMissing": "la citation n'est pas dans la description",
+        "numberNotQuoted": "le nombre n'est pas dans la citation",
+        "unknownKey": "clé dnd5e inconnue « {key} »",
+        "outOfBounds": "valeur hors bornes ({value})",
+        "formulaNotAllowed": "formule non admise ({formula})",
+        "scopeMismatch": "la portée « {scope} » ne convient pas à « {kind} »",
+        "distanceConverted": "{from} → {to}",
+        "fieldRemoved": "{field} retiré ({why})",
+        "notApplicable": "sans objet pour ce type d'objet",
+        "effectSkipped": "dnd5e ne sait pas appliquer ce changement ; affiché comme non automatisé",
+        "strict": "refusé par dnd5e : {error}"
+      }
     }
   }
 }
