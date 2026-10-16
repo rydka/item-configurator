@@ -1,0 +1,470 @@
+{
+ "versions": {
+  "foundry": "14.369",
+  "dnd5e": "6.0.6"
+ },
+ "dnd5e": {
+  "damageTypes": {
+   "acid": "Acid",
+   "bludgeoning": "Bludgeoning",
+   "cold": "Cold",
+   "fire": "Fire",
+   "force": "Force",
+   "lightning": "Lightning",
+   "necrotic": "Necrotic",
+   "piercing": "Piercing",
+   "poison": "Poison",
+   "psychic": "Psychic",
+   "radiant": "Radiant",
+   "slashing": "Slashing",
+   "thunder": "Thunder"
+  },
+  "healingTypes": {
+   "healing": "Hit Points",
+   "maximum": "Maximum Hit Points",
+   "temphp": "Temporary Hit Points"
+  },
+  "abilities": {
+   "cha": "Charisma",
+   "con": "Constitution",
+   "dex": "Dexterity",
+   "int": "Intelligence",
+   "str": "Strength",
+   "wis": "Wisdom"
+  },
+  "skills": {
+   "acr": "Acrobatics",
+   "ani": "Animal Handling",
+   "arc": "Arcana",
+   "ath": "Athletics",
+   "dec": "Deception",
+   "his": "History",
+   "ins": "Insight",
+   "inv": "Investigation",
+   "itm": "Intimidation",
+   "med": "Medicine",
+   "nat": "Nature",
+   "per": "Persuasion",
+   "prc": "Perception",
+   "prf": "Performance",
+   "rel": "Religion",
+   "slt": "Sleight of Hand",
+   "ste": "Stealth",
+   "sur": "Survival"
+  },
+  "conditionTypes": {
+   "bleeding": "Bleeding",
+   "blinded": "Blinded",
+   "burning": "Burning",
+   "charmed": "Charmed",
+   "cursed": "Cursed",
+   "deafened": "Deafened",
+   "dehydration": "Dehydration",
+   "diseased": "Diseased",
+   "exhaustion": "Exhaustion",
+   "falling": "Falling",
+   "frightened": "Frightened",
+   "grappled": "Grappled",
+   "incapacitated": "Incapacitated",
+   "invisible": "Invisible",
+   "malnutrition": "Malnutrition",
+   "paralyzed": "Paralyzed",
+   "petrified": "Petrified",
+   "poisoned": "Poisoned",
+   "prone": "Prone",
+   "restrained": "Restrained",
+   "silenced": "Silenced",
+   "stunned": "Stunned",
+   "suffocation": "Suffocation",
+   "surprised": "Surprised",
+   "transformed": "Transformed",
+   "unconscious": "Unconscious"
+  },
+  "activityActivationTypes": {
+   "action": "Action",
+   "bonus": "Bonus Action",
+   "crew": "Crew Action",
+   "day": "Day",
+   "encounter": "Start of Encounter",
+   "hour": "Hour",
+   "lair": "Lair Action",
+   "legendary": "Legendary Action",
+   "longRest": "End of a Long Rest",
+   "minute": "Minute",
+   "mythic": "Mythic Action",
+   "reaction": "Reaction",
+   "shortRest": "End of a Short Rest",
+   "special": "Special",
+   "turnEnd": "End of Turn",
+   "turnStart": "Start of Turn"
+  },
+  "itemRarity": {
+   "artifact": "Artifact",
+   "common": "Common",
+   "legendary": "Legendary",
+   "rare": "Rare",
+   "uncommon": "Uncommon",
+   "veryRare": "Very Rare"
+  },
+  "attunementTypes": {
+   "optional": "Optional Attunement",
+   "required": "Attunement Required"
+  },
+  "currencies": {
+   "cp": "Copper",
+   "ep": "Electrum",
+   "gp": "Gold",
+   "pp": "Platinum",
+   "sp": "Silver"
+  },
+  "limitedUsePeriods": {
+   "dawn": "Dawn",
+   "day": "Day",
+   "dusk": "Dusk",
+   "initiative": "Initiative",
+   "lr": "Long Rest",
+   "sr": "Short Rest",
+   "turn": "Each Turn",
+   "turnEnd": "End of Turn",
+   "turnStart": "Start of Turn"
+  },
+  "timePeriods": {
+   "day": "Day",
+   "disp": "Until Dispelled",
+   "dstr": "Until Dispelled or Triggered",
+   "hour": "Hour",
+   "inst": "Instantaneous",
+   "minute": "Minute",
+   "month": "Month",
+   "perm": "Permanent",
+   "round": "Round",
+   "spec": "Special",
+   "turn": "Turn",
+   "year": "Year"
+  },
+  "timeUnits": {
+   "day": "Day",
+   "hour": "Hour",
+   "minute": "Minute",
+   "month": "Month",
+   "round": "Round",
+   "second": "Second",
+   "turn": "Turn",
+   "week": "Week",
+   "year": "Year"
+  },
+  "distanceUnits": {
+   "any": "Any",
+   "ft": "Feet",
+   "km": "Kilometers",
+   "m": "Meters",
+   "mi": "Miles",
+   "self": "Self",
+   "spec": "Special",
+   "touch": "Touch"
+  },
+  "areaTargetTypes": {
+   "circle": "Circle",
+   "cone": "Cone",
+   "cube": "Cube",
+   "cylinder": "Cylinder",
+   "line": "Line",
+   "radius": "Emanation",
+   "ring": "Ring",
+   "sphere": "Sphere",
+   "square": "Square",
+   "wall": "Wall"
+  },
+  "individualTargetTypes": {
+   "ally": "Ally",
+   "any": "Any",
+   "creature": "Creature",
+   "creatureOrObject": "Creature or Object",
+   "enemy": "Enemy",
+   "object": "Object",
+   "self": "Self",
+   "space": "Space",
+   "willing": "Willing Creature"
+  },
+  "armorTypes": {
+   "heavy": "Heavy Armor",
+   "light": "Light Armor",
+   "medium": "Medium Armor",
+   "natural": "Natural Armor",
+   "shield": "Shield"
+  },
+  "miscEquipmentTypes": {
+   "clothing": "Clothing",
+   "ring": "Ring",
+   "rod": "Rod",
+   "trinket": "Trinket",
+   "vehicle": "Vehicle Equipment",
+   "wand": "Wand",
+   "wondrous": "Wondrous Item"
+  },
+  "movementTypes": {
+   "burrow": "Burrow",
+   "climb": "Climb",
+   "fly": "Fly",
+   "jump": "Jump",
+   "swim": "Swim",
+   "walk": "Speed"
+  },
+  "movementUnits": {
+   "ft": "Feet",
+   "km": "Kilometers",
+   "m": "Meters",
+   "mi": "Miles"
+  },
+  "senses": {
+   "blindsight": "Blindsight",
+   "darkvision": "Darkvision",
+   "tremorsense": "Tremorsense",
+   "truesight": "Truesight"
+  },
+  "attackClassifications": {
+   "spell": "Spell",
+   "unarmed": "Unarmed",
+   "weapon": "Weapon"
+  },
+  "attackTypes": {
+   "melee": "Melee",
+   "ranged": "Ranged"
+  },
+  "attackModes": {
+   "offhand": "Offhand",
+   "oneHanded": "One-Handed",
+   "ranged": "Ranged",
+   "thrown": "Thrown",
+   "thrown-offhand": "Offhand Throw",
+   "twoHanded": "Two-Handed"
+  },
+  "weaponTypes": {
+   "improv": "Improvised",
+   "martialM": "Martial Melee",
+   "martialR": "Martial Ranged",
+   "natural": "Natural",
+   "siege": "Siege Weapon",
+   "simpleM": "Simple Melee",
+   "simpleR": "Simple Ranged"
+  },
+  "itemProperties": {
+   "ada": "Adamantine",
+   "amm": "Ammunition",
+   "concentration": "Concentration",
+   "fin": "Finesse",
+   "fir": "Firearm",
+   "foc": "Focus",
+   "gear": "Gear",
+   "hvy": "Heavy",
+   "lgt": "Light",
+   "lod": "Loading",
+   "material": "Material",
+   "mgc": "Magical",
+   "rch": "Reach",
+   "rel": "Reload",
+   "ret": "Returning",
+   "ritual": "Ritual",
+   "sidekick": "Sidekick",
+   "sil": "Silvered",
+   "somatic": "Somatic",
+   "spc": "Special",
+   "stealthDisadvantage": "Stealth Disadvantage",
+   "thr": "Thrown",
+   "trait": "Passive Trait",
+   "two": "Two-Handed",
+   "unidentifiedContents": "Hide Unidentified Contents",
+   "ver": "Versatile",
+   "vocal": "Verbal",
+   "weightlessContents": "Weightless Contents"
+  },
+  "activityConsumptionTypes": {
+   "activityUses": "Activity Uses",
+   "attribute": "Attribute",
+   "hitDice": "Hit Dice",
+   "itemUses": "Item Uses",
+   "material": "Material",
+   "spellSlots": "Spell Slots"
+  },
+  "abilityActivationTypes": {
+   "action": "Action",
+   "bonus": "Bonus Action",
+   "crew": "Crew Action",
+   "day": "Day",
+   "hour": "Hour",
+   "lair": "Lair Action",
+   "legendary": "Legendary Action",
+   "minute": "Minute",
+   "mythic": "Mythic Action",
+   "none": "None",
+   "reaction": "Reaction",
+   "special": "Special"
+  },
+  "activityTypes": [
+   "attack",
+   "cast",
+   "check",
+   "damage",
+   "enchant",
+   "forward",
+   "heal",
+   "order",
+   "save",
+   "summon",
+   "teleport",
+   "transform",
+   "utility"
+  ],
+  "equipmentTypes": {
+   "clothing": "Clothing",
+   "heavy": "Heavy Armor",
+   "light": "Light Armor",
+   "medium": "Medium Armor",
+   "natural": "Natural Armor",
+   "ring": "Ring",
+   "rod": "Rod",
+   "shield": "Shield",
+   "trinket": "Trinket",
+   "vehicle": "Vehicle Equipment",
+   "wand": "Wand",
+   "wondrous": "Wondrous Item"
+  },
+  "validProperties": {
+   "class": [
+    "sidekick"
+   ],
+   "consumable": [
+    "mgc"
+   ],
+   "container": [
+    "mgc",
+    "unidentifiedContents",
+    "weightlessContents"
+   ],
+   "equipment": [
+    "ada",
+    "foc",
+    "mgc",
+    "stealthDisadvantage"
+   ],
+   "feat": [
+    "mgc",
+    "trait"
+   ],
+   "loot": [
+    "mgc"
+   ],
+   "weapon": [
+    "ada",
+    "amm",
+    "fin",
+    "fir",
+    "foc",
+    "hvy",
+    "lgt",
+    "lod",
+    "mgc",
+    "rch",
+    "rel",
+    "ret",
+    "sil",
+    "spc",
+    "thr",
+    "two",
+    "ver"
+   ],
+   "spell": [
+    "concentration",
+    "material",
+    "ritual",
+    "somatic",
+    "vocal"
+   ],
+   "tool": [
+    "foc",
+    "mgc"
+   ]
+  },
+  "statusEffects": [
+   "burrowing",
+   "concentrating",
+   "coverHalf",
+   "coverThreeQuarters",
+   "coverTotal",
+   "dead",
+   "dodging",
+   "ethereal",
+   "flying",
+   "hiding",
+   "hovering",
+   "marked",
+   "sleeping",
+   "stable"
+  ],
+  "coreStatusEffects": [
+   "bleeding",
+   "blinded",
+   "burning",
+   "burrowing",
+   "charmed",
+   "concentrating",
+   "coverHalf",
+   "coverThreeQuarters",
+   "coverTotal",
+   "cursed",
+   "dead",
+   "deafened",
+   "dehydration",
+   "diseased",
+   "dodging",
+   "encumbered",
+   "ethereal",
+   "exceedingCarryingCapacity",
+   "exhaustion",
+   "falling",
+   "flying",
+   "frightened",
+   "grappled",
+   "heavilyEncumbered",
+   "hiding",
+   "hovering",
+   "incapacitated",
+   "invisible",
+   "malnutrition",
+   "marked",
+   "paralyzed",
+   "petrified",
+   "poisoned",
+   "prone",
+   "restrained",
+   "silenced",
+   "sleeping",
+   "stable",
+   "stunned",
+   "suffocation",
+   "surprised",
+   "transformed",
+   "unconscious"
+  ]
+ },
+ "const": {
+  "ACTIVE_EFFECT_DURATION_UNITS": [
+   "years",
+   "months",
+   "days",
+   "hours",
+   "minutes",
+   "seconds",
+   "rounds",
+   "turns"
+  ],
+  "ACTIVE_EFFECT_MODES": {
+   "CUSTOM": 0,
+   "MULTIPLY": 1,
+   "ADD": 2,
+   "DOWNGRADE": 3,
+   "UPGRADE": 4,
+   "OVERRIDE": 5
+  }
+ }
+}
