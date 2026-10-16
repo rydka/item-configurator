@@ -65,9 +65,9 @@ function complementFromRules(rulesOnly, rules, parser, translation, descriptors)
   };
   const addActivity = (index, covered) => {
     const from = `activities.${index}`;
-    if (added.has(from)) return;
+    if (added.has(from)) return true;
     const source = rules.translation.activities[index];
-    if (!source || activitySeen.has(activitySignature(source))) return;
+    if (!source || activitySeen.has(activitySignature(source))) return false;
     activitySeen.add(activitySignature(source));
     const copy = clone(source);
     if (copy.effects?.length) {
@@ -79,25 +79,29 @@ function complementFromRules(rulesOnly, rules, parser, translation, descriptors)
     translation.activities.push(copy);
     added.set(from, to);
     for (const d of described.filter((x) => x.group === "activities" && x.paths.includes(from))) mark(d, from, to, covered);
+    return true;
   };
   const addSystem = (path, covered) => {
     const field = path.replace(/^system\./, "");
-    if (added.has(path) || getPath(translation.system, field) !== undefined) return;
+    if (added.has(path) || getPath(translation.system, field) !== undefined) return false;
     const value = getPath(rules.translation.system, field);
-    if (value === undefined) return;
+    if (value === undefined) return false;
     setPath(translation.system, field, clone(value));
     added.set(path, path);
     for (const d of described.filter((x) => x.group === "details" && x.paths.some((p) => p === path || path.startsWith(`${p}.`) || p.startsWith(`${path}.`)))) {
       if (!descriptors.some((existing) => existing.ref === d.paths[0] && existing.check === "rulesOnly")) mark(d, d.paths[0], d.paths[0], covered);
     }
+    return true;
   };
   for (const fact of rulesOnly) {
     const covered = fact.covered === true;
     const path = String(fact.path ?? "");
-    if (path.startsWith("activities.")) addActivity(Number(path.split(".")[1]), covered);
-    else if (path.startsWith("effects.")) addEffect(Number(path.split(".")[1]), covered);
-    else if (path.startsWith("system.")) addSystem(path, covered);
-    if (Number.isInteger(fact.paragraph) && !covered) addedParagraphs.add(fact.paragraph);
+    let added = false;
+    if (path.startsWith("activities.")) added = addActivity(Number(path.split(".")[1]), covered);
+    else if (path.startsWith("effects.")) added = Boolean(addEffect(Number(path.split(".")[1]), covered));
+    else if (path.startsWith("system.")) added = addSystem(path, covered);
+    // Only a paragraph an added element actually reads leaves the "not interpreted" list (C8)
+    if (added && Number.isInteger(fact.paragraph) && !covered) addedParagraphs.add(fact.paragraph);
   }
   return addedParagraphs;
 }
