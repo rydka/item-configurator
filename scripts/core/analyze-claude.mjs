@@ -18,11 +18,10 @@ import { buildClaudeRequest, describeForClaude } from "../ai/claude-prompt.mjs";
 import { validateClaudeItem } from "../ai/claude-validate.mjs";
 import { buildFromClaude } from "../ai/claude-build.mjs";
 
-/** Client statuses -> statuses the preview explains (`Preview.Ai.*`). */
-const STATUS = { http: "error", invalid: "error" };
 const NO_ACTIVITY_TYPES = ["loot", "container"];
 
-const aiStatus = (status) => STATUS[status] ?? status ?? "error";
+/** The client's status is kept as it is (`noKey`, `unauthorized`, `http`, `refusal`, `truncated`, `invalid`, `unreachable`, `timeout`, `aborted`). */
+const aiStatus = (status) => (typeof status === "string" && status ? status : "error");
 
 /** `complete` wrapped so that it never throws and always answers in the client's shape. */
 async function callClaude(complete, request, signal) {
