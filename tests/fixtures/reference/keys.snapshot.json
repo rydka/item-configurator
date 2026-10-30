@@ -1,0 +1,165 @@
+{
+ "abilities": [
+  "cha",
+  "con",
+  "dex",
+  "int",
+  "str",
+  "wis"
+ ],
+ "skills": [
+  "acr",
+  "ani",
+  "arc",
+  "ath",
+  "dec",
+  "his",
+  "ins",
+  "inv",
+  "itm",
+  "med",
+  "nat",
+  "per",
+  "prc",
+  "prf",
+  "rel",
+  "slt",
+  "ste",
+  "sur"
+ ],
+ "damageTypes": [
+  "acid",
+  "bludgeoning",
+  "cold",
+  "fire",
+  "force",
+  "lightning",
+  "necrotic",
+  "piercing",
+  "poison",
+  "psychic",
+  "radiant",
+  "slashing",
+  "thunder"
+ ],
+ "conditionTypes": [],
+ "areaTargetTypes": [
+  "circle",
+  "cone",
+  "cube",
+  "cylinder",
+  "line",
+  "radius",
+  "ring",
+  "sphere",
+  "square",
+  "wall"
+ ],
+ "individualTargetTypes": [
+  "ally",
+  "any",
+  "creature",
+  "creatureOrObject",
+  "enemy",
+  "object",
+  "self",
+  "space",
+  "willing"
+ ],
+ "activityActivationTypes": [
+  "action",
+  "bonus",
+  "crew",
+  "day",
+  "encounter",
+  "hour",
+  "lair",
+  "legendary",
+  "longRest",
+  "minute",
+  "mythic",
+  "reaction",
+  "shortRest",
+  "special",
+  "turnEnd",
+  "turnStart"
+ ],
+ "activityTypes": [],
+ "limitedUsePeriods": [
+  "dawn",
+  "day",
+  "dusk",
+  "initiative",
+  "lr",
+  "sr",
+  "turn",
+  "turnEnd",
+  "turnStart"
+ ],
+ "itemRarity": [
+  "artifact",
+  "common",
+  "legendary",
+  "rare",
+  "uncommon",
+  "veryRare"
+ ],
+ "attunementTypes": [],
+ "weaponTypes": [
+  "improv",
+  "martialM",
+  "martialR",
+  "natural",
+  "siege",
+  "simpleM",
+  "simpleR"
+ ],
+ "weaponMasteries": [],
+ "armorTypes": [
+  "heavy",
+  "light",
+  "medium",
+  "natural",
+  "shield"
+ ],
+ "consumableTypes": [
+  "ammo",
+  "food",
+  "poison",
+  "potion",
+  "rod",
+  "scroll",
+  "trinket",
+  "wand",
+  "wondrous"
+ ],
+ "currencies": [
+  "cp",
+  "ep",
+  "gp",
+  "pp",
+  "sp"
+ ],
+ "movementTypes": [
+  "burrow",
+  "climb",
+  "fly",
+  "jump",
+  "swim",
+  "walk"
+ ],
+ "spellcasting": [],
+ "weaponIds": [],
+ "armorIds": [],
+ "healingTypes": [
+  "healing",
+  "maximum",
+  "temphp"
+ ],
+ "validProperties": {
+  "weapon": [],
+  "equipment": [],
+  "consumable": [],
+  "feat": []
+ }
+}

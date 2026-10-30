@@ -1,0 +1,120 @@
+<div class="item-configurator-body">
+<section class="intro">
+  {{#if typeChange}}<p class="type-change"><i class="fa-solid fa-right-left"></i> {{typeChange}}</p>{{/if}}
+  <p class="ai-status {{#if ai.rulesOnly}}rules-only{{/if}}"><i class="fa-solid fa-robot"></i> {{ai.text}}</p>
+  {{#if stale}}<p class="hint warning stale"><i class="fa-solid fa-triangle-exclamation"></i> {{localize "item-configurator.Preview.Stale"}}</p>{{/if}}
+</section>
+
+<div class="groups">
+  {{#if checks.length}}
+  <section class="group group-check">
+    <h3>{{localize "item-configurator.Preview.Group.check"}}</h3>
+    <p class="hint">{{localize "item-configurator.Preview.Check.Hint"}}</p>
+    <ul>
+      {{#each checks}}
+      <li class="check {{#if critical}}critical{{/if}}">
+        <div class="entry-line">
+          <span class="label"><strong>{{family}}</strong>{{#if entry}} — {{entry}}{{/if}}</span>
+          {{#if critical}}<span class="origin critical-mark">{{localize "item-configurator.Preview.Check.Critical"}}</span>{{/if}}
+        </div>
+        <div class="choices">
+          <label><input type="radio" class="check-choice" name="check-{{id}}" data-check="{{id}}" value="claude" {{checked claudeChosen}}> {{localize "item-configurator.Preview.Check.Claude"}}: <code>{{claude}}</code></label>
+          <label><input type="radio" class="check-choice" name="check-{{id}}" data-check="{{id}}" value="rules" {{checked rulesChosen}}> {{localize "item-configurator.Preview.Check.Rules"}}: <code>{{rules}}</code></label>
+        </div>
+        {{#if rulesRaw}}<blockquote class="source">{{rulesRaw}}</blockquote>{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+  {{/if}}
+
+  {{#each groups}}
+  <section class="group group-{{group}}">
+    <h3>{{title}}</h3>
+    <ul>
+      {{#each entries}}
+      <li class="entry action-{{action}} {{#if keep}}keep{{/if}} {{#if remove}}remove{{/if}} {{#unless selected}}unselected{{/unless}}" data-entry="{{id}}">
+        <div class="entry-line">
+          {{#if selectable}}<input type="checkbox" class="entry-select" data-entry="{{id}}" {{checked selected}}>{{/if}}
+          <span class="badge">{{actionLabel}}</span>
+          <span class="label">{{label}}</span>
+          {{#if ai}}<span class="origin ai-mark">{{localize "item-configurator.Preview.AiMark"}}</span>{{/if}}
+          {{#if claude}}<span class="origin claude-mark">{{localize "item-configurator.Preview.ClaudeMark"}}</span>{{/if}}
+          {{#if base}}<span class="origin base-mark">{{localize "item-configurator.Preview.BaseMark"}}</span>{{/if}}
+          {{#if agree}}<span class="origin check-mark agree">{{localize "item-configurator.Preview.Check.Agree"}}</span>{{/if}}
+          {{#if conflict}}<span class="origin check-mark conflict"><i class="fa-solid fa-triangle-exclamation"></i> {{localize "item-configurator.Preview.Group.check"}}</span>{{/if}}
+          {{#if claudeOnly}}<span class="origin check-mark claude-only">{{localize "item-configurator.Preview.Check.ClaudeOnly"}}</span>{{/if}}
+          {{#if rulesOnly}}<span class="origin check-mark rules-only">{{localize "item-configurator.Preview.Check.RulesOnly"}}</span>{{/if}}
+          {{#if inferred}}<span class="origin inferred-mark">{{localize "item-configurator.Preview.Check.Inferred"}}</span>{{/if}}
+          {{#if certainty}}<span class="origin certainty-mark {{#if low}}low{{/if}}">{{certainty}}</span>{{/if}}
+        </div>
+        {{#if previous}}<div class="previous">{{localize "item-configurator.Preview.Previous"}} <code>{{previous}}</code></div>{{/if}}
+        {{#if keep}}{{#if value}}<div class="proposed">{{localize "item-configurator.Preview.Proposed"}} <code>{{value}}</code></div>{{/if}}{{/if}}
+        {{#if raw}}<blockquote class="source">{{raw}}</blockquote>{{/if}}
+      </li>
+      {{/each}}
+    </ul>
+  </section>
+  {{/each}}
+
+  {{#if empty}}<p class="nothing">{{localize "item-configurator.Messages.NothingRecognized"}}</p>{{/if}}
+
+  {{#if notAutomated.length}}
+  <section class="group group-not-automated">
+    <h3>{{localize "item-configurator.Preview.Group.notAutomated"}}</h3>
+    <p class="hint">{{localize "item-configurator.Preview.NotAutomatedHint"}}</p>
+    <ul>{{#each notAutomated}}<li><blockquote class="source">{{raw}}</blockquote>{{#if ai}} <span class="origin ai-mark">{{localize "item-configurator.Preview.AiMark"}}</span>{{/if}}{{#if claude}} <span class="origin claude-mark">{{localize "item-configurator.Preview.ClaudeMark"}}</span>{{/if}}</li>{{/each}}</ul>
+  </section>
+  {{/if}}
+
+  {{#if corrected.length}}
+  <section class="group group-corrected">
+    <h3>{{localize "item-configurator.Preview.Corrected"}}</h3>
+    <ul>{{#each corrected}}<li>{{this}}</li>{{/each}}</ul>
+  </section>
+  {{/if}}
+
+  {{#if discarded.length}}
+  <section class="group group-discarded">
+    <h3>{{localize "item-configurator.Preview.Discarded"}}</h3>
+    <ul>{{#each discarded}}<li>{{this}}</li>{{/each}}</ul>
+  </section>
+  {{/if}}
+
+  {{#if rejected.length}}
+  <section class="group group-rejected">
+    <h3>{{localize "item-configurator.Preview.Rejected"}}</h3>
+    <ul>{{#each rejected}}<li>{{label}}{{#if raw}} <blockquote class="source">{{raw}}</blockquote>{{/if}}</li>{{/each}}</ul>
+  </section>
+  {{/if}}
+
+  {{#if unrecognized.length}}
+  <section class="group group-unrecognized">
+    <h3>{{localize "item-configurator.Preview.Unrecognized"}}</h3>
+    {{#if claudeMode}}<p class="hint">{{localize "item-configurator.Claude.Uncovered"}}</p>{{/if}}
+    <ul>{{#each unrecognized}}<li><blockquote class="source">{{this}}</blockquote></li>{{/each}}</ul>
+  </section>
+  {{/if}}
+
+  {{#if flavor.length}}
+  <details class="group group-flavor">
+    <summary><h3>{{localize "item-configurator.Preview.Group.flavor"}} ({{flavor.length}})</h3></summary>
+    <ul>{{#each flavor}}<li><blockquote class="source">{{this}}</blockquote></li>{{/each}}</ul>
+  </details>
+  {{/if}}
+</div>
+
+<footer class="preview-footer">
+  <label class="replace">
+    <input type="checkbox" name="replace" {{checked replace}}>
+    {{localize "item-configurator.Preview.Replace"}}
+  </label>
+  {{#if replace}}
+  <p class="hint warning">{{localize "item-configurator.Preview.ReplaceWarning"}}{{#if removals}} ({{removals}}){{/if}}</p>
+  {{/if}}
+  <div class="buttons">
+    <button type="button" data-action="apply" class="item-configurator-apply" {{#if empty}}disabled{{/if}}><i class="fa-solid fa-check"></i> {{localize "item-configurator.Preview.Apply"}}</button>
+    <button type="button" data-action="cancel"><i class="fa-solid fa-xmark"></i> {{localize "item-configurator.Cancel"}}</button>
+  </div>
+</footer>
+</div>

@@ -1,0 +1,15 @@
+{
+ "description": "Index that matches no request: ignored/rejected",
+ "handcrafted": true,
+ "sentences": [
+  "Once per turn, a hit with this weapon deals an extra 2d6 necrotic damage."
+ ],
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{\"results\":[{\"index\":7,\"facts\":[{\"kind\":\"damage\",\"number\":2,\"denomination\":6,\"damageType\":\"necrotic\",\"evidence\":\"extra 2d6 necrotic damage\"}]}]}"
+  },
+  "done": true
+ }
+}

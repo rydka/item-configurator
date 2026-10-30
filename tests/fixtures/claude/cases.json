@@ -1,0 +1,308 @@
+[
+ {
+  "id": "ring",
+  "file": "ring.json",
+  "kind": "valid",
+  "expectedFile": "expected.json#ring",
+  "uncovered": [],
+  "rejections": []
+ },
+ {
+  "id": "compass",
+  "file": "compass.json",
+  "kind": "valid",
+  "expectedFile": "expected.json#compass",
+  "uncovered": [],
+  "rejections": [],
+  "corrections": [
+   {
+    "ref": "a1",
+    "field": "target.template.size",
+    "reason": "9 m -> 30 ft (imperial world)"
+   }
+  ]
+ },
+ {
+  "id": "compass-metric",
+  "file": "compass-metric.json",
+  "kind": "valid",
+  "note": "metric world: 9 m kept, no distance correction",
+  "expectedFile": "expected.json#compass",
+  "corrections": []
+ },
+ {
+  "id": "quote-absent",
+  "file": "quote-absent.json",
+  "kind": "invalid",
+  "rejections": [
+   {
+    "ref": "a2",
+    "field": "quotes",
+    "reason": "quote not in description"
+   }
+  ],
+  "keep": [
+   "a1",
+   "a3",
+   "a4"
+  ]
+ },
+ {
+  "id": "unknown-key-essential",
+  "file": "unknown-key-essential.json",
+  "kind": "invalid",
+  "rejections": [
+   {
+    "ref": "a1",
+    "field": "healing.types",
+    "reason": "unknown healing type"
+   }
+  ]
+ },
+ {
+  "id": "unknown-key-optional",
+  "file": "unknown-key-optional.json",
+  "kind": "invalid",
+  "corrections": [
+   {
+    "ref": "a1",
+    "field": "range",
+    "reason": "unknown distance unit, field removed"
+   }
+  ],
+  "keep": [
+   "a1"
+  ]
+ },
+ {
+  "id": "out-of-bounds-dice",
+  "file": "out-of-bounds-dice.json",
+  "kind": "invalid",
+  "rejections": [
+   {
+    "ref": "a1",
+    "field": "healing",
+    "reason": "dice faces not in {2,3,4,6,8,10,12,20,100}"
+   }
+  ]
+ },
+ {
+  "id": "out-of-bounds-duration",
+  "file": "out-of-bounds-duration.json",
+  "kind": "invalid",
+  "corrections": [
+   {
+    "ref": "a3",
+    "field": "duration",
+    "reason": "duration above 1000, field removed"
+   }
+  ],
+  "keep": [
+   "a3"
+  ]
+ },
+ {
+  "id": "formula-actor",
+  "file": "formula-actor.json",
+  "kind": "invalid",
+  "corrections": [
+   {
+    "ref": "a2",
+    "field": "roll",
+    "reason": "formula outside the whitelist, field removed"
+   }
+  ],
+  "keep": [
+   "a2"
+  ]
+ },
+ {
+  "id": "number-not-cited",
+  "file": "number-not-cited.json",
+  "kind": "invalid",
+  "corrections": [
+   {
+    "ref": "a3",
+    "field": "duration",
+    "reason": "12 absent from the quotes, field removed"
+   }
+  ],
+  "keep": [
+   "a3"
+  ]
+ },
+ {
+  "id": "scope-incompatible",
+  "file": "scope-incompatible.json",
+  "kind": "invalid",
+  "corrections": [
+   {
+    "ref": "e1",
+    "field": "changes",
+    "reason": "scope walk incompatible with resistance, change removed"
+   }
+  ],
+  "notAutomated": [
+   "Jusqu'à la fin de votre prochain tour, votre vitesse est réduite de moitié"
+  ]
+ },
+ {
+  "id": "thirteen-activities",
+  "file": "thirteen-activities.json",
+  "kind": "invalid",
+  "corrections": [
+   {
+    "ref": "activities",
+    "field": "length",
+    "reason": "more than 12 activities, first 12 kept"
+   }
+  ],
+  "activityCount": 12
+ },
+ {
+  "id": "script-in-name",
+  "file": "script-in-name.json",
+  "kind": "invalid",
+  "note": "< and > removed from the name, activity kept; never an HTML field",
+  "nameMustNotContain": [
+   "<",
+   ">"
+  ],
+  "keep": [
+   "a1"
+  ]
+ },
+ {
+  "id": "html-and-handlebars",
+  "file": "html-and-handlebars.json",
+  "kind": "invalid",
+  "note": "angle brackets removed; the double braces stay literal text (the template escapes them)",
+  "nameMustNotContain": [
+   "<",
+   ">"
+  ],
+  "keep": [
+   "a1"
+  ]
+ },
+ {
+  "id": "paragraph-uncovered",
+  "file": "paragraph-uncovered.json",
+  "kind": "invalid",
+  "uncovered": [
+   "P6"
+  ],
+  "note": "paragraph 6 (Fil lumineux) is cited by nothing: listed as not interpreted (C8)"
+ },
+ {
+  "id": "activity-type-excluded",
+  "file": "activity-type-excluded.json",
+  "kind": "invalid",
+  "rejections": [
+   {
+    "ref": "a1",
+    "field": "type",
+    "reason": "activity type not allowed"
+   }
+  ]
+ },
+ {
+  "id": "activity-on-loot",
+  "file": "activity-on-loot.json",
+  "kind": "invalid",
+  "rejections": [
+   {
+    "ref": "a1",
+    "field": "type",
+    "reason": "not applicable to this item type"
+   }
+  ],
+  "note": "existing behaviour: no activity on a loot or a container"
+ },
+ {
+  "id": "low-certainty",
+  "file": "low-certainty.json",
+  "kind": "valid",
+  "note": "a low-certainty element is proposed unchecked (analyze-claude, not the validator)",
+  "lowRefs": [
+   "a1"
+  ]
+ },
+ {
+  "id": "wrong-shape",
+  "file": "wrong-shape.json",
+  "kind": "invalid",
+  "note": "defensive shape check: activities is not an array"
+ },
+ {
+  "id": "refusal",
+  "file": "refusal.json",
+  "kind": "fallback",
+  "status": "refusal"
+ },
+ {
+  "id": "max-tokens",
+  "file": "max-tokens.json",
+  "kind": "fallback",
+  "status": "truncated"
+ },
+ {
+  "id": "invalid-json",
+  "file": "invalid-json.json",
+  "kind": "fallback",
+  "status": "invalid"
+ },
+ {
+  "id": "fenced-json",
+  "file": "fenced-json.json",
+  "kind": "fallback",
+  "status": "invalid",
+  "note": "output_config.format guarantees raw JSON: a fenced answer counts as invalid"
+ },
+ {
+  "id": "http-401",
+  "file": "http-401.json",
+  "kind": "fallback",
+  "httpStatus": 401,
+  "status": "unauthorized",
+  "note": "status names are indicative: the test adapts them to those of anthropic.mjs"
+ },
+ {
+  "id": "http-403",
+  "file": "http-403.json",
+  "kind": "fallback",
+  "httpStatus": 403,
+  "status": "unauthorized",
+  "note": "status names are indicative: the test adapts them to those of anthropic.mjs"
+ },
+ {
+  "id": "http-429",
+  "file": "http-429.json",
+  "kind": "fallback",
+  "httpStatus": 429,
+  "status": "rate-limited",
+  "note": "status names are indicative: the test adapts them to those of anthropic.mjs"
+ },
+ {
+  "id": "http-500",
+  "file": "http-500.json",
+  "kind": "fallback",
+  "httpStatus": 500,
+  "status": "server-error",
+  "note": "status names are indicative: the test adapts them to those of anthropic.mjs"
+ },
+ {
+  "id": "http-529",
+  "file": "http-529.json",
+  "kind": "fallback",
+  "httpStatus": 529,
+  "status": "server-error",
+  "note": "status names are indicative: the test adapts them to those of anthropic.mjs"
+ },
+ {
+  "id": "network-error",
+  "file": "network-error.json",
+  "kind": "fallback",
+  "status": "network"
+ }
+]

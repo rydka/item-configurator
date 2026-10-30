@@ -1,3 +1,119 @@
 /* Scope every rule under a module-specific class to avoid clashing with other modules. */
-.item-configurator {
+
+/* Title bar icons of the item sheet. */
+.item-configurator-configure.disabled,
+.item-configurator-undo.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
+
+/* Toolbar under the sheet header: explicit "Configure" / "Undo" buttons. */
+.item-configurator-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+}
+.item-configurator-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  flex: 0 1 auto;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.item-configurator-toolbar button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.item-configurator [hidden] { display: none !important; }
+
+.item-configurator .hint { margin: 0 0 0.5rem; font-size: var(--font-size-12); opacity: 0.8; }
+.item-configurator .form-footer,
+.item-configurator .preview-footer .buttons { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem; }
+
+.item-configurator.preview .group h3 { font-size: var(--font-size-16); }
+
+/* Type window. */
+.item-configurator.type-dialog .busy-note { display: none; }
+.item-configurator.type-dialog.busy .busy-note { display: block; }
+.item-configurator.type-dialog .notes { font-size: var(--font-size-12); opacity: 0.8; }
+/* Progress line of the Claude first mode: steps active, then done; Cancel aborts the Claude call. */
+.item-configurator.type-dialog .progress { display: none; list-style: none; margin: 0.25rem 0 0; padding: 0 0 0 0.5rem; font-size: var(--font-size-12); }
+.item-configurator.type-dialog.busy.claude-progress .progress { display: block; }
+.item-configurator.type-dialog .progress li { margin: 0.15rem 0; opacity: 0.6; }
+.item-configurator.type-dialog .progress li.active,
+.item-configurator.type-dialog .progress li.done { opacity: 1; }
+.item-configurator.type-dialog .progress .done-mark,
+.item-configurator.type-dialog .progress .active-mark { display: none; width: 1em; }
+.item-configurator.type-dialog .progress li.active .active-mark { display: inline-block; }
+.item-configurator.type-dialog .progress li.done .done-mark { display: inline-block; color: var(--color-level-success, #2a2); }
+.item-configurator.type-dialog .progress .progress-cancel { margin-top: 0.3rem; }
+.item-configurator.type-dialog .progress .progress-cancel button { width: auto; font-size: var(--font-size-12); }
+
+/* Preview window. */
+.item-configurator.preview .intro p { margin: 0 0 0.25rem; }
+.item-configurator.preview .ai-status.rules-only { color: var(--color-warm-2, #a60); }
+.item-configurator.preview .groups { max-height: 55vh; overflow-y: auto; padding-right: 0.25rem; }
+.item-configurator.preview .group h3 { margin: 0.5rem 0 0.25rem; border-bottom: 1px solid var(--color-border-light-2, #999); }
+.item-configurator.preview .group ul { list-style: none; margin: 0; padding: 0; }
+/* Collapsed groups (flavor text): the summary carries the title. */
+.item-configurator.preview details.group > summary { cursor: pointer; margin: 0.5rem 0 0.25rem; border-bottom: 1px solid var(--color-border-light-2, #999); }
+.item-configurator.preview details.group > summary h3 { display: inline; margin: 0; border: none; }
+.item-configurator.preview .group-not-automated .hint { margin: 0 0 0.25rem; }
+.item-configurator.preview .entry { margin-bottom: 0.4rem; }
+.item-configurator.preview .entry-line { display: flex; gap: 0.4rem; align-items: baseline; flex-wrap: wrap; }
+.item-configurator.preview .badge {
+  font-size: var(--font-size-11);
+  text-transform: uppercase;
+  padding: 0 0.3rem;
+  border-radius: 3px;
+  background: var(--color-cool-4, #468);
+  color: #fff;
+}
+.item-configurator.preview .action-set .badge,
+.item-configurator.preview .action-replace .badge { background: var(--color-warm-2, #a60); }
+.item-configurator.preview .action-keep .badge { background: var(--color-dark-5, #666); }
+.item-configurator.preview .action-remove .badge { background: var(--color-level-error, #b22); }
+.item-configurator.preview .entry.remove .label { text-decoration: line-through; }
+.item-configurator.preview .entry.keep { opacity: 0.7; }
+.item-configurator.preview .origin { font-size: var(--font-size-11); font-weight: bold; }
+.item-configurator.preview .ai-mark,
+.item-configurator.preview .claude-mark { color: var(--color-level-info, #36c); }
+/* Claude first: checkbox per entry, cross-check marks, "To check" choices. */
+.item-configurator.preview .entry-select { margin: 0; flex: 0 0 auto; }
+.item-configurator.preview .entry.unselected .label { opacity: 0.55; text-decoration: line-through; }
+.item-configurator.preview .check-mark.agree { color: var(--color-level-success, #2a2); }
+.item-configurator.preview .check-mark.conflict,
+.item-configurator.preview .critical-mark { color: var(--color-level-error, #b22); }
+.item-configurator.preview .check-mark.claude-only,
+.item-configurator.preview .check-mark.rules-only,
+.item-configurator.preview .inferred-mark,
+.item-configurator.preview .certainty-mark { color: var(--color-warm-2, #a60); font-weight: normal; font-style: italic; }
+.item-configurator.preview .certainty-mark.low { font-weight: bold; }
+.item-configurator.preview .group-check h3 { color: var(--color-warm-2, #a60); }
+.item-configurator.preview .group-check .check { margin-bottom: 0.5rem; }
+.item-configurator.preview .group-check .choices { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin: 0.15rem 0 0 0.4rem; font-size: var(--font-size-12); }
+.item-configurator.preview .group-check .choices label { display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; }
+.item-configurator.preview .group-check .choices input { margin: 0; }
+.item-configurator.preview .group-corrected li,
+.item-configurator.preview .group-discarded li { font-size: var(--font-size-12); }
+.item-configurator.preview .source {
+  margin: 0.15rem 0 0 0.4rem;
+  padding: 0 0 0 0.5rem;
+  border-left: 2px solid var(--color-border-light-2, #999);
+  font-style: italic;
+  font-size: var(--font-size-12);
+}
+.item-configurator.preview .previous,
+.item-configurator.preview .proposed { font-size: var(--font-size-12); margin-left: 0.4rem; }
+.item-configurator.preview .preview-footer { margin-top: 0.5rem; }
+.item-configurator.preview .preview-footer .warning,
+.item-configurator.preview .intro .stale { color: var(--color-warm-2, #a60); }
+
+/* AI settings window. */
+.item-configurator.ai-settings .connection.ok { color: var(--color-level-success, #2a2); }
+.item-configurator.ai-settings .connection.ko { color: var(--color-level-error, #b22); }

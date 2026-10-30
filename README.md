@@ -16,6 +16,20 @@ https://github.com/rydka/item-configurator/releases/latest/download/module.json
 
 À compléter.
 
+## API
+
+`game.modules.get("item-configurator").api` (disponible après le hook `init`, chargée au premier appel) :
+
+- `open(item)` : ouvre l'interface du module sur l'objet, exactement comme le bouton de la fiche (fenêtre de choix du type, puis aperçu). Renvoie une promesse résolue avec la fenêtre affichée. Rejette avec une `Error` au message localisé si l'utilisateur ne peut pas configurer l'objet (`errors.notAllowed` : ni MJ ni propriétaire autorisé, ou type non pris en charge) ou si l'objet est dans un compendium verrouillé (`Button.LockedPack`). Aucune notification n'est affichée : c'est à l'appelant de le faire.
+- `configure(item, { type, subtype, variant, useAI, replace, apply, signal })` : analyse sans interface, mêmes règles d'accès ; renvoie `{ proposal, changeSet, applied }`.
+
+Exemple pour un autre module :
+
+```js
+const api = game.modules.get("item-configurator")?.api;
+if (api?.open) await api.open(item).catch((err) => ui.notifications.warn(err.message));
+```
+
 ## Développement
 
 ```

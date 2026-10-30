@@ -1,0 +1,32 @@
+{
+ "input": {
+  "name": "L'Anneau du Dernier Souffle",
+  "type": "equipment",
+  "value": "ring",
+  "subtypeLabel": "Anneau",
+  "paragraphs": [
+   "Anneau, peu commun (nécessite un lien d'harmonisation)",
+   "Forgé dans l'argent noirci, cet anneau serti d'une pierre grise garde la chaleur de celui qui le porte, même lorsque la vie s'enfuit.",
+   "Le dernier souffle. Une fois par repos long, quand vous tombez à 0 point de vie sans être tué sur le coup, vous pouvez utiliser votre réaction pour tomber à 1 point de vie à la place et gagner 1d6 + votre bonus de maîtrise points de vie temporaires.",
+   "Le prix du sursis. Jusqu'à la fin de votre prochain tour, votre vitesse est réduite de moitié et vous ne pouvez pas effectuer de réactions."
+  ]
+ },
+ "response": {
+  "id": "msg_sim0020",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-5-5",
+  "content": [],
+  "stop_reason": "refusal",
+  "stop_sequence": null,
+  "usage": {
+   "input_tokens": 612,
+   "output_tokens": 0,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 3104
+  }
+ },
+ "world": {
+  "metric": false
+ }
+}

@@ -1,0 +1,16 @@
+{
+ "description": "no-mechanics",
+ "sentences": [
+  "A lovingly carved wooden figure that a long-dead sculptor left behind."
+ ],
+ "requestModel": "llama3.1:8b",
+ "elapsedMs": 515,
+ "response": {
+  "model": "llama3.1:8b",
+  "message": {
+   "role": "assistant",
+   "content": "{\"results\":[{\"index\":0,\"facts\":[]}]}"
+  },
+  "done": true
+ }
+}

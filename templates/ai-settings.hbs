@@ -1,0 +1,75 @@
+<div class="item-configurator-body">
+<div class="form-group">
+  <label>{{localize "item-configurator.settings.aiEnabled.name"}}</label>
+  <div class="form-fields"><input type="checkbox" name="aiEnabled" {{checked enabled}}></div>
+  <p class="hint">{{localize "item-configurator.settings.aiEnabled.hint"}}</p>
+</div>
+<div class="form-group">
+  <label>{{localize "item-configurator.settings.aiProvider.name"}}</label>
+  <div class="form-fields">
+    <select name="aiProvider">
+      {{#each providers}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+    </select>
+  </div>
+  <p class="hint">{{localize "item-configurator.settings.aiProvider.hint"}}</p>
+</div>
+
+<div class="form-group provider-ollama" {{#if isAnthropic}}hidden{{/if}}>
+  <label>{{localize "item-configurator.settings.ollamaUrl.name"}}</label>
+  <div class="form-fields"><input type="text" name="ollamaUrl" value="{{url}}"></div>
+  <p class="hint">{{localize "item-configurator.settings.ollamaUrl.hint"}}</p>
+</div>
+<div class="form-group provider-ollama" {{#if isAnthropic}}hidden{{/if}}>
+  <label>{{localize "item-configurator.settings.ollamaModel.name"}}</label>
+  <div class="form-fields">
+    <select name="ollamaModel">
+      <option value="" {{#unless model}}selected{{/unless}}>{{localize "item-configurator.AiSettings.Auto"}}</option>
+      {{#each models}}<option value="{{name}}" {{#if selected}}selected{{/if}}>{{name}}{{#if missing}} ({{localize "item-configurator.AiSettings.NotInstalled"}}){{/if}}</option>{{/each}}
+    </select>
+    <button type="button" data-action="test"><i class="fa-solid fa-plug"></i> {{localize "item-configurator.AiSettings.Test"}}</button>
+  </div>
+  <p class="hint">{{localize "item-configurator.settings.ollamaModel.hint"}}</p>
+  <p class="connection {{#if reachable}}ok{{else}}ko{{/if}}">
+    {{#if reachable}}{{localize "item-configurator.AiSettings.Reachable"}} ({{modelCount}}){{else}}{{localize "item-configurator.AiSettings.Unreachable"}}{{/if}}
+  </p>
+</div>
+
+<div class="form-group provider-anthropic" {{#unless isAnthropic}}hidden{{/unless}}>
+  <label>{{localize "item-configurator.settings.anthropicModel.name"}}</label>
+  <div class="form-fields">
+    <select name="anthropicModel">
+      {{#each anthropicModels}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+    </select>
+  </div>
+  <p class="hint">{{localize "item-configurator.settings.anthropicModel.hint"}}</p>
+</div>
+<div class="form-group provider-anthropic" {{#unless isAnthropic}}hidden{{/unless}}>
+  <label>{{localize "item-configurator.settings.anthropicEffort.name"}}</label>
+  <div class="form-fields">
+    <select name="anthropicEffort">
+      {{#each efforts}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+    </select>
+  </div>
+  <p class="hint">{{localize "item-configurator.settings.anthropicEffort.hint"}}</p>
+</div>
+<div class="form-group provider-anthropic" {{#unless isAnthropic}}hidden{{/unless}}>
+  <label>{{localize "item-configurator.settings.anthropicTimeout.name"}}</label>
+  <div class="form-fields"><input type="number" name="anthropicTimeout" value="{{anthropicTimeout}}" min="{{minAnthropic}}" max="{{maxAnthropic}}" step="1"></div>
+  <p class="hint">{{localize "item-configurator.settings.anthropicTimeout.hint"}}</p>
+</div>
+<div class="form-group provider-anthropic" {{#unless isAnthropic}}hidden{{/unless}}>
+  <label>{{localize "item-configurator.settings.anthropicApiKey.name"}}</label>
+  <div class="form-fields"><input type="password" name="anthropicApiKey" value="{{apiKey}}" autocomplete="off" spellcheck="false"></div>
+  <p class="hint">{{localize "item-configurator.settings.anthropicApiKey.hint"}}</p>
+  <p class="hint warning anthropic-warning"><i class="fa-solid fa-triangle-exclamation"></i> {{localize "item-configurator.AiSettings.AnthropicWarning"}}</p>
+</div>
+
+<div class="form-group provider-ollama" {{#if isAnthropic}}hidden{{/if}}>
+  <label>{{localize "item-configurator.settings.aiTimeout.name"}}</label>
+  <div class="form-fields"><input type="number" name="aiTimeout" value="{{timeout}}" min="{{min}}" max="{{max}}" step="1"></div>
+  <p class="hint">{{localize "item-configurator.settings.aiTimeout.hint"}}</p>
+</div>
+<footer class="form-footer">
+  <button type="submit"><i class="fa-solid fa-floppy-disk"></i> {{localize "item-configurator.AiSettings.Save"}}</button>
+</footer>
+</div>

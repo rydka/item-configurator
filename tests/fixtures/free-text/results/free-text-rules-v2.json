@@ -1,0 +1,56 @@
+{
+ "date": "2026-10-16T09:21:53.495Z",
+ "set": "free-text",
+ "comparator": "v2",
+ "ai": false,
+ "model": null,
+ "extra": {},
+ "results": [
+  {
+   "label": "rules-en",
+   "items": 8,
+   "errors": 0,
+   "recall": 0.8,
+   "precision": 0.9523809523809523,
+   "criticalErrors": 2,
+   "wrongValue": 0,
+   "trueNotInTruth": 1,
+   "unverified": 0,
+   "precisionAdjusted": 0.9761904761904762,
+   "criticalErrorsAdjusted": 1,
+   "expectedFields": 50,
+   "proposedFields": 42,
+   "hits": 40,
+   "deductions": {
+    "total": 0,
+    "correct": 0
+   },
+   "msMedian": 6,
+   "msP95": 131,
+   "msMax": 131
+  },
+  {
+   "label": "rules-fr",
+   "items": 14,
+   "errors": 0,
+   "recall": 0.7014925373134329,
+   "precision": 1,
+   "criticalErrors": 0,
+   "wrongValue": 0,
+   "trueNotInTruth": 0,
+   "unverified": 0,
+   "precisionAdjusted": 1,
+   "criticalErrorsAdjusted": 0,
+   "expectedFields": 67,
+   "proposedFields": 47,
+   "hits": 47,
+   "deductions": {
+    "total": 2,
+    "correct": 0
+   },
+   "msMedian": 3,
+   "msP95": 8,
+   "msMax": 8
+  }
+ ]
+}

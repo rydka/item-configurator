@@ -4,6 +4,13 @@ export default defineConfig({
   test: {
     include: ["tests/unit/**/*.test.mjs"],
     setupFiles: ["tests/setup/foundry-globals.mjs"],
-    environment: "node"
+    environment: "node",
+    coverage: {
+      provider: "v8",
+      reportOnFailure: true,
+      include: ["scripts/core/**", "scripts/ai/**"],
+      reporter: ["text-summary", "text"],
+      thresholds: { lines: 90 }
+    }
   }
 });

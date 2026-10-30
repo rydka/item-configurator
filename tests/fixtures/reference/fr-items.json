@@ -1,0 +1,3093 @@
+[
+ {
+  "stratum": "weapon",
+  "uuid": "Compendium.dnd5e.items.Item.QM3gdsL0eaAus7XT",
+  "pack": "dnd5e.items",
+  "name": "Hachette vicieuse",
+  "type": "weapon",
+  "value": "simpleM",
+  "subtype": "simpleM",
+  "description": "<p>Cette hache à une main est légère et équilibrée pour le lancer, tout en restant efficace au corps à corps. Quand vous obtenez un 20 au jet d'attaque avec cette arme magique, votre coup critique inflige 2d6 dégâts supplémentaires du type de l'arme.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 2,
+     "units": "lb"
+    },
+    "price": {
+     "value": 4000,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "range": {
+     "value": 20,
+     "long": 60,
+     "units": "ft",
+     "reach": null
+    },
+    "uses": {
+     "max": "",
+     "recovery": [],
+     "spent": 0
+    },
+    "damage": {
+     "versatile": {
+      "number": null,
+      "denomination": null,
+      "bonus": "",
+      "types": [],
+      "custom": {
+       "enabled": false,
+       "formula": ""
+      },
+      "scaling": {
+       "mode": "",
+       "number": null,
+       "formula": ""
+      },
+      "modifiers": []
+     },
+     "base": {
+      "number": 1,
+      "denomination": 6,
+      "bonus": "",
+      "types": [
+       "slashing"
+      ],
+      "custom": {
+       "enabled": false,
+       "formula": ""
+      },
+      "scaling": {
+       "mode": "",
+       "number": null,
+       "formula": ""
+      },
+      "modifiers": []
+     }
+    },
+    "armor": {
+     "value": 10
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "properties": [
+     "lgt",
+     "mgc",
+     "thr"
+    ],
+    "proficient": null,
+    "type": {
+     "value": "simpleM",
+     "baseItem": "handaxe"
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "attuned": false,
+    "ammunition": {},
+    "identifier": "vicious-handaxe",
+    "mastery": "",
+    "rarities": [
+     "rare"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [
+    {
+     "_id": "dnd5eactivity000",
+     "type": "attack",
+     "activation": {
+      "type": "action",
+      "value": 1,
+      "condition": "",
+      "override": false
+     },
+     "consumption": {
+      "targets": [],
+      "scaling": {
+       "allowed": false,
+       "max": ""
+      },
+      "spellSlot": true
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "concentration": false,
+      "value": "",
+      "units": "inst",
+      "special": "",
+      "override": false,
+      "expiry": null
+     },
+     "effects": [],
+     "range": {
+      "value": "20",
+      "units": "ft",
+      "special": "",
+      "override": false
+     },
+     "target": {
+      "template": {
+       "count": "",
+       "contiguous": false,
+       "type": "",
+       "size": "",
+       "width": "",
+       "height": "",
+       "units": "ft",
+       "stationary": false
+      },
+      "affects": {
+       "count": "",
+       "type": "",
+       "choice": false,
+       "special": ""
+      },
+      "prompt": true,
+      "override": false
+     },
+     "attack": {
+      "ability": "",
+      "bonus": "",
+      "critical": {
+       "threshold": null
+      },
+      "flat": false,
+      "type": {
+       "value": "melee",
+       "classification": "weapon"
+      }
+     },
+     "damage": {
+      "critical": {
+       "bonus": "2d6"
+      },
+      "includeBase": true,
+      "parts": []
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": []
+     },
+     "sort": 0,
+     "img": null,
+     "behaviors": [],
+     "flags": {},
+     "visibility": {
+      "level": {},
+      "requireAttunement": false,
+      "requireIdentification": false,
+      "requireMagic": false
+     }
+    }
+   ],
+   "effects": []
+  },
+  "sourceName": "Vicious Handaxe",
+  "lang": "fr"
+ },
+ {
+  "stratum": "weapon",
+  "uuid": "Compendium.dnd5e.items.Item.sl6yiYSlqkHiVVSN",
+  "pack": "dnd5e.items",
+  "name": "Épée courte +1",
+  "type": "weapon",
+  "value": "martialM",
+  "subtype": "martialM",
+  "description": "<p>Que ce soit par une bénédiction démoniaque, un legs céleste, une expérience insensée ou un savoir-faire exceptionnel, cette arme a été améliorée pour semer plus de sang entre les mains de son porteur. Vous obtenez un bonus aux jets d'attaque et de dégâts effectués avec cette arme magique.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 2,
+     "units": "lb"
+    },
+    "price": {
+     "value": 400,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "range": {
+     "value": null,
+     "long": null,
+     "units": "ft",
+     "reach": null
+    },
+    "uses": {
+     "max": "",
+     "recovery": [],
+     "spent": 0
+    },
+    "damage": {
+     "versatile": {
+      "number": null,
+      "denomination": null,
+      "bonus": "",
+      "types": [],
+      "custom": {
+       "enabled": false,
+       "formula": ""
+      },
+      "scaling": {
+       "mode": "",
+       "number": null,
+       "formula": ""
+      },
+      "modifiers": []
+     },
+     "base": {
+      "number": 1,
+      "denomination": 6,
+      "bonus": "",
+      "types": [
+       "piercing"
+      ],
+      "custom": {
+       "enabled": false,
+       "formula": ""
+      },
+      "scaling": {
+       "mode": "",
+       "number": null,
+       "formula": ""
+      },
+      "modifiers": []
+     }
+    },
+    "armor": {
+     "value": 10
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "properties": [
+     "fin",
+     "lgt",
+     "mgc"
+    ],
+    "proficient": null,
+    "type": {
+     "value": "martialM",
+     "baseItem": "shortsword"
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "magicalBonus": "1",
+    "attuned": false,
+    "ammunition": {},
+    "identifier": "shortsword-1",
+    "rarities": [
+     "uncommon"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [
+    {
+     "_id": "dnd5eactivity000",
+     "type": "attack",
+     "activation": {
+      "type": "action",
+      "value": 1,
+      "condition": "",
+      "override": false
+     },
+     "consumption": {
+      "targets": [],
+      "scaling": {
+       "allowed": false,
+       "max": ""
+      },
+      "spellSlot": true
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "concentration": false,
+      "value": "",
+      "units": "inst",
+      "special": "",
+      "override": false,
+      "expiry": null
+     },
+     "effects": [],
+     "range": {
+      "value": "5",
+      "units": "ft",
+      "special": "",
+      "override": false
+     },
+     "target": {
+      "template": {
+       "count": "",
+       "contiguous": false,
+       "type": "",
+       "size": "",
+       "width": "",
+       "height": "",
+       "units": "ft",
+       "stationary": false
+      },
+      "affects": {
+       "count": "",
+       "type": "",
+       "choice": false,
+       "special": ""
+      },
+      "prompt": true,
+      "override": false
+     },
+     "attack": {
+      "ability": "",
+      "bonus": "",
+      "critical": {
+       "threshold": null
+      },
+      "flat": false,
+      "type": {
+       "value": "melee",
+       "classification": "weapon"
+      }
+     },
+     "damage": {
+      "critical": {
+       "bonus": ""
+      },
+      "includeBase": true,
+      "parts": []
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": []
+     },
+     "sort": 0,
+     "img": null,
+     "behaviors": [],
+     "flags": {},
+     "visibility": {
+      "level": {},
+      "requireAttunement": false,
+      "requireIdentification": false,
+      "requireMagic": false
+     }
+    }
+   ],
+   "effects": []
+  },
+  "sourceName": "Shortsword +1",
+  "lang": "fr"
+ },
+ {
+  "stratum": "armor",
+  "uuid": "Compendium.dnd5e.items.Item.6067acDZGv7KNOkP",
+  "pack": "dnd5e.items",
+  "name": "Cotte de mailles elfique",
+  "type": "equipment",
+  "value": "medium",
+  "subtype": "medium",
+  "description": "<p>Vous bénéficiez d'un bonus de +1 à la CA tant que vous portez cette armure. Vous la maîtrisez même si vous ne maîtrisez pas les armures intermédiaires.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 20,
+     "units": "lb"
+    },
+    "price": {
+     "value": 4000,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 13,
+     "dex": 2,
+     "magicalBonus": "1"
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": null,
+    "proficient": 1,
+    "type": {
+     "value": "medium",
+     "baseItem": "chainshirt"
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "elven-chain",
+    "rarities": [
+     "rare"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": []
+  },
+  "sourceName": "Elven Chain",
+  "lang": "fr"
+ },
+ {
+  "stratum": "armor",
+  "uuid": "Compendium.dnd5e.items.Item.BwC8hZaNjO7IQc6K",
+  "pack": "dnd5e.items",
+  "name": "Armure de plates à bandes +3",
+  "type": "equipment",
+  "value": "heavy",
+  "subtype": "heavy",
+  "description": "<p>Cette armure a été ornée de runes puissantes, forgée dans des feux ensorcelés, bénie par un être puissant, ou un autre événement lui a conféré une protection accrue pour celui qui la porte. Vous obtenez un bonus à la CA tant que vous portez cette armure.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 60,
+     "units": "lb"
+    },
+    "price": {
+     "value": 200000,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 17,
+     "dex": 0,
+     "magicalBonus": "3"
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": 15,
+    "proficient": null,
+    "type": {
+     "value": "heavy",
+     "baseItem": "splint"
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc",
+     "stealthDisadvantage"
+    ],
+    "attuned": false,
+    "identifier": "splint-armor-3",
+    "rarities": [
+     "legendary"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": []
+  },
+  "sourceName": "Splint Armor +3",
+  "lang": "fr"
+ },
+ {
+  "stratum": "armor",
+  "uuid": "Compendium.dnd5e.items.Item.lccm5AjIk91aIHbi",
+  "pack": "dnd5e.items",
+  "name": "Cuirasse de résistance",
+  "type": "equipment",
+  "value": "medium",
+  "subtype": "medium",
+  "description": "<p>(Nécessite un lien d'harmonisation) Vous avez la résistance à un type de dégâts tant que vous portez cette armure. Le MJ choisit le type ou le détermine au hasard.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 20,
+     "units": "lb"
+    },
+    "price": {
+     "value": 4000,
+     "denomination": "gp"
+    },
+    "attunement": "required",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 14,
+     "dex": 2
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": null,
+    "proficient": null,
+    "type": {
+     "value": "medium",
+     "baseItem": "breastplate"
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "breastplate-armor-of-resistance",
+    "rarities": [
+     "rare"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": []
+  },
+  "sourceName": "Breastplate Armor of Resistance",
+  "lang": "fr"
+ },
+ {
+  "stratum": "armor",
+  "uuid": "Compendium.dnd5e.items.Item.n7fm71CN7qDIBEKk",
+  "pack": "dnd5e.items",
+  "name": "Cotte de mailles d'adamantium",
+  "type": "equipment",
+  "value": "heavy",
+  "subtype": "heavy",
+  "description": "<p>Cette armure est renforcée d'adamantium, l'une des substances les plus dures qui existent. Tant que vous la portez, tout coup critique porté contre vous devient un coup normal.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 55,
+     "units": "lb"
+    },
+    "price": {
+     "value": 400,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 16,
+     "dex": 0
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": 13,
+    "proficient": null,
+    "type": {
+     "value": "heavy",
+     "baseItem": "chainmail"
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "ada",
+     "mgc",
+     "stealthDisadvantage"
+    ],
+    "attuned": false,
+    "identifier": "adamantine-chain-mail",
+    "rarities": [
+     "uncommon"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": []
+  },
+  "sourceName": "Adamantine Chain Mail",
+  "lang": "fr"
+ },
+ {
+  "stratum": "armor-misc",
+  "uuid": "Compendium.dnd5e.items.Item.3TWT5bv3z5zGUZCe",
+  "pack": "dnd5e.items",
+  "name": "Gantelets de puissance d'ogre",
+  "type": "equipment",
+  "value": "clothing",
+  "subtype": "clothing",
+  "description": "<p>Objet merveilleux. Votre valeur de Force est de 19 tant que vous portez ces gantelets. Ils n'ont aucun effet sur vous si votre Force est déjà de 19 ou plus.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 2,
+     "units": "lb"
+    },
+    "price": {
+     "value": 400,
+     "denomination": "gp"
+    },
+    "attunement": "required",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 0,
+     "dex": 0
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": null,
+    "proficient": null,
+    "type": {
+     "value": "clothing",
+     "baseItem": ""
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "gauntlets-of-ogre-power",
+    "rarities": [
+     "uncommon"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": [
+    {
+     "origin": "Compendium.dnd5e.items.3TWT5bv3z5zGUZCe",
+     "duration": {
+      "value": null,
+      "units": "seconds",
+      "expiry": null,
+      "expired": false
+     },
+     "disabled": false,
+     "_id": "m7FoXVGKT7C9X7aq",
+     "tint": "#ffffff",
+     "transfer": true,
+     "flags": {},
+     "name": "Gauntlets of Ogre Power",
+     "description": "",
+     "statuses": [],
+     "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "coreVersion": "14.367",
+      "systemId": "dnd5e",
+      "systemVersion": "4.0.0",
+      "createdTime": null,
+      "modifiedTime": null,
+      "lastModifiedBy": null,
+      "exportSource": null
+     },
+     "img": "icons/magic/unholy/strike-hand-glow-pink.webp",
+     "type": "base",
+     "system": {
+      "changes": [
+       {
+        "key": "system.abilities.str.value",
+        "value": 19,
+        "priority": null,
+        "type": "upgrade",
+        "phase": "initial",
+        "_id": "pN21Sl3f9daTP9lC",
+        "conditions": "{}",
+        "replacement": ""
+       }
+      ],
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}",
+      "magical": false,
+      "rider": {
+       "statuses": []
+      }
+     },
+     "sort": 0,
+     "start": null,
+     "showIcon": 1,
+     "folder": null
+    }
+   ]
+  },
+  "sourceName": "Gauntlets of Ogre Power",
+  "lang": "fr"
+ },
+ {
+  "stratum": "armor-misc",
+  "uuid": "Compendium.dnd5e.items.Item.lvaMqEhfidfHDGf5",
+  "pack": "dnd5e.items",
+  "name": "Cape de protection",
+  "type": "equipment",
+  "value": "clothing",
+  "subtype": "clothing",
+  "description": "<p>Objet merveilleux, (nécessite un lien d'harmonisation) Vous bénéficiez d'un bonus de +1 à la CA et aux jets de sauvegarde tant que vous portez cette cape.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 3,
+     "units": "lb"
+    },
+    "price": {
+     "value": 400,
+     "denomination": "gp"
+    },
+    "attunement": "required",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 0,
+     "dex": 0
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": null,
+    "proficient": null,
+    "type": {
+     "value": "clothing",
+     "baseItem": ""
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "cloak-of-protection",
+    "rarities": [
+     "uncommon"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": [
+    {
+     "_id": "jxfin1rh71p1xjjv",
+     "disabled": false,
+     "duration": {
+      "value": null,
+      "units": "seconds",
+      "expiry": null,
+      "expired": false
+     },
+     "origin": "Compendium.dnd5e.items.lvaMqEhfidfHDGf5",
+     "transfer": true,
+     "flags": {},
+     "tint": "#ffffff",
+     "name": "+1 to AC & Saves",
+     "description": "",
+     "statuses": [],
+     "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "coreVersion": "14.367",
+      "systemId": "dnd5e",
+      "systemVersion": "4.0.0",
+      "createdTime": null,
+      "modifiedTime": null,
+      "lastModifiedBy": null,
+      "exportSource": null
+     },
+     "img": "icons/equipment/back/cloak-heavy-fur-blue.webp",
+     "type": "base",
+     "system": {
+      "changes": [
+       {
+        "key": "system.attributes.ac.bonus",
+        "value": "+1",
+        "priority": null,
+        "type": "add",
+        "phase": "initial",
+        "_id": "vyiRtignRcRZ8J1t",
+        "conditions": "{}",
+        "replacement": ""
+       },
+       {
+        "key": "system.bonuses.abilities.save",
+        "value": "+1",
+        "priority": null,
+        "type": "add",
+        "phase": "initial",
+        "_id": "H1sVhQ79LgggvPnC",
+        "conditions": "{}",
+        "replacement": ""
+       }
+      ],
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}",
+      "magical": false,
+      "rider": {
+       "statuses": []
+      }
+     },
+     "sort": 0,
+     "start": null,
+     "showIcon": 1,
+     "folder": null
+    }
+   ]
+  },
+  "sourceName": "Cloak of Protection",
+  "lang": "fr"
+ },
+ {
+  "stratum": "armor-misc",
+  "uuid": "Compendium.dnd5e.items.Item.RDPFmUR9exTEXFc8",
+  "pack": "dnd5e.items",
+  "name": "Bottes des terres hivernales",
+  "type": "equipment",
+  "value": "clothing",
+  "subtype": "clothing",
+  "description": "<p>Objet merveilleux, (nécessite un lien d'harmonisation) Ces bottes fourrées sont bien ajustées et très chaudes. Tant que vous les portez, vous bénéficiez des avantages suivants : vous avez la résistance aux dégâts de froid. Vous ignorez le terrain difficile créé par la glace ou la neige. Vous supportez des températures allant jusqu'à -45 degrés Celsius sans protection supplémentaire. Si vous portez des vêtements épais, vous supportez jusqu'à -70 degrés Celsius.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 1,
+     "units": "lb"
+    },
+    "price": {
+     "value": 400,
+     "denomination": "gp"
+    },
+    "attunement": "required",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 0,
+     "dex": 0
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": null,
+    "proficient": null,
+    "type": {
+     "value": "clothing",
+     "baseItem": ""
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "boots-of-the-winterlands",
+    "rarities": [
+     "uncommon"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": [
+    {
+     "origin": "Compendium.dnd5e.items.RDPFmUR9exTEXFc8",
+     "duration": {
+      "value": null,
+      "units": "seconds",
+      "expiry": null,
+      "expired": false
+     },
+     "disabled": false,
+     "_id": "6PXhI0qCk64LuoXO",
+     "tint": "#ffffff",
+     "transfer": true,
+     "flags": {},
+     "name": "Boots of the Winterlands",
+     "description": "",
+     "statuses": [],
+     "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "coreVersion": "14.367",
+      "systemId": "dnd5e",
+      "systemVersion": "4.0.0",
+      "createdTime": null,
+      "modifiedTime": null,
+      "lastModifiedBy": null,
+      "exportSource": null
+     },
+     "img": "icons/equipment/feet/boots-leather-banded-furred.webp",
+     "type": "base",
+     "system": {
+      "changes": [
+       {
+        "key": "system.traits.dr.value",
+        "value": "cold",
+        "priority": null,
+        "type": "add",
+        "phase": "initial",
+        "_id": "GUWmXPtldp8fOlzW",
+        "conditions": "{}",
+        "replacement": ""
+       }
+      ],
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}",
+      "magical": false,
+      "rider": {
+       "statuses": []
+      }
+     },
+     "sort": 0,
+     "start": null,
+     "showIcon": 1,
+     "folder": null
+    }
+   ]
+  },
+  "sourceName": "Boots of the Winterlands",
+  "lang": "fr"
+ },
+ {
+  "stratum": "potion",
+  "uuid": "Compendium.dnd5e.equipment24.Item.dmgGreaterPotion",
+  "pack": "dnd5e.equipment24",
+  "name": "Potion de soins (supérieure)",
+  "type": "consumable",
+  "value": "potion",
+  "subtype": "potion",
+  "description": "<p>Potion, peu commun. Vous récupérez 4d4 + 4 points de vie quand vous buvez cette potion. Quelle que soit sa puissance, le liquide rouge de la potion scintille quand on l'agite.</p>",
+  "truth": {
+   "system": {
+    "uses": {
+     "spent": 0,
+     "recovery": [],
+     "autoDestroy": true,
+     "max": "1"
+    },
+    "identifier": "greater-potion-of-healing",
+    "source": {
+     "revision": 1,
+     "rules": "2024",
+     "license": "CC-BY-4.0",
+     "book": ""
+    },
+    "identified": true,
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+     "value": 0.5,
+     "units": "lb"
+    },
+    "price": {
+     "value": 200,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "attuned": false,
+    "equipped": false,
+    "type": {
+     "value": "potion",
+     "subtype": ""
+    },
+    "damage": {
+     "base": {
+      "number": null,
+      "denomination": null,
+      "types": [],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "properties": [
+     "mgc"
+    ],
+    "rarities": [
+     "uncommon"
+    ]
+   },
+   "activities": [
+    {
+     "type": "heal",
+     "name": "Consume",
+     "_id": "6pjLMRaAveRvnVpt",
+     "sort": 0,
+     "activation": {
+      "type": "bonus",
+      "value": null,
+      "override": false,
+      "condition": ""
+     },
+     "consumption": {
+      "scaling": {
+       "allowed": false
+      },
+      "spellSlot": true,
+      "targets": [
+       {
+        "type": "itemUses",
+        "value": "1",
+        "target": "",
+        "scaling": {}
+       }
+      ]
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "units": "inst",
+      "concentration": false,
+      "override": false,
+      "expiry": null
+     },
+     "effects": [],
+     "range": {
+      "override": false,
+      "units": "self",
+      "special": ""
+     },
+     "target": {
+      "template": {
+       "contiguous": false,
+       "units": "ft",
+       "type": "",
+       "stationary": false
+      },
+      "affects": {
+       "choice": false,
+       "count": "",
+       "type": "creature",
+       "special": ""
+      },
+      "override": false,
+      "prompt": true
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": [],
+      "max": ""
+     },
+     "healing": {
+      "number": 4,
+      "denomination": 4,
+      "types": [
+       "healing"
+      ],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "bonus": "4",
+      "modifiers": []
+     },
+     "img": "",
+     "visibility": {
+      "requireMagic": true,
+      "level": {
+       "min": null,
+       "max": null
+      },
+      "identifier": "",
+      "requireAttunement": false,
+      "requireIdentification": false
+     },
+     "behaviors": [],
+     "flags": {}
+    }
+   ],
+   "effects": []
+  },
+  "sourceName": "Potion of Healing (Greater)",
+  "lang": "fr"
+ },
+ {
+  "stratum": "potion",
+  "uuid": "Compendium.dnd5e.equipment24.Item.dmgPotionOfPoiso",
+  "pack": "dnd5e.equipment24",
+  "name": "Potion de poison",
+  "type": "consumable",
+  "value": "potion",
+  "subtype": "potion",
+  "description": "<p>Potion, peu commun. Cette concoction a l'aspect, l'odeur et le goût d'une potion de soins ou d'une autre potion bénéfique. En réalité, c'est un poison masqué par une illusion magique. Le sort Identification révèle sa vraie nature. Si vous buvez cette potion, vous subissez 4d6 dégâts de poison et devez réussir un jet de sauvegarde de Constitution DD 13 sous peine d'être empoisonné pendant 1 heure.</p>",
+  "truth": {
+   "system": {
+    "uses": {
+     "spent": 0,
+     "recovery": [],
+     "autoDestroy": true,
+     "max": "1"
+    },
+    "identifier": "potion-of-poison",
+    "source": {
+     "revision": 1,
+     "rules": "2024",
+     "license": "CC-BY-4.0",
+     "book": ""
+    },
+    "identified": true,
+    "unidentified": {
+     "description": "<p><em>Potion, Common</em></p><p>You regain 2d4 + 2 Hit Points when you drink this potion.</p><p>Whatever its potency, the potion’s red liquid glimmers when agitated.</p>",
+     "name": "Unidentified Consumable"
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+     "value": 0.5,
+     "units": "lb"
+    },
+    "price": {
+     "value": 200,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "attuned": false,
+    "equipped": false,
+    "type": {
+     "value": "potion",
+     "subtype": ""
+    },
+    "damage": {
+     "base": {
+      "number": null,
+      "denomination": null,
+      "types": [],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "properties": [
+     "mgc"
+    ],
+    "rarities": [
+     "uncommon"
+    ]
+   },
+   "activities": [
+    {
+     "type": "save",
+     "name": "Drink",
+     "_id": "zlmOWbfYFIcJlBuN",
+     "sort": 0,
+     "activation": {
+      "type": "bonus",
+      "value": null,
+      "override": false,
+      "condition": ""
+     },
+     "consumption": {
+      "scaling": {
+       "allowed": false
+      },
+      "spellSlot": true,
+      "targets": [
+       {
+        "type": "itemUses",
+        "value": "1",
+        "target": "",
+        "scaling": {}
+       }
+      ]
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "units": "hour",
+      "concentration": false,
+      "override": false,
+      "value": "1",
+      "expiry": null
+     },
+     "effects": [
+      {
+       "_id": "lZOgSICPuR1fKxTL",
+       "onSave": false,
+       "level": {
+        "min": null,
+        "max": null
+       },
+       "uuid": null
+      }
+     ],
+     "range": {
+      "override": false,
+      "units": "self",
+      "special": ""
+     },
+     "target": {
+      "template": {
+       "contiguous": false,
+       "units": "ft",
+       "type": "",
+       "stationary": false
+      },
+      "affects": {
+       "choice": false,
+       "count": "",
+       "type": ""
+      },
+      "override": false,
+      "prompt": true
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": [],
+      "max": ""
+     },
+     "damage": {
+      "parts": [
+       {
+        "custom": {
+         "enabled": false,
+         "formula": ""
+        },
+        "number": 4,
+        "denomination": 6,
+        "bonus": "",
+        "types": [
+         "poison"
+        ],
+        "modifiers": [],
+        "scaling": {
+         "number": 1
+        }
+       }
+      ],
+      "onSave": "full"
+     },
+     "save": {
+      "ability": [
+       "con"
+      ],
+      "dc": {
+       "calculation": "",
+       "formula": "13"
+      },
+      "visible": true
+     },
+     "img": "",
+     "visibility": {
+      "requireMagic": true,
+      "level": {
+       "min": null,
+       "max": null
+      },
+      "identifier": "",
+      "requireAttunement": false,
+      "requireIdentification": false
+     },
+     "behaviors": [],
+     "flags": {}
+    }
+   ],
+   "effects": [
+    {
+     "name": "Poisoned",
+     "img": "systems/dnd5e/icons/svg/statuses/poisoned.svg",
+     "origin": "Compendium.dnd5e.equipment24.Item.dmgPotionOfPoiso",
+     "transfer": false,
+     "_id": "lZOgSICPuR1fKxTL",
+     "type": "base",
+     "system": {
+      "changes": [],
+      "magical": true,
+      "rider": {
+       "statuses": []
+      },
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}"
+     },
+     "disabled": false,
+     "duration": {
+      "value": 3600,
+      "units": "seconds",
+      "expiry": "turnStart",
+      "expired": false
+     },
+     "description": "",
+     "tint": "#ffffff",
+     "statuses": [
+      "poisoned"
+     ],
+     "sort": 0,
+     "flags": {
+      "dnd5e": {
+       "riders": {}
+      }
+     },
+     "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "coreVersion": "14.364",
+      "systemId": "dnd5e",
+      "systemVersion": "6.0.0",
+      "createdTime": 1730864211372,
+      "modifiedTime": 1783544097535,
+      "lastModifiedBy": "dnd5ebuilder0000",
+      "exportSource": null
+     },
+     "showIcon": 2,
+     "start": null,
+     "folder": null
+    }
+   ]
+  },
+  "sourceName": "Potion of Poison",
+  "lang": "fr"
+ },
+ {
+  "stratum": "potion",
+  "uuid": "Compendium.dnd5e.equipment24.Item.dmgSuperiorPotio",
+  "pack": "dnd5e.equipment24",
+  "name": "Potion de soins (excellente)",
+  "type": "consumable",
+  "value": "potion",
+  "subtype": "potion",
+  "description": "<p>Potion, rare. Vous récupérez 8d4 + 8 points de vie quand vous buvez cette potion. Quelle que soit sa puissance, le liquide rouge de la potion scintille quand on l'agite.</p>",
+  "truth": {
+   "system": {
+    "uses": {
+     "spent": 0,
+     "recovery": [],
+     "autoDestroy": true,
+     "max": "1"
+    },
+    "identifier": "superior-potion-of-healing",
+    "source": {
+     "revision": 1,
+     "rules": "2024",
+     "license": "CC-BY-4.0",
+     "book": ""
+    },
+    "identified": true,
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+     "value": 0.5,
+     "units": "lb"
+    },
+    "price": {
+     "value": 2000,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "attuned": false,
+    "equipped": false,
+    "type": {
+     "value": "potion",
+     "subtype": ""
+    },
+    "damage": {
+     "base": {
+      "number": null,
+      "denomination": null,
+      "types": [],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "properties": [
+     "mgc"
+    ],
+    "rarities": [
+     "rare"
+    ]
+   },
+   "activities": [
+    {
+     "type": "heal",
+     "name": "Consume",
+     "sort": 0,
+     "activation": {
+      "type": "bonus",
+      "value": null,
+      "override": false,
+      "condition": ""
+     },
+     "consumption": {
+      "scaling": {
+       "allowed": false
+      },
+      "spellSlot": true,
+      "targets": [
+       {
+        "type": "itemUses",
+        "value": "1",
+        "target": "",
+        "scaling": {}
+       }
+      ]
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "units": "inst",
+      "concentration": false,
+      "override": false,
+      "expiry": null
+     },
+     "effects": [],
+     "range": {
+      "override": false,
+      "units": "self",
+      "special": ""
+     },
+     "target": {
+      "template": {
+       "contiguous": false,
+       "units": "ft",
+       "type": "",
+       "stationary": false
+      },
+      "affects": {
+       "choice": false,
+       "count": "",
+       "type": "creature",
+       "special": ""
+      },
+      "override": false,
+      "prompt": true
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": [],
+      "max": ""
+     },
+     "healing": {
+      "number": 8,
+      "denomination": 4,
+      "types": [
+       "healing"
+      ],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "bonus": "8",
+      "modifiers": []
+     },
+     "_id": "eT46ucSUynLRTs6N",
+     "img": "",
+     "visibility": {
+      "requireMagic": true,
+      "level": {
+       "min": null,
+       "max": null
+      },
+      "identifier": "",
+      "requireAttunement": false,
+      "requireIdentification": false
+     },
+     "behaviors": [],
+     "flags": {}
+    }
+   ],
+   "effects": []
+  },
+  "sourceName": "Potion of Healing (Superior)",
+  "lang": "fr"
+ },
+ {
+  "stratum": "potion",
+  "uuid": "Compendium.dnd5e.equipment24.Item.phbagAntitoxin00",
+  "pack": "dnd5e.equipment24",
+  "name": "Antitoxine",
+  "type": "consumable",
+  "value": "potion",
+  "subtype": "potion",
+  "description": "<p>Par une action bonus, vous pouvez boire une fiole d'antitoxine pour obtenir l'avantage aux jets de sauvegarde visant à éviter ou à faire cesser l'état empoisonné pendant 1 heure.</p>",
+  "truth": {
+   "system": {
+    "price": {
+     "value": 50,
+     "denomination": "gp"
+    },
+    "source": {
+     "rules": "2024",
+     "license": "CC-BY-4.0",
+     "book": "",
+     "revision": 1
+    },
+    "identified": true,
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+     "value": 0,
+     "units": "lb"
+    },
+    "attunement": "",
+    "attuned": false,
+    "equipped": false,
+    "uses": {
+     "max": "1",
+     "autoDestroy": true,
+     "spent": 0,
+     "recovery": []
+    },
+    "damage": {
+     "base": {
+      "number": null,
+      "denomination": null,
+      "types": [],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "type": {
+     "value": "potion",
+     "subtype": ""
+    },
+    "properties": [],
+    "identifier": "antitoxin",
+    "rarities": []
+   },
+   "activities": [
+    {
+     "type": "utility",
+     "activation": {
+      "type": "bonus",
+      "value": 1,
+      "condition": "",
+      "override": false
+     },
+     "consumption": {
+      "targets": [
+       {
+        "type": "itemUses",
+        "value": "1",
+        "target": "",
+        "scaling": {}
+       }
+      ],
+      "scaling": {
+       "allowed": false,
+       "max": ""
+      },
+      "spellSlot": true
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "concentration": false,
+      "value": "1",
+      "units": "hour",
+      "special": "",
+      "override": false,
+      "expiry": null
+     },
+     "effects": [
+      {
+       "_id": "DzWVacNiq6ggXbU9",
+       "uuid": null,
+       "level": {}
+      }
+     ],
+     "range": {
+      "units": "self",
+      "special": "",
+      "override": false
+     },
+     "target": {
+      "template": {
+       "count": "",
+       "contiguous": false,
+       "type": "",
+       "size": "",
+       "width": "",
+       "height": "",
+       "units": "ft",
+       "stationary": false
+      },
+      "affects": {
+       "count": "",
+       "type": "self",
+       "choice": false,
+       "special": ""
+      },
+      "prompt": false,
+      "override": false
+     },
+     "roll": {
+      "formula": "",
+      "name": "",
+      "prompt": false,
+      "visible": false
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": [],
+      "max": ""
+     },
+     "sort": 0,
+     "_id": "2TNbDh0n59svuGIx",
+     "name": "",
+     "img": "",
+     "behaviors": [],
+     "flags": {},
+     "visibility": {
+      "level": {},
+      "requireAttunement": false,
+      "requireIdentification": false,
+      "requireMagic": false
+     }
+    }
+   ],
+   "effects": [
+    {
+     "name": "Antitoxin",
+     "img": "icons/consumables/potions/bottle-round-corked-pink.webp",
+     "origin": "Compendium.dnd5e.equipment24.Item.phbagAntitoxin00",
+     "transfer": false,
+     "_id": "DzWVacNiq6ggXbU9",
+     "type": "base",
+     "system": {
+      "changes": [],
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}",
+      "magical": false,
+      "rider": {
+       "statuses": []
+      }
+     },
+     "disabled": false,
+     "duration": {
+      "value": 3600,
+      "units": "seconds",
+      "expiry": "turnStart",
+      "expired": false
+     },
+     "description": "",
+     "tint": "#ffffff",
+     "statuses": [],
+     "sort": 0,
+     "flags": {},
+     "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "coreVersion": "14.364",
+      "systemId": "dnd5e",
+      "systemVersion": "4.0.0",
+      "createdTime": 1725846653216,
+      "modifiedTime": 1725846664457,
+      "lastModifiedBy": "dnd5ebuilder0000",
+      "exportSource": null
+     },
+     "start": null,
+     "showIcon": 1,
+     "folder": null
+    }
+   ]
+  },
+  "sourceName": "Antitoxin",
+  "lang": "fr"
+ },
+ {
+  "stratum": "potion",
+  "uuid": "Compendium.dnd5e.items.Item.bEZOY6uvHRweMM56",
+  "pack": "dnd5e.items",
+  "name": "Potion de force de géant du feu",
+  "type": "consumable",
+  "value": "potion",
+  "subtype": "potion",
+  "description": "<p>Le liquide transparent de cette potion contient un éclat d'ongle de géant du feu. Quand vous buvez cette potion, votre valeur de Force devient 25 pendant la durée indiquée. La potion n'a aucun effet sur vous si votre Force est égale ou supérieure à cette valeur.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 0.1,
+     "units": "lb"
+    },
+    "price": {
+     "value": 2000,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "uses": {
+     "max": "1",
+     "recovery": [],
+     "autoDestroy": true,
+     "spent": 0
+    },
+    "damage": {
+     "base": {
+      "number": null,
+      "denomination": null,
+      "types": [],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "type": {
+     "value": "potion",
+     "subtype": ""
+    },
+    "unidentified": {
+     "description": "<p>This potion's transparent liquid has floating in it a sliver of fingernail.</p>",
+     "name": "Unidentified Potion"
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "potion-of-fire-giant-strength",
+    "rarities": [
+     "rare"
+    ]
+   },
+   "activities": [
+    {
+     "type": "utility",
+     "activation": {
+      "type": "action",
+      "value": 1,
+      "condition": "",
+      "override": false
+     },
+     "consumption": {
+      "targets": [
+       {
+        "type": "itemUses",
+        "value": "1",
+        "target": "",
+        "scaling": {}
+       }
+      ],
+      "scaling": {
+       "allowed": false,
+       "max": ""
+      },
+      "spellSlot": true
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "concentration": false,
+      "value": "1",
+      "units": "hour",
+      "special": "",
+      "override": false,
+      "expiry": null
+     },
+     "effects": [
+      {
+       "_id": "iCEYqMYew63B7ocr",
+       "uuid": null,
+       "level": {}
+      }
+     ],
+     "range": {
+      "units": "touch",
+      "special": "",
+      "override": false
+     },
+     "target": {
+      "template": {
+       "count": "",
+       "contiguous": false,
+       "type": "",
+       "size": "",
+       "width": "",
+       "height": "",
+       "units": "ft",
+       "stationary": false
+      },
+      "affects": {
+       "count": "1",
+       "type": "creature",
+       "choice": false,
+       "special": ""
+      },
+      "prompt": true,
+      "override": false
+     },
+     "roll": {
+      "formula": "",
+      "name": "",
+      "prompt": false,
+      "visible": false
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": [],
+      "max": ""
+     },
+     "sort": 100000,
+     "name": "Drink",
+     "img": "",
+     "visibility": {
+      "requireMagic": true,
+      "level": {
+       "min": null,
+       "max": null
+      },
+      "identifier": "",
+      "requireAttunement": false,
+      "requireIdentification": false
+     },
+     "behaviors": [],
+     "flags": {},
+     "_id": "xT9Z6NFEEUFhxy1P"
+    }
+   ],
+   "effects": [
+    {
+     "name": "Fire Giant Strength",
+     "img": "icons/magic/fire/flame-burning-fist-strike.webp",
+     "origin": "Compendium.dnd5e.items.Item.bEZOY6uvHRweMM56",
+     "transfer": false,
+     "_id": "iCEYqMYew63B7ocr",
+     "type": "base",
+     "system": {
+      "changes": [
+       {
+        "key": "system.abilities.str.value",
+        "type": "upgrade",
+        "value": 25,
+        "phase": "initial",
+        "priority": null,
+        "_id": "N80ZcHlev9Qf4rgw",
+        "conditions": "{}",
+        "replacement": ""
+       }
+      ],
+      "magical": true,
+      "rider": {
+       "statuses": []
+      },
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}"
+     },
+     "disabled": false,
+     "start": null,
+     "duration": {
+      "value": 1,
+      "units": "hours",
+      "expiry": "turnStart",
+      "expired": false
+     },
+     "description": "<p>Your Strength score changes to 25 for the duration. This has no effect on you if your Strength is equal to or greater than 25.</p>",
+     "tint": "#ffffff",
+     "statuses": [],
+     "showIcon": 1,
+     "folder": null,
+     "sort": 0,
+     "flags": {},
+     "_stats": {
+      "coreVersion": "14.361",
+      "systemId": "dnd5e",
+      "systemVersion": "6.0.0",
+      "createdTime": 1783374143565,
+      "modifiedTime": 1783374171879,
+      "lastModifiedBy": "dnd5ebuilder0000",
+      "compendiumSource": "Compendium.dnd5e.items.Item.1KMSpOSU0EliUBm2.ActiveEffect.sjbluBPTvdkkf3pv",
+      "duplicateSource": null,
+      "exportSource": null
+     }
+    }
+   ]
+  },
+  "sourceName": "Potion of Fire Giant Strength",
+  "lang": "fr"
+ },
+ {
+  "stratum": "potion",
+  "uuid": "Compendium.dnd5e.items.Item.FvNOwWbh5FXyX4xe",
+  "pack": "dnd5e.items",
+  "name": "Feu grégeois",
+  "type": "consumable",
+  "value": "potion",
+  "subtype": "potion",
+  "description": "<p>Ce fluide collant s'enflamme au contact de l'air. Par une action, vous pouvez lancer cette fiole à la portée indiquée ; elle se brise à l'impact. Faites une attaque à distance contre une créature ou un objet, en traitant le feu grégeois comme une arme improvisée. En cas de succès, la cible subit 1d4 dégâts de feu au début de chacun de ses tours. Une créature peut mettre fin à ces dégâts en utilisant son action pour réussir un test de Dextérité DD 10 afin d'éteindre les flammes.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 1,
+     "units": "lb"
+    },
+    "price": {
+     "value": 50,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "uses": {
+     "max": "1",
+     "recovery": [],
+     "autoDestroy": true,
+     "spent": 0
+    },
+    "damage": {
+     "base": {
+      "number": 1,
+      "denomination": 4,
+      "bonus": "",
+      "types": [
+       "fire"
+      ],
+      "custom": {
+       "enabled": false,
+       "formula": ""
+      },
+      "scaling": {
+       "mode": "",
+       "number": null,
+       "formula": ""
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "type": {
+     "value": "potion",
+     "subtype": ""
+    },
+    "unidentified": {
+     "description": "<p>A flask of sticky, adhesive fluid.</p>",
+     "name": "Unidentified Flask"
+    },
+    "container": null,
+    "properties": [],
+    "attuned": false,
+    "identifier": "alchemists-fire",
+    "rarities": []
+   },
+   "activities": [
+    {
+     "type": "attack",
+     "activation": {
+      "type": "action",
+      "value": 1,
+      "condition": "",
+      "override": false
+     },
+     "consumption": {
+      "targets": [
+       {
+        "type": "itemUses",
+        "target": "",
+        "value": "1",
+        "scaling": {
+         "mode": "",
+         "formula": ""
+        }
+       }
+      ],
+      "scaling": {
+       "allowed": false,
+       "max": ""
+      },
+      "spellSlot": true
+     },
+     "description": {
+      "chatFlavor": "improvised weapon",
+      "value": ""
+     },
+     "duration": {
+      "concentration": false,
+      "value": "",
+      "units": "inst",
+      "special": "",
+      "override": false,
+      "expiry": null
+     },
+     "effects": [
+      {
+       "_id": "qAc1etkfUQkCbmTM",
+       "uuid": null,
+       "level": {}
+      }
+     ],
+     "range": {
+      "value": "20",
+      "units": "ft",
+      "special": "",
+      "override": false
+     },
+     "target": {
+      "template": {
+       "count": "",
+       "contiguous": false,
+       "type": "",
+       "size": "",
+       "width": "",
+       "height": "",
+       "units": "ft",
+       "stationary": false
+      },
+      "affects": {
+       "count": "1",
+       "type": "creature",
+       "choice": false,
+       "special": ""
+      },
+      "prompt": true,
+      "override": false
+     },
+     "attack": {
+      "ability": "dex",
+      "bonus": "",
+      "critical": {
+       "threshold": null
+      },
+      "flat": false,
+      "type": {
+       "value": "ranged",
+       "classification": "weapon"
+      }
+     },
+     "damage": {
+      "critical": {
+       "bonus": ""
+      },
+      "includeBase": true,
+      "parts": [
+       {
+        "number": 1,
+        "denomination": 4,
+        "bonus": "",
+        "types": [
+         "fire"
+        ],
+        "custom": {
+         "enabled": false,
+         "formula": ""
+        },
+        "scaling": {
+         "mode": "whole",
+         "number": null,
+         "formula": ""
+        },
+        "modifiers": []
+       }
+      ]
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": []
+     },
+     "sort": 100000,
+     "img": null,
+     "behaviors": [],
+     "flags": {},
+     "visibility": {
+      "level": {},
+      "requireAttunement": false,
+      "requireIdentification": false,
+      "requireMagic": false
+     },
+     "_id": "fEkrHFEJKXhIwljC"
+    }
+   ],
+   "effects": [
+    {
+     "name": "Covered in Alchemist's Fire",
+     "img": "icons/magic/fire/flame-burning-skeleton-explosion.webp",
+     "origin": "Compendium.dnd5e.items.Item.FvNOwWbh5FXyX4xe",
+     "transfer": false,
+     "_id": "qAc1etkfUQkCbmTM",
+     "type": "base",
+     "system": {
+      "changes": [],
+      "magical": false,
+      "rider": {
+       "statuses": []
+      },
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}"
+     },
+     "disabled": false,
+     "start": null,
+     "duration": {
+      "value": null,
+      "units": "seconds",
+      "expiry": null,
+      "expired": false
+     },
+     "description": "<p>You are covered in Alchemist's Fire, and take [[/damage 1d4 fire]] damage at the start of each of your turns. You can end this damage by using your action to make a [[/check 10 dex]] check to extinguish the flames.</p>",
+     "tint": "#ffffff",
+     "statuses": [
+      "burning"
+     ],
+     "showIcon": 2,
+     "folder": null,
+     "sort": 0,
+     "flags": {},
+     "_stats": {
+      "coreVersion": "14.361",
+      "systemId": "dnd5e",
+      "systemVersion": "6.0.0",
+      "createdTime": 1783376239339,
+      "modifiedTime": 1783376346692,
+      "lastModifiedBy": "dnd5ebuilder0000",
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null
+     }
+    }
+   ]
+  },
+  "sourceName": "Alchemist's Fire",
+  "lang": "fr"
+ },
+ {
+  "stratum": "potion",
+  "uuid": "Compendium.dnd5e.items.Item.kKGJjVVlJVoakWgQ",
+  "pack": "dnd5e.items",
+  "name": "Potion de résistance à la force",
+  "type": "consumable",
+  "value": "potion",
+  "subtype": "potion",
+  "description": "<p>La potion est d'une couleur terne et indéfinissable et sent légèrement mauvais. Quand vous buvez cette potion, vous obtenez la résistance aux dégâts de force pendant la durée indiquée.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 0.1,
+     "units": "lb"
+    },
+    "price": {
+     "value": 200,
+     "denomination": "gp"
+    },
+    "attunement": "",
+    "equipped": false,
+    "identified": true,
+    "uses": {
+     "max": "1",
+     "recovery": [],
+     "autoDestroy": true,
+     "spent": 0
+    },
+    "damage": {
+     "base": {
+      "number": null,
+      "denomination": null,
+      "types": [],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "type": {
+     "value": "potion",
+     "subtype": ""
+    },
+    "unidentified": {
+     "description": "<p>The potion is a plain indescriminate color and smells slightly foul.</p>",
+     "name": "Unidentified Potion"
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "potion-of-force-resistance",
+    "rarities": [
+     "uncommon"
+    ]
+   },
+   "activities": [
+    {
+     "type": "utility",
+     "activation": {
+      "type": "action",
+      "value": 1,
+      "condition": "",
+      "override": false
+     },
+     "consumption": {
+      "targets": [
+       {
+        "type": "itemUses",
+        "value": "1",
+        "target": "",
+        "scaling": {}
+       }
+      ],
+      "scaling": {
+       "allowed": false,
+       "max": ""
+      },
+      "spellSlot": true
+     },
+     "description": {
+      "chatFlavor": "",
+      "value": ""
+     },
+     "duration": {
+      "concentration": false,
+      "value": "1",
+      "units": "hour",
+      "special": "",
+      "override": false,
+      "expiry": null
+     },
+     "effects": [
+      {
+       "_id": "d8PTXF30xWHZcQGt",
+       "level": {},
+       "uuid": null
+      }
+     ],
+     "range": {
+      "units": "touch",
+      "special": "",
+      "override": false
+     },
+     "target": {
+      "template": {
+       "count": "",
+       "contiguous": false,
+       "type": "",
+       "size": "",
+       "width": "",
+       "height": "",
+       "units": "ft",
+       "stationary": false
+      },
+      "affects": {
+       "count": "1",
+       "type": "creature",
+       "choice": false,
+       "special": ""
+      },
+      "prompt": true,
+      "override": false
+     },
+     "roll": {
+      "formula": "",
+      "name": "",
+      "prompt": false,
+      "visible": false
+     },
+     "uses": {
+      "spent": 0,
+      "recovery": [],
+      "max": ""
+     },
+     "sort": 100000,
+     "name": "Drink",
+     "img": "",
+     "visibility": {
+      "requireMagic": true,
+      "level": {
+       "min": null,
+       "max": null
+      },
+      "identifier": "",
+      "requireAttunement": false,
+      "requireIdentification": false
+     },
+     "flags": {},
+     "_id": "WBQEjgocMEcDWwnO",
+     "behaviors": []
+    }
+   ],
+   "effects": [
+    {
+     "name": "Force Resistance",
+     "img": "icons/magic/lightning/orb-ball-purple.webp",
+     "origin": "Compendium.dnd5e.items.Item.kKGJjVVlJVoakWgQ",
+     "transfer": false,
+     "_id": "d8PTXF30xWHZcQGt",
+     "type": "base",
+     "system": {
+      "changes": [
+       {
+        "key": "system.traits.dr.value",
+        "type": "add",
+        "value": "force",
+        "phase": "initial",
+        "priority": null,
+        "_id": "g1vivqwpHmumg41W",
+        "conditions": "{}",
+        "replacement": ""
+       }
+      ],
+      "magical": true,
+      "rider": {
+       "statuses": []
+      },
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}"
+     },
+     "disabled": false,
+     "start": null,
+     "duration": {
+      "value": 1,
+      "units": "hours",
+      "expiry": "turnStart",
+      "expired": false
+     },
+     "description": "<p>You have resistance to force damage.</p>",
+     "tint": "#ffffff",
+     "statuses": [],
+     "showIcon": 1,
+     "folder": null,
+     "sort": 0,
+     "flags": {},
+     "_stats": {
+      "coreVersion": "14.361",
+      "systemId": "dnd5e",
+      "systemVersion": "6.0.0",
+      "createdTime": 1781978458621,
+      "modifiedTime": 1781984551077,
+      "lastModifiedBy": "dnd5ebuilder0000",
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "exportSource": null
+     }
+    }
+   ]
+  },
+  "sourceName": "Potion of Force Resistance",
+  "lang": "fr"
+ },
+ {
+  "stratum": "scroll",
+  "uuid": "Compendium.dnd5e.equipment24.Item.phbagSpellScroll",
+  "pack": "dnd5e.equipment24",
+  "name": "Parchemin de sort, niveau 1",
+  "type": "consumable",
+  "value": "scroll",
+  "subtype": "scroll",
+  "description": "<p>Un parchemin de sort (tour de magie) ou de sort (niveau 1) est un objet magique qui porte les mots d'un tour de magie ou d'un sort de niveau 1, déterminé par le créateur du parchemin. Si le sort figure sur la liste de sorts de votre classe, vous pouvez lire le parchemin et lancer le sort avec son temps d'incantation normal, sans fournir de composantes matérielles. Si le sort exige un jet de sauvegarde ou un jet d'attaque, le DD de sauvegarde du sort est 13 et le bonus d'attaque est +5. Le parchemin se désintègre une fois l'incantation terminée.</p>",
+  "truth": {
+   "system": {
+    "price": {
+     "value": 50,
+     "denomination": "gp"
+    },
+    "source": {
+     "custom": "",
+     "rules": "2024",
+     "license": "CC-BY-4.0",
+     "book": "",
+     "revision": 1
+    },
+    "identified": true,
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "quantity": 1,
+    "weight": {
+     "value": 0,
+     "units": "lb"
+    },
+    "rarities": [
+     "common"
+    ],
+    "attunement": "",
+    "attuned": false,
+    "equipped": false,
+    "uses": {
+     "max": "1",
+     "autoDestroy": true,
+     "spent": 0,
+     "recovery": []
+    },
+    "damage": {
+     "base": {
+      "number": null,
+      "denomination": null,
+      "types": [],
+      "custom": {
+       "enabled": false
+      },
+      "scaling": {
+       "number": 1
+      },
+      "modifiers": []
+     },
+     "replace": false
+    },
+    "type": {
+     "value": "scroll",
+     "subtype": ""
+    },
+    "properties": [
+     "mgc"
+    ],
+    "identifier": "spell-scroll-level-1"
+   },
+   "activities": [],
+   "effects": []
+  },
+  "sourceName": "Spell Scroll, Level 1",
+  "lang": "fr"
+ },
+ {
+  "stratum": "wondrous",
+  "uuid": "Compendium.dnd5e.items.Item.5SorTMl8NKDO9Yge",
+  "pack": "dnd5e.items",
+  "name": "Anneau de résistance au poison",
+  "type": "equipment",
+  "value": "ring",
+  "subtype": "ring",
+  "description": "<p>(Nécessite un lien d'harmonisation) Cet anneau est serti d'une améthyste qui scintille quand elle capte la lumière. Vous avez la résistance aux dégâts de poison tant que vous portez cet anneau.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 0,
+     "units": "lb"
+    },
+    "price": {
+     "value": 4000,
+     "denomination": "gp"
+    },
+    "attunement": "required",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "recovery": [],
+     "spent": 0
+    },
+    "armor": {
+     "value": 0,
+     "dex": 0
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": null,
+    "proficient": null,
+    "type": {
+     "value": "ring",
+     "baseItem": ""
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "ring-of-poison-resistance",
+    "rarities": [
+     "rare"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": [
+    {
+     "name": "Poison Resistance",
+     "img": "icons/equipment/finger/ring-faceted-gold-purple.webp",
+     "_id": "3tapgRkSFBeqcTH0",
+     "type": "base",
+     "system": {
+      "changes": [
+       {
+        "key": "system.traits.dr.value",
+        "value": "poison",
+        "priority": null,
+        "type": "add",
+        "phase": "initial",
+        "_id": "1FsWkMbWnZMgPvJA",
+        "conditions": "{}",
+        "replacement": ""
+       }
+      ],
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}",
+      "magical": false,
+      "rider": {
+       "statuses": []
+      }
+     },
+     "disabled": false,
+     "duration": {
+      "value": null,
+      "units": "seconds",
+      "expiry": null,
+      "expired": false
+     },
+     "description": "",
+     "origin": null,
+     "tint": "#ffffff",
+     "transfer": true,
+     "statuses": [],
+     "sort": 0,
+     "flags": {},
+     "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "coreVersion": "14.367",
+      "systemId": "dnd5e",
+      "systemVersion": "4.1.0",
+      "createdTime": 1731017778496,
+      "modifiedTime": 1731017879860,
+      "lastModifiedBy": "dnd5ebuilder0000",
+      "exportSource": null
+     },
+     "start": null,
+     "showIcon": 1,
+     "folder": null
+    }
+   ]
+  },
+  "sourceName": "Ring of Poison Resistance",
+  "lang": "fr"
+ },
+ {
+  "stratum": "wondrous",
+  "uuid": "Compendium.dnd5e.items.Item.NRj0lC3SM03s1YB3",
+  "pack": "dnd5e.items",
+  "name": "Ceinture de force de géant des nuages",
+  "type": "equipment",
+  "value": "wondrous",
+  "subtype": "wondrous",
+  "description": "<p>Objet merveilleux (nécessite un lien d'harmonisation). Tant que vous portez cette ceinture, votre valeur de Force devient 27. Si votre Force est déjà égale ou supérieure à celle de la ceinture, l'objet n'a aucun effet sur vous.</p>",
+  "truth": {
+   "system": {
+    "source": {
+     "custom": "",
+     "book": "",
+     "page": "",
+     "license": "CC-BY-4.0",
+     "rules": "2014",
+     "revision": 1
+    },
+    "quantity": 1,
+    "weight": {
+     "value": 1,
+     "units": "lb"
+    },
+    "price": {
+     "value": 200000,
+     "denomination": "gp"
+    },
+    "attunement": "required",
+    "equipped": false,
+    "identified": true,
+    "cover": null,
+    "uses": {
+     "max": "",
+     "spent": 0,
+     "recovery": []
+    },
+    "armor": {
+     "value": 0,
+     "dex": 0
+    },
+    "hp": {
+     "value": 0,
+     "max": 0,
+     "dt": null,
+     "conditions": ""
+    },
+    "speed": {
+     "value": null,
+     "conditions": "",
+     "units": "ft"
+    },
+    "strength": null,
+    "proficient": null,
+    "type": {
+     "value": "wondrous",
+     "baseItem": ""
+    },
+    "unidentified": {
+     "description": ""
+    },
+    "container": null,
+    "properties": [
+     "mgc"
+    ],
+    "attuned": false,
+    "identifier": "belt-of-cloud-giant-strength",
+    "rarities": [
+     "legendary"
+    ],
+    "crew": {
+     "value": []
+    }
+   },
+   "activities": [],
+   "effects": [
+    {
+     "origin": "Compendium.dnd5e.items.NRj0lC3SM03s1YB3",
+     "duration": {
+      "value": null,
+      "units": "seconds",
+      "expiry": null,
+      "expired": false
+     },
+     "disabled": false,
+     "_id": "iGbcuTRYb2okyQeS",
+     "tint": "#ffffff",
+     "transfer": true,
+     "flags": {},
+     "name": "Belt of Cloud Giant Strength",
+     "description": "",
+     "statuses": [],
+     "_stats": {
+      "compendiumSource": null,
+      "duplicateSource": null,
+      "coreVersion": "14.367",
+      "systemId": "dnd5e",
+      "systemVersion": "4.0.0",
+      "createdTime": null,
+      "modifiedTime": null,
+      "lastModifiedBy": null,
+      "exportSource": null
+     },
+     "img": "icons/equipment/waist/belt-thick-gemmed-steel-grey.webp",
+     "type": "base",
+     "system": {
+      "changes": [
+       {
+        "key": "system.abilities.str.value",
+        "value": 27,
+        "priority": null,
+        "type": "upgrade",
+        "phase": "initial",
+        "_id": "H3U3BS2L1el4QXlQ",
+        "conditions": "{}",
+        "replacement": ""
+       }
+      ],
+      "origin": {
+       "actor": null,
+       "behavior": null,
+       "effect": null,
+       "item": null,
+       "message": null
+      },
+      "conditions": "{}",
+      "magical": false,
+      "rider": {
+       "statuses": []
+      }
+     },
+     "sort": 0,
+     "start": null,
+     "showIcon": 1,
+     "folder": null
+    }
+   ]
+  },
+  "sourceName": "Belt of Cloud Giant Strength",
+  "lang": "fr"
+ },
+ {
+  "stratum": "misc",
+  "uuid": "Compendium.dnd5e.equipment24.Item.1NwTdI5LHEH5WThq",
+  "pack": "dnd5e.equipment24",
+  "name": "Couverture",
+  "type": "loot",
+  "value": "gear",
+  "subtype": "gear",
+  "description": "<p>Quand vous êtes enveloppé dans une couverture, vous avez l'avantage aux jets de sauvegarde contre le froid extrême.</p>",
+  "truth": {
+   "system": {
+    "price": {
+     "value": 5,
+     "denomination": "sp"
+    },
+    "source": {
+     "custom": "",
+     "rules": "2024",
+     "revision": 1,
+     "license": "CC-BY-4.0",
+     "book": ""
+    },
+    "identified": true,
+    "unidentified": {
+     "description": ""
+    },
+    "container": "phbagPriestsPack",
+    "quantity": 1,
+    "weight": {
+     "value": 3,
+     "units": "lb"
+    },
+    "properties": [],
+    "type": {
+     "value": "gear",
+     "subtype": ""
+    },
+    "identifier": "blanket",
+    "rarities": []
+   },
+   "activities": [],
+   "effects": []
+  },
+  "sourceName": "Blanket",
+  "lang": "fr"
+ }
+]

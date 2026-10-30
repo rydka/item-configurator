@@ -1,13 +1,241 @@
 {
   "item-configurator": {
     "settings": {
-      "enabled": {
-        "name": "Enable Item Configurator",
-        "hint": "Turn the module's features on or off for this world."
+      "allowPlayers": {
+        "name": "Players can configure their items",
+        "hint": "Let players configure the items they own from the item description. The Game Master can always do it."
+      },
+      "aiEnabled": {
+        "name": "Use an AI",
+        "hint": "Have an AI read the description: Claude (Anthropic) reads the whole of it and the rules cross-check its numbers, or a local Ollama model helps with the sentences the rules do not understand. Off by default."
+      },
+      "aiProvider": {
+        "name": "AI provider",
+        "hint": "Ollama runs on your machine; Anthropic sends the item descriptions to Anthropic's servers with your API key, in a single call per item."
+      },
+      "anthropicTimeout": {
+        "name": "Claude time limit (seconds)",
+        "hint": "Claude reads the whole description in one call. After this delay the preview shows the rules alone."
+      },
+      "anthropicModel": {
+        "name": "Claude model",
+        "hint": "Sonnet is faster and cheaper; Opus is more capable."
+      },
+      "anthropicEffort": {
+        "name": "Effort",
+        "hint": "How much the model thinks before answering. Low is enough for most descriptions; higher costs more tokens and time."
+      },
+      "anthropicApiKey": {
+        "name": "Anthropic API key",
+        "hint": "Stored in this browser only, never in the world settings. Nothing is sent without a key."
+      },
+      "ollamaUrl": {
+        "name": "Ollama address",
+        "hint": "Address of the Ollama server, as seen from the Game Master's browser."
+      },
+      "ollamaModel": {
+        "name": "Model",
+        "hint": "Ollama model used for the AI. Leave on automatic to pick the best installed model."
+      },
+      "aiTimeout": {
+        "name": "AI time limit (seconds)",
+        "hint": "After this delay the configuration continues with the rules alone."
       }
     },
+    "Type": {
+      "consumable": "Consumable",
+      "weapon": "Weapon",
+      "equipment": "Armor or equipment",
+      "tool": "Tool",
+      "loot": "Loot",
+      "container": "Container"
+    },
+    "Button": {
+      "Configure": "Configure from description",
+      "ConfigureLabel": "Configure",
+      "Undo": "Undo last configuration",
+      "LockedPack": "This item is in a locked compendium. Unlock the compendium to configure it."
+    },
     "errors": {
-      "wrongSystem": "Item Configurator requires the dnd5e system."
+      "wrongSystem": "Item Configurator requires the dnd5e system.",
+      "notAllowed": "You are not allowed to configure this item.",
+      "parserMissing": "Item Configurator requires the Dnd5e Text Parser module to be active.",
+      "parserVersion": "Unsupported Dnd5e Text Parser version: {version}.",
+      "applyFailed": "The configuration failed and the item was restored: {error}",
+      "analysisFailed": "The analysis failed: {error}",
+      "previewFailed": "The preview could not be recomputed: {error}"
+    },
+    "Cancel": "Cancel",
+    "Undo": {
+      "Title": "Undo last configuration",
+      "Modified": "This item was modified after it was configured. Restoring it will discard those changes. Continue?",
+      "Done": "{name} was restored to its state before the configuration."
+    },
+    "TypeDialog": {
+      "Title": "Configure from description",
+      "Heading": "Configure {name}",
+      "Hint": "Choose what kind of item this is. The description will be read to propose its details, activities and effects.",
+      "Type": "Item type",
+      "Subtype": "Subtype",
+      "AiOn": "The AI will help with the sentences the rules do not understand.",
+      "ClaudeOn": "Claude will read the whole description; the rules will cross-check its numbers.",
+      "Analyzing": "Analyzing the description...",
+      "Analyze": "Analyze"
+    },
+    "Progress": {
+      "Rules": "Rules",
+      "Claude": "Claude is reading the description... {elapsed} s / {limit} s",
+      "Check": "Validation and cross-check",
+      "Done": "done",
+      "Cancel": "Cancel and show the rules alone"
+    },
+    "Messages": {
+      "EmptyDescription": "This item has no description to read.",
+      "ContainerNotEmpty": "This container is not empty: its contents would be lost by the conversion. Move them out first, or keep the Container type.",
+      "NothingRecognized": "Nothing could be recognized in the description. The item was not modified.",
+      "Applied": "{name} was configured."
+    },
+    "Preview": {
+      "Title": "Configuration preview",
+      "Heading": "Preview: {name}",
+      "Invalid": "Invalid proposal ignored ({path}): {error}",
+      "ExistingActivity": "Existing activity: {name} ({type})",
+      "ExistingEffect": "Existing effect: {name}",
+      "NotApplicable": "{what}: not applicable to this item type ({type})",
+      "Chosen": "Type chosen in the window: {value}",
+      "Deduced": {
+        "SingleUse": "Single use, destroyed when empty (deduced from the type: {type})"
+      },
+      "Action": {
+        "add": "Add",
+        "set": "Set",
+        "replace": "Replace",
+        "remove": "Remove",
+        "keep": "Kept"
+      },
+      "Group": {
+        "check": "To check",
+        "details": "Details",
+        "activities": "Activities",
+        "effects": "Effects",
+        "notAutomated": "Not automated",
+        "flavor": "Flavor text"
+      },
+      "Check": {
+        "Hint": "Claude and the rules read these values differently. Claude's value is proposed; pick the rules' value to write it instead.",
+        "Claude": "Claude",
+        "Rules": "Rules",
+        "Agree": "✓ rules",
+        "ClaudeOnly": "Claude only",
+        "RulesOnly": "rules (complement)",
+        "Inferred": "deduced",
+        "Critical": "critical",
+        "Certainty": {
+          "high": "high certainty",
+          "medium": "medium certainty",
+          "low": "low certainty"
+        },
+        "Family": {
+          "dice": "Dice",
+          "dc": "Save DC",
+          "attackBonus": "Attack bonus",
+          "magicalBonus": "Magical bonus",
+          "ac": "Armor class",
+          "effectBonus": "Effect bonus",
+          "uses": "Uses",
+          "activation": "Activation",
+          "duration": "Duration",
+          "distance": "Distance",
+          "rarity": "Rarity",
+          "attunement": "Attunement"
+        }
+      },
+      "NotAutomatedHint": "dnd5e has no mechanism for these clauses: nothing is written for them, they are applied by hand at the table.",
+      "TypeChange": "The item will be converted from {from} to {to}.",
+      "Stale": "The item was modified while this preview was open. The proposal was recomputed on its current state: check it, then apply again.",
+      "Ai": {
+        "off": "Rules only (AI disabled).",
+        "unreachable": "Rules only (the AI is not reachable from this browser).",
+        "timeout": "Rules only (the AI took too long).",
+        "error": "Rules only (the AI returned an unusable answer).",
+        "noKey": "Rules only (no Anthropic API key in this browser: nothing was sent).",
+        "unauthorized": "Rules only (Anthropic refused the API key: check it in the AI settings).",
+        "refusal": "Rules only (the AI declined to answer; its answer was not used).",
+        "truncated": "Rules only (the AI answer was cut short; it was not used).",
+        "invalid": "Rules only (the AI answer could not be read; it was not used).",
+        "http": "Rules only (the Anthropic API answered with an error).",
+        "aborted": "Rules only (the AI call was cancelled).",
+        "ok": "AI used for unrecognized sentences ({model}).",
+        "claude": "Claude read the whole description ({model}); the rules cross-checked its numbers."
+      },
+      "AiMark": "(AI)",
+      "ClaudeMark": "(Claude)",
+      "BaseMark": "(base item)",
+      "Previous": "Currently:",
+      "Proposed": "Read in the text (not applied):",
+      "Rejected": "Ignored",
+      "Corrected": "Corrected",
+      "Discarded": "Discarded",
+      "Unrecognized": "Not interpreted",
+      "Replace": "Replace existing",
+      "ReplaceWarning": "Existing values and the activities or effects of any group with a proposal will be replaced. You can undo afterwards.",
+      "Apply": "Apply"
+    },
+    "AiSettings": {
+      "MenuName": "AI",
+      "MenuLabel": "Configure the AI",
+      "MenuHint": "Enable the AI, choose the provider (local Ollama or Anthropic's Claude), the model and the time limit.",
+      "Title": "AI",
+      "Auto": "Automatic",
+      "NotInstalled": "not installed",
+      "Test": "Test",
+      "Reachable": "Ollama is reachable. Installed models",
+      "Unreachable": "Ollama is not reachable at this address.",
+      "Provider": {
+        "ollama": "Ollama (local, helps with unrecognized sentences)",
+        "anthropic": "Anthropic (Claude reads the whole description)"
+      },
+      "Effort": {
+        "low": "Low (default)",
+        "medium": "Medium",
+        "high": "High"
+      },
+      "AnthropicWarning": "With this provider, the descriptions of the items you configure are sent to Anthropic. Only the Game Master's browser makes the calls.",
+      "Save": "Save"
+    },
+    "Claude": {
+      "Unavailable": "Claude unavailable: {reason}. The rules alone were used.",
+      "Corrected": "Corrected: {what}",
+      "Rejected": "Rejected: {what}",
+      "Uncovered": "Paragraphs neither Claude nor the rules interpreted.",
+      "TooMany": "More than {max} {what}: only the first {max} were kept.",
+      "Fact": {
+        "Duration": "Duration: {value} {units}",
+        "Check": "Ability check: {ability} {skill} DC {dc}",
+        "Roll": "Roll: {formula} {name}",
+        "EffectDuration": "Effect duration: {value} {units} {until}"
+      },
+      "Why": {
+        "missing": "missing",
+        "duplicate": "duplicate",
+        "notAnObject": "not an object",
+        "notAnArray": "not a list"
+      },
+      "Reason": {
+        "quoteMissing": "the quote is not in the description",
+        "numberNotQuoted": "the number is not in the quote",
+        "unknownKey": "unknown dnd5e key \"{key}\"",
+        "outOfBounds": "value out of bounds ({value})",
+        "formulaNotAllowed": "formula not allowed ({formula})",
+        "scopeMismatch": "scope \"{scope}\" does not fit \"{kind}\"",
+        "distanceConverted": "{from} → {to}",
+        "fieldRemoved": "{field} removed ({why})",
+        "notApplicable": "not applicable to this item type",
+        "effectSkipped": "dnd5e cannot apply this change; shown as not automated",
+        "tooMany": "more than {max} {what}: only the first {max} kept",
+        "instruction": "quoted only from a paragraph that reads like an instruction to the AI",
+        "strict": "refused by dnd5e: {error}"
+      }
     }
   }
 }

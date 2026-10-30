@@ -1,0 +1,235 @@
+{
+ "type": "object",
+ "properties": {
+  "results": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "index": {
+      "type": "integer"
+     },
+     "facts": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "kind": {
+         "type": "string",
+         "enum": [
+          "attack",
+          "damage",
+          "extraDamage",
+          "save",
+          "heal",
+          "uses",
+          "activation",
+          "consume",
+          "cast",
+          "effect"
+         ]
+        },
+        "evidence": {
+         "type": "string"
+        },
+        "number": {
+         "type": "integer"
+        },
+        "denomination": {
+         "type": "integer"
+        },
+        "bonus": {
+         "type": "integer"
+        },
+        "damageType": {
+         "type": "string",
+         "enum": [
+          "acid",
+          "bludgeoning",
+          "cold",
+          "fire",
+          "force",
+          "lightning",
+          "necrotic",
+          "piercing",
+          "poison",
+          "psychic",
+          "radiant",
+          "slashing",
+          "thunder"
+         ]
+        },
+        "spell": {
+         "type": "string"
+        },
+        "level": {
+         "type": "integer"
+        },
+        "charges": {
+         "type": "integer"
+        },
+        "attackType": {
+         "type": "string",
+         "enum": [
+          "melee",
+          "ranged"
+         ]
+        },
+        "classification": {
+         "type": "string",
+         "enum": [
+          "weapon",
+          "spell"
+         ]
+        },
+        "ability": {
+         "type": "string",
+         "enum": [
+          "str",
+          "dex",
+          "con",
+          "int",
+          "wis",
+          "cha"
+         ]
+        },
+        "dc": {
+         "type": "integer"
+        },
+        "onSave": {
+         "type": "string",
+         "enum": [
+          "half",
+          "none"
+         ]
+        },
+        "max": {
+         "type": "integer"
+        },
+        "period": {
+         "type": "string",
+         "enum": [
+          "day",
+          "dawn",
+          "dusk",
+          "sr",
+          "lr"
+         ]
+        },
+        "activation": {
+         "type": "string",
+         "enum": [
+          "action",
+          "bonus",
+          "reaction",
+          "legendary",
+          "special"
+         ]
+        },
+        "cost": {
+         "type": "integer"
+        },
+        "effectKind": {
+         "type": "string",
+         "enum": [
+          "ac",
+          "attack",
+          "damage",
+          "save",
+          "check",
+          "resistance",
+          "immunity",
+          "vulnerability",
+          "abilityScore",
+          "speed"
+         ]
+        },
+        "amount": {
+         "type": "integer"
+        },
+        "scope": {
+         "type": "string",
+         "enum": [
+          "str",
+          "dex",
+          "con",
+          "int",
+          "wis",
+          "cha",
+          "acr",
+          "ani",
+          "arc",
+          "ath",
+          "dec",
+          "his",
+          "ins",
+          "itm",
+          "inv",
+          "med",
+          "nat",
+          "prc",
+          "prf",
+          "per",
+          "rel",
+          "slt",
+          "ste",
+          "sur",
+          "acid",
+          "bludgeoning",
+          "cold",
+          "fire",
+          "force",
+          "lightning",
+          "necrotic",
+          "piercing",
+          "poison",
+          "psychic",
+          "radiant",
+          "slashing",
+          "thunder",
+          "blinded",
+          "charmed",
+          "deafened",
+          "exhaustion",
+          "frightened",
+          "grappled",
+          "incapacitated",
+          "invisible",
+          "paralyzed",
+          "petrified",
+          "poisoned",
+          "prone",
+          "restrained",
+          "stunned",
+          "unconscious",
+          "mwak",
+          "rwak",
+          "msak",
+          "rsak",
+          "walk",
+          "fly",
+          "swim",
+          "climb",
+          "burrow",
+          "all"
+         ]
+        }
+       },
+       "required": [
+        "kind",
+        "evidence"
+       ]
+      }
+     }
+    },
+    "required": [
+     "index",
+     "facts"
+    ]
+   }
+  }
+ },
+ "required": [
+  "results"
+ ]
+}
