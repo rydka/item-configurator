@@ -12,7 +12,10 @@ Hooks.once("init", () => {
   // Public API (C18). Loaded on first call so the module stays light at startup.
   const self = game.modules.get(MODULE_ID);
   if (self) {
-    self.api = { configure: async (...args) => (await import("./foundry/api.mjs")).configure(...args) };
+    self.api = {
+      configure: async (...args) => (await import("./foundry/api.mjs")).configure(...args),
+      open: async (...args) => (await import("./foundry/api.mjs")).open(...args)
+    };
   }
 
   // The AI settings window extends ApplicationV2: load it now, register the menu when it is ready.

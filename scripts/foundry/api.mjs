@@ -7,6 +7,34 @@ import { quickPlan, runAnalysis } from "./analysis.mjs";
 import { applyChangeSet } from "./apply.mjs";
 
 /**
+ * Same access rules as the sheet button (C1, C2): throws a localized error when the user may not configure the item.
+ * @param {Item} item
+ */
+function assertAllowed(item) {
+  const allowed = buttonState({
+    type: item?.type,
+    canConfigure: canConfigure({ isGM: game.user.isGM, isOwner: Boolean(item?.isOwner), allowPlayers: playersAllowed() }),
+    packLocked: Boolean(item?.compendium?.locked)
+  });
+  if (allowed === "hidden") throw new Error(game.i18n.localize(`${MODULE_ID}.errors.notAllowed`));
+  if (allowed === "disabled") throw new Error(game.i18n.localize(`${MODULE_ID}.Button.LockedPack`));
+}
+
+/**
+ * Open the module's interface on an item, exactly as the sheet button does: the type window, then the preview.
+ * @param {Item} item
+ * @returns {Promise<TypeDialog>} The rendered type window (resolves once it is displayed).
+ * @throws {Error} When the user may not configure the item (same rules and messages as `configure`).
+ */
+export async function open(item) {
+  assertAllowed(item);
+  const { TypeDialog } = await import("./type-dialog.mjs");
+  const dialog = new TypeDialog({ item });
+  await dialog.render({ force: true });
+  return dialog;
+}
+
+/**
  * Analyze an item's description with the same path as the preview window, and optionally apply the result.
  * @param {Item} item
  * @param {object} [options]
@@ -21,13 +49,7 @@ import { applyChangeSet } from "./apply.mjs";
  * @throws {Error} When the user may not configure the item.
  */
 export async function configure(item, { type, subtype, variant, useAI, replace = false, apply = false, signal } = {}) {
-  const allowed = buttonState({
-    type: item.type,
-    canConfigure: canConfigure({ isGM: game.user.isGM, isOwner: item.isOwner, allowPlayers: playersAllowed() }),
-    packLocked: Boolean(item.compendium?.locked)
-  });
-  if (allowed === "hidden") throw new Error(game.i18n.localize(`${MODULE_ID}.errors.notAllowed`));
-  if (allowed === "disabled") throw new Error(game.i18n.localize(`${MODULE_ID}.Button.LockedPack`));
+  assertAllowed(item);
 
   const guess = guessType(await quickPlan(item), { type: item.type, system: item._source.system, name: item.name });
   const sameType = !type || type === guess.type;
