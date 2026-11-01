@@ -2,15 +2,15 @@
   "id": "item-configurator",
   "title": "Item Configurator",
   "description": "Configure a dnd5e item (details, activities, active effects) from its description, with a preview and optional local AI.",
-  "version": "0.1.0",
+  "version": "0.1.0-v13",
   "authors": [
     {
       "name": "Rydka"
     }
   ],
   "compatibility": {
-    "minimum": "14",
-    "verified": "14"
+    "minimum": "13",
+    "verified": "13"
   },
   "relationships": {
     "requires": [
@@ -18,10 +18,10 @@
         "id": "dnd5e-text-parser",
         "type": "module",
         "compatibility": {
-          "minimum": "1.0.0",
-          "verified": "1.1.0"
+          "minimum": "1.1.0-v13",
+          "verified": "1.1.0-v13"
         },
-        "manifest": "https://github.com/rydka/dnd5e-text-parser/releases/latest/download/module.json"
+        "manifest": "https://raw.githubusercontent.com/rydka/dnd5e-text-parser/v13/module.json"
       }
     ],
     "systems": [
@@ -29,8 +29,9 @@
         "id": "dnd5e",
         "type": "system",
         "compatibility": {
-          "minimum": "6.0.0",
-          "verified": "6.0.6"
+          "minimum": "5.3.0",
+          "verified": "5.3.3",
+          "maximum": "5.99"
         }
       }
     ]
@@ -54,7 +55,7 @@
     }
   ],
   "url": "https://github.com/rydka/item-configurator",
-  "manifest": "https://github.com/rydka/item-configurator/releases/latest/download/module.json",
-  "download": "https://github.com/rydka/item-configurator/releases/latest/download/module.zip",
+  "manifest": "https://raw.githubusercontent.com/rydka/item-configurator/v13/module.json",
+  "download": "https://github.com/rydka/item-configurator/releases/download/v0.1.0-v13/module.zip",
   "bugs": "https://github.com/rydka/item-configurator/issues"
 }
