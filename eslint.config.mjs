@@ -15,9 +15,7 @@ const foundryGlobals = {
   ChatMessage: "readonly",
   Roll: "readonly",
   Item: "readonly",
-  ActiveEffect: "readonly",
-  _replace: "readonly",
-  _del: "readonly"
+  ActiveEffect: "readonly"
 };
 
 export default [

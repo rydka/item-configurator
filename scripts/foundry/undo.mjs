@@ -1,18 +1,15 @@
 /** Restoration of an item from its undo snapshot (C14). */
 import { MODULE_ID } from "../constants.mjs";
 import { UNDO_FLAG, modifiedSince, restoreOps } from "../core/snapshot.mjs";
+import { restoreUpdate } from "../core/update-ops.mjs";
 
 /** The undo snapshot stored on the item, if any. */
 export const getSnapshot = (item) => item.getFlag(MODULE_ID, UNDO_FLAG) ?? null;
 
-/** Write the snapshot back: type, system (`_replace`), effects with their original ids, and drop the flag. */
+/** Write the snapshot back: type, whole system (`==system`), effects with their original ids, and drop the flag. */
 export async function restoreItem(item, snapshot) {
   const ops = restoreOps(snapshot, item.toObject());
-  await item.update({
-    type: ops.update.type,
-    system: _replace(ops.update.system),
-    [`flags.${MODULE_ID}.${UNDO_FLAG}`]: _del
-  });
+  await item.update(restoreUpdate(ops, MODULE_ID));
   const stale = ops.deleteEffectIds.filter((id) => item.effects.has(id));
   if (stale.length) await item.deleteEmbeddedDocuments("ActiveEffect", stale);
   if (ops.createEffects.length) await item.createEmbeddedDocuments("ActiveEffect", ops.createEffects, { keepId: true });

@@ -3,6 +3,7 @@ import { MODULE_ID } from "../constants.mjs";
 import { pruneChangeSet } from "../core/changes.mjs";
 import { ID_PATTERN } from "../core/paths.mjs";
 import { UNDO_FLAG, contentFingerprint, makeSnapshot } from "../core/snapshot.mjs";
+import { activityDeletionUpdate, typeChangeUpdate } from "../core/update-ops.mjs";
 import { restoreItem } from "./undo.mjs";
 
 const flagPath = `flags.${MODULE_ID}.${UNDO_FLAG}`;
@@ -81,13 +82,13 @@ export async function applyChangeSet(item, changeSet) {
   await item.update({ [flagPath]: snapshot });
   try {
     if (changeSet.typeChange) {
-      await item.update({ type: changeSet.typeChange.to, system: _replace(changeSet.typeChange.system) });
+      await item.update(typeChangeUpdate(changeSet.typeChange.to, changeSet.typeChange.system));
     }
 
     const update = { ...changeSet.systemPatch };
     for (const activity of changeSet.activities?.add ?? []) update[`system.activities.${activity._id}`] = created(activity);
     for (const id of changeSet.activities?.remove ?? []) {
-      if (item._source.system.activities?.[id]) update[`system.activities.${id}`] = _del;
+      if (item._source.system.activities?.[id]) Object.assign(update, activityDeletionUpdate(id));
     }
     if (Object.keys(update).length) await item.update(update);
 
