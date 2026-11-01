@@ -1,15 +1,19 @@
 /**
  * Translation of the validated answer of Claude (`claude-validate.mjs`) into dnd5e sources: the item `system`
  * patch, the activity sources (written directly: the schema follows the dnd5e field names), the ActiveEffect
- * sources (written by `parser.toEffects`, whose table of v14 keys is already tested: Claude never picks a
- * `system.*` key) and the damage parts (`parser.toDamagePart`). Also builds the descriptors the preview shows,
- * with the same shape as `parser.describe(plan)` plus `origin: "claude"`, `ref`, `certainty`, `inferred`.
+ * sources (written by `parser.toEffects`, whose table of dnd5e 5.3.3 actor paths and Foundry v13 change modes is
+ * already tested: Claude never picks a `system.*` key) and the damage parts (`parser.toDamagePart`). Also builds the
+ * descriptors the preview shows, with the same shape as `parser.describe(plan)` plus `origin: "claude"`, `ref`,
+ * `certainty`, `inferred`.
  *
  * Alignment (used by `core/crosscheck.mjs`): `activities[n]` is the source of `item.activities[n]` (null when it
  * could not be written: unresolved spell), `effects[n]` the source of `item.effects[n]` (null when the library
- * could not write any of its changes). Pure: no Foundry global.
+ * could not write any of its changes), `effectChanges[n][j]` the indices, in `effects[n].changes`, of the Foundry
+ * changes written for `item.effects[n].changes[j]` (several for an attack bonus or a speed multiplier, none for a
+ * skipped change; `effectChanges[n]` is null with `effects[n]`). Pure: no Foundry global.
  */
 import { BONUS_KINDS, DETAIL_FIELDS } from "./claude-schema.mjs";
+import { changeIndices } from "../core/crosscheck.mjs";
 import { setPath } from "../core/paths.mjs";
 
 const LIB = "dnd5e-text-parser.";
@@ -138,6 +142,7 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
 
   // ---- Effects (first: the activities list their ids) -----------------------------------------------------------
   const effectIds = new Map();
+  const effectChanges = [];
   const effects = (item.effects ?? []).map((effect, n) => {
     const label = effect.name || name || "Effect";
     const planEffects = effect.changes.map((change) => toItemEffect(change, effect));
@@ -148,8 +153,14 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
     if (!source) {
       // Nothing dnd5e can write: the clause stays visible, with its quote
       clause(effect.quotes[0], effect);
+      effectChanges[n] = null;
       return null;
     }
+    // Where each of Claude's changes landed: the same change translated alone, located in the combined list
+    effectChanges[n] = planEffects.map((planEffect) => {
+      const alone = parser.toEffects({ name: label, effects: [planEffect] }, { keys, idGen: () => "", name: label });
+      return changeIndices(source.changes, alone[0]?.changes);
+    });
     source.name = label;
     source.transfer = effect.transfer;
     if (source.flags) delete source.flags;
@@ -270,7 +281,7 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
     describe(NOTE_FLAVOR, { text: entry.text }, { quotes: [entry.text], paragraphs: entry.paragraphs }, { group: null, raw: entry.text });
   }
 
-  return { system, activities, effects, descriptors, notes };
+  return { system, activities, effects, effectChanges, descriptors, notes };
 }
 
 /**

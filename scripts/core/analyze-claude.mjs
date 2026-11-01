@@ -10,7 +10,7 @@
  * `complete({ system, messages, schema }, { signal })`. No Foundry global.
  */
 import { SINGLE_USE_TYPES, analyze, baseFragment } from "./analyze.mjs";
-import { CROSSCHECK_POLICY, coveredParagraphs, crossCheck, factsFromClaude, factsFromRules } from "./crosscheck.mjs";
+import { CROSSCHECK_POLICY, changeIndices, coveredParagraphs, crossCheck, factsFromClaude, factsFromRules } from "./crosscheck.mjs";
 import { activitySignature, effectSignature } from "./changes.mjs";
 import { clone, getPath, randomId, setPath } from "./paths.mjs";
 import { buildItemSchema } from "../ai/claude-schema.mjs";
@@ -40,6 +40,26 @@ async function callClaude(complete, request, signal) {
  * element Claude already proposes (same signature) is not added again. Activities bring their linked effects along.
  * Descriptors come from `parser.describe(rules.plan)`, re-indexed.
  */
+/**
+ * Where each plan effect landed in the rules' effect sources (`parser.toEffects` groups the passive effects into one
+ * source): `result[n]` lists the indices, in the `changes` of that source, of the Foundry changes written for
+ * `plan.effects[n]`; `null` when the library wrote none. Feeds `factsFromRules` (`changes.<k>.value` fields).
+ * @param {{ plan: object, translation: { effects: object[] } }} rules
+ * @param {object} parser
+ * @param {object} keys
+ * @returns {(number[]|null)[]}
+ */
+function rulesEffectChanges(rules, parser, keys) {
+  const sources = (rules.translation?.effects ?? []).filter(Boolean);
+  return (rules.plan?.effects ?? []).map((effect) => {
+    const alone = parser.toEffects({ name: "", effects: [effect] }, { keys, idGen: () => "" })[0]?.changes ?? [];
+    if (!alone.length) return null;
+    const matches = sources.map((source) => changeIndices(source.changes, alone));
+    // The source holding every change; else the first holding some (a `traits.*` entry deduplicated by `toEffects`)
+    return matches.find((indices) => indices.length === alone.length) ?? matches.find((indices) => indices.length) ?? null;
+  });
+}
+
 function complementFromRules(rulesOnly, rules, parser, translation, descriptors) {
   const described = parser.describe(rules.plan);
   const added = new Map();   // rules path -> new path
@@ -153,7 +173,11 @@ export async function analyzeClaudeFirst(input, {
   const validated = validateClaudeItem(result.json, { paragraphs, enums, keys, metric, type });
   const built = buildFromClaude(validated.item, { parser, keys, idGen, type, name, resolveSpell });
   const covered = coveredParagraphs(validated.item, paragraphs);
-  const crosscheck = crossCheck(factsFromRules(rules.plan, paragraphs), factsFromClaude(validated.item, paragraphs), policy ?? CROSSCHECK_POLICY, { covered });
+  const crosscheck = crossCheck(
+    factsFromRules(rules.plan, paragraphs, { effectChanges: rulesEffectChanges(rules, parser, keys) }),
+    factsFromClaude(validated.item, paragraphs, { effectChanges: built.effectChanges }),
+    policy ?? CROSSCHECK_POLICY, { covered }
+  );
 
   const system = built.system;
   const chosen = [];

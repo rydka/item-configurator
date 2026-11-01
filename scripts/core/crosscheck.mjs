@@ -214,16 +214,46 @@ const distanceFact = ({ value, units }, { prefix, ...rest }) => {
     ...rest
   });
 };
-const effectBonusFact = ({ kind, scope, value }, { field, ...rest }) => {
+/**
+ * Bonus fact of one plan / Claude change. `fields` are the `changes.<k>.value` paths of every Foundry change the
+ * bonus produced in the effect source (an attack bonus gives four, a speed multiplier five): a choice writes them all.
+ */
+const effectBonusFact = ({ kind, scope, value }, { fields, ...rest }) => {
   const amount = num(bonusText(value));
   if (amount === null || !BONUS_KINDS.includes(kind)) return null;
   const where = scope ?? "";
   const sign = amount >= 0 && kind !== "speedMultiplier" ? "+" : "";
   return fact("effectBonus", {
     value: `${kind}:${where}=${amount}`, display: `${kind}${where ? ` (${where})` : ""} ${sign}${amount}`,
-    canon: amount, patch: [{ field, form: "string", data: String(value) }], ...rest
+    canon: amount, patch: list(fields).map((field) => ({ field, form: "string", data: String(value) })), ...rest
   });
 };
+
+/**
+ * Indices, in the `changes` of an effect source, of the entries of `wanted` (same `key|mode|value`, in order; an
+ * entry deduplicated by `toEffects` is skipped). Aligns a plan / Claude change with the Foundry changes it produced.
+ * @param {object[]} changes  `changes` of the effect source written by `parser.toEffects`.
+ * @param {object[]} wanted   `changes` of the same plan change translated alone.
+ * @returns {number[]}
+ */
+export function changeIndices(changes, wanted) {
+  const signature = (c) => `${c.key}|${c.mode}|${c.value}`;
+  const result = [];
+  let cursor = 0;
+  for (const entry of list(wanted)) {
+    const at = list(changes).findIndex((c, i) => i >= cursor && signature(c) === signature(entry));
+    if (at < 0) continue;
+    result.push(at);
+    cursor = at + 1;
+  }
+  return result;
+}
+
+/**
+ * `changes.<k>.value` fields of a change: its real indices when the alignment is known (none for a change the library
+ * skipped or an effect it dropped), else its own index.
+ */
+const changeFields = (indices, fallback) => (indices === undefined ? [fallback] : list(indices)).map((k) => `changes.${k}.value`);
 
 /* -------------------------------------------- */
 /*  Rules                                        */
@@ -233,9 +263,12 @@ const effectBonusFact = ({ kind, scope, value }, { field, ...rest }) => {
  * Facts of the rules' plan (`parser.parseItem`).
  * @param {object} plan                        ItemPlan.
  * @param {(string|{ text: string })[]} paragraphs
+ * @param {{ effectChanges?: (number[]|null)[] }} [alignment]  `effectChanges[n]`: indices, in the `changes` of the
+ *   effect source `toEffects` wrote for plan effect `n`, of the Foundry changes it produced (`changeIndices`); `null`
+ *   when it produced none. Without it, the plan index stands for the change index.
  * @returns {object[]}  Facts (`path` of an activity / effect is its index in the plan).
  */
-export function factsFromRules(plan, paragraphs) {
+export function factsFromRules(plan, paragraphs, { effectChanges } = {}) {
   const locate = paragraphLocator(paragraphs);
   const facts = [];
   const add = (f) => { if (f) facts.push(f); };
@@ -283,7 +316,7 @@ export function factsFromRules(plan, paragraphs) {
   list(plan?.effects).forEach((effect, n) => {
     const ref = `effects.${n}`;
     const base = { ref, path: ref, paragraph: locate(effect.raw), raw: text(effect.raw) };
-    add(effectBonusFact(effect, { field: `changes.${n}.value`, ...base }));
+    add(effectBonusFact(effect, { fields: changeFields(effectChanges?.[n], n), ...base }));
     if (effect.duration) add(durationFact(effect.duration, { form: "effectDuration", ...base }));
   });
   return facts;
@@ -307,9 +340,12 @@ const DETAIL_FACTS = {
  * Facts of Claude's validated answer (schema of `ai/claude-schema.mjs`).
  * @param {object} item                        Validated item (`details`, `uses`, `activities`, `effects`).
  * @param {(string|{ text: string })[]} paragraphs
+ * @param {{ effectChanges?: (number[][]|null)[] }} [alignment]  `effectChanges[n][j]`: indices, in the `changes` of
+ *   the effect source `buildFromClaude` wrote for `item.effects[n]`, of the Foundry changes of its change `j`
+ *   (`buildFromClaude(...).effectChanges`). Without it, `j` stands for the change index.
  * @returns {object[]}  Facts (`path` of an activity / effect is its index in the item's list).
  */
-export function factsFromClaude(item, paragraphs) {
+export function factsFromClaude(item, paragraphs, { effectChanges } = {}) {
   const locate = paragraphLocator(paragraphs);
   const facts = [];
   const add = (f) => { if (f) facts.push(f); };
@@ -356,7 +392,7 @@ export function factsFromClaude(item, paragraphs) {
 
   list(item?.effects).forEach((effect, n) => {
     const base = { ref: text(effect.ref) || `effects.${n}`, path: `effects.${n}`, paragraph: firstParagraph(locate, effect.quotes), inferred: Boolean(effect.inferred), raw: text(effect.quotes?.[0]) };
-    list(effect.changes).forEach((change, j) => add(effectBonusFact(change, { field: `changes.${j}.value`, ...base })));
+    list(effect.changes).forEach((change, j) => add(effectBonusFact(change, { fields: changeFields(effectChanges?.[n]?.[j], j), ...base })));
     if (effect.duration?.units) add(durationFact(effect.duration, { form: "effectDuration", ...base }));
   });
   return facts;
