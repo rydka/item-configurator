@@ -91,9 +91,9 @@ export function activitySignature(activity) {
   ]);
 }
 
-/** Identity of an effect source. */
+/** Identity of an effect source (Foundry v13: top-level `changes[]` with a numeric `mode`). */
 export function effectSignature(effect) {
-  const changes = toArray(effect.system?.changes).map((c) => `${c.key}|${c.type}|${c.value}`).sort();
+  const changes = toArray(effect.changes).map((c) => `${c.key}|${c.mode}|${c.value}`).sort();
   return JSON.stringify([Boolean(effect.transfer), changes]);
 }
 

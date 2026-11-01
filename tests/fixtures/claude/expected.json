@@ -49,14 +49,33 @@
    {
     "id": "E1",
     "transfer": false,
-    "duration.expiry": [
-     "sourceEnd",
-     "1 turn"
-    ],
+    "duration": {
+     "turns": 1
+    },
     "changes": [
      {
-      "key": "system.attributes.movement.multiplier",
-      "type": "multiply",
+      "key": "system.attributes.movement.walk",
+      "mode": 1,
+      "value": "0.5"
+     },
+     {
+      "key": "system.attributes.movement.burrow",
+      "mode": 1,
+      "value": "0.5"
+     },
+     {
+      "key": "system.attributes.movement.climb",
+      "mode": 1,
+      "value": "0.5"
+     },
+     {
+      "key": "system.attributes.movement.fly",
+      "mode": 1,
+      "value": "0.5"
+     },
+     {
+      "key": "system.attributes.movement.swim",
+      "mode": 1,
       "value": "0.5"
      }
     ]

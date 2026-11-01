@@ -15,12 +15,12 @@ const WAND = p(
 );
 
 const groups = (cs, group, action) => cs.entries.filter((e) => e.group === group && (!action || e.action === action));
-const changesOf = (cs) => cs.effects.add.flatMap((e) => e.system.changes.map((c) => `${c.key}=${c.value}`));
+const changesOf = (cs) => cs.effects.add.flatMap((e) => e.changes.map((c) => `${c.key}=${c.value}`));
 
 describe("scenario 1: Flame Tongue (C5, C6, C12)", () => {
   it("details, attack and 'Command Word' activities with the extra 2d6 fire", async () => {
     const { changeSet: cs, proposal } = await run({ name: "Flame Tongue Longsword", html: FLAME, type: "weapon", value: "martialM" });
-    expect(cs.systemPatch).toMatchObject({ "system.rarities": ["rare"], "system.attunement": "required", "system.type.value": "martialM" });
+    expect(cs.systemPatch).toMatchObject({ "system.rarity": "rare", "system.attunement": "required", "system.type.value": "martialM" });
     const [attack, command] = cs.activities.add;
     expect(attack.type).toBe("attack");
     expect(attack.damage.parts[0]).toMatchObject({ number: 2, denomination: 6, types: ["fire"] });
@@ -62,7 +62,7 @@ describe("scenario 2: Potion of Healing (C5, C6)", () => {
   it("one use destroyed when empty, and a heal activity", async () => {
     const { changeSet: cs } = await run({ name: "Potion of Healing", html: POTION, type: "consumable", value: "potion" });
     expect(cs.systemPatch).toMatchObject({
-      "system.uses.max": "1", "system.uses.autoDestroy": true, "system.type.value": "potion", "system.rarities": ["common"]
+      "system.uses.max": "1", "system.uses.autoDestroy": true, "system.type.value": "potion", "system.rarity": "common"
     });
     expect(cs.activities.add).toHaveLength(1);
     expect(cs.activities.add[0].type).toBe("heal");
@@ -82,10 +82,10 @@ describe("scenario 2: Potion of Healing (C5, C6)", () => {
 describe("scenario 3: Cloak of Protection (C7)", () => {
   it("one passive effect +1 AC and +1 to saves, attunement required", async () => {
     const { changeSet: cs } = await run({ name: "Cloak of Protection", html: CLOAK, type: "equipment", value: "clothing" });
-    expect(cs.systemPatch).toMatchObject({ "system.attunement": "required", "system.rarities": ["uncommon"], "system.type.value": "clothing" });
+    expect(cs.systemPatch).toMatchObject({ "system.attunement": "required", "system.rarity": "uncommon", "system.type.value": "clothing" });
     expect(cs.effects.add).toHaveLength(1);
     expect(cs.effects.add[0].transfer).toBe(true);
-    expect(changesOf(cs)).toEqual(expect.arrayContaining(["system.attributes.ac.bonus=+1", "system.rolls.ability.save.bonus=+1"]));
+    expect(changesOf(cs)).toEqual(expect.arrayContaining(["system.attributes.ac.bonus=+1", "system.bonuses.abilities.save=+1"]));
     expect(cs.activities.add).toEqual([]);
   });
 });
@@ -97,9 +97,9 @@ describe("one case per formulation (C5-C7), English", () => {
     expect(cs.unrecognized, text).toEqual([]);
   };
   it("bonus to attack and damage rolls", effect("You gain a +1 bonus to attack rolls and damage rolls made with this magic weapon.",
-    ["system.rolls.attack.bonus=+1", "system.rolls.damage.mwak.bonus=+1"]));
+    ["system.bonuses.mwak.attack=+1", "system.bonuses.mwak.damage=+1"]));
   it("bonus to AC", effect("You gain a +2 bonus to AC while you wear this armor.", ["system.attributes.ac.bonus=+2"]));
-  it("bonus to one saving throw", effect("You gain a +2 bonus to Wisdom saving throws.", ["system.abilities.wis.save.roll.bonus=+2"]));
+  it("bonus to one saving throw", effect("You gain a +2 bonus to Wisdom saving throws.", ["system.abilities.wis.bonuses.save=+2"]));
   it("resistance", effect("You have resistance to fire damage while you wear this armor.", ["system.traits.dr.value=fire"]));
   it("immunity to damage", effect("You have immunity to poison damage.", ["system.traits.di.value=poison"]));
   it("immunity to a condition", effect("You are immune to the frightened condition.", ["system.traits.ci.value=frightened"]));
@@ -111,7 +111,7 @@ describe("one case per formulation (C5-C7), English", () => {
 
   it("temporary effect after use is not transferred and carries a duration (C7)", async () => {
     const { changeSet: cs } = await run({ html: p("When you drink this potion, you gain resistance to fire damage for 1 hour."), type: "consumable", value: "potion" });
-    expect(cs.effects.add[0]).toMatchObject({ transfer: false, duration: { value: 1, units: "hours" } });
+    expect(cs.effects.add[0]).toMatchObject({ transfer: false, duration: { seconds: 3600 } });
     expect(cs.activities.add.some((a) => a.effects?.some((e) => e._id === cs.effects.add[0]._id))).toBe(true);
   });
   it("save activity with DC, ability and half on success (C6)", async () => {

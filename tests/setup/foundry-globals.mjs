@@ -53,8 +53,9 @@ function createSettings() {
 export function installFoundryGlobals() {
   globalThis.Hooks = createHooks();
   globalThis.game = {
-    system: { id: "dnd5e", version: "6.0.6" },
-    version: "14.369",
+    system: { id: "dnd5e", version: "5.3.3" },
+    version: "13.350",
+    release: { generation: 13 },
     modules: new Map(),
     settings: createSettings(),
     i18n: { localize: vi.fn((k) => k), format: vi.fn((k) => k) },
@@ -62,6 +63,11 @@ export function installFoundryGlobals() {
   };
   globalThis.ui = { notifications: { info: vi.fn(), warn: vi.fn(), error: vi.fn() } };
   globalThis.CONFIG = { DND5E: {} };
+  // Foundry v13 / dnd5e 5.3.3: no `_replace` / `_del` (a forgotten call must throw ReferenceError),
+  // no ACTIVE_EFFECT_DURATION_UNITS.
+  globalThis.CONST = {
+    ACTIVE_EFFECT_MODES: { CUSTOM: 0, MULTIPLY: 1, ADD: 2, DOWNGRADE: 3, UPGRADE: 4, OVERRIDE: 5 }
+  };
 }
 
 beforeEach(() => {

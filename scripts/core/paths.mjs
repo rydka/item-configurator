@@ -15,15 +15,24 @@ export function getPath(object, path) {
   return current;
 }
 
-/** Set a dotted path, creating the parents. */
+const hasIndex = (array, key) => /^\d+$/.test(key) && Number(key) < array.length;
+
+/**
+ * Set a dotted path, creating the plain-object parents. An existing array is traversed by index (`changes.0.value`)
+ * but never grown: a missing element leaves the object untouched (a `{ value }` without `key` / `mode` would not be
+ * a valid effect change).
+ */
 export function setPath(object, path, value) {
   const keys = String(path).split(".");
   let current = object;
   for (const key of keys.slice(0, -1)) {
-    if (!isPlain(current[key])) current[key] = {};
+    if (Array.isArray(current) && !hasIndex(current, key)) return object;
+    if (!isPlain(current[key]) && !Array.isArray(current[key])) current[key] = {};
     current = current[key];
   }
-  current[keys.at(-1)] = value;
+  const last = keys.at(-1);
+  if (Array.isArray(current) && !hasIndex(current, last)) return object;
+  current[last] = value;
   return object;
 }
 

@@ -1,15 +1,19 @@
 /**
  * Translation of the validated answer of Claude (`claude-validate.mjs`) into dnd5e sources: the item `system`
  * patch, the activity sources (written directly: the schema follows the dnd5e field names), the ActiveEffect
- * sources (written by `parser.toEffects`, whose table of v14 keys is already tested: Claude never picks a
- * `system.*` key) and the damage parts (`parser.toDamagePart`). Also builds the descriptors the preview shows,
- * with the same shape as `parser.describe(plan)` plus `origin: "claude"`, `ref`, `certainty`, `inferred`.
+ * sources (written by `parser.toEffects`, whose table of dnd5e 5.3.3 actor paths and Foundry v13 change modes is
+ * already tested: Claude never picks a `system.*` key) and the damage parts (`parser.toDamagePart`). Also builds the
+ * descriptors the preview shows, with the same shape as `parser.describe(plan)` plus `origin: "claude"`, `ref`,
+ * `certainty`, `inferred`.
  *
  * Alignment (used by `core/crosscheck.mjs`): `activities[n]` is the source of `item.activities[n]` (null when it
  * could not be written: unresolved spell), `effects[n]` the source of `item.effects[n]` (null when the library
- * could not write any of its changes). Pure: no Foundry global.
+ * could not write any of its changes), `effectChanges[n][j]` the indices, in `effects[n].changes`, of the Foundry
+ * changes written for `item.effects[n].changes[j]` (several for an attack bonus or a speed multiplier, none for a
+ * skipped change; `effectChanges[n]` is null with `effects[n]`). Pure: no Foundry global.
  */
 import { BONUS_KINDS, DETAIL_FIELDS } from "./claude-schema.mjs";
+import { changeIndices } from "../core/crosscheck.mjs";
 import { setPath } from "../core/paths.mjs";
 
 const LIB = "dnd5e-text-parser.";
@@ -19,10 +23,6 @@ export const NOTE_FLAVOR = `${LIB}Note.Flavor`;
 export const NOTE_EFFECT_SKIPPED = `${LIB}Note.EffectSkipped`;
 export const NOTE_SPELL_NOT_FOUND = `${LIB}Note.SpellNotFound`;
 
-/** dnd5e time period -> Foundry ActiveEffect duration unit (`duration-field.mjs`, `getEffectDuration`). */
-export const EFFECT_UNITS = {
-  turn: "turns", round: "rounds", second: "seconds", minute: "minutes", hour: "hours", day: "days", month: "months", year: "years"
-};
 /** Property group of `validProperties` per item type. */
 const PROPERTY_GROUP = { weapon: "weapon", equipment: "equipment", consumable: "consumable" };
 /** Scopes that mean "every roll" for the library (which expects no scope then). */
@@ -72,10 +72,10 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
     const quotes = detail.quotes.join(" ");
     switch (detail.field) {
       case "rarity":
-        setPath(system, "rarities", [detail.key]);
+        setPath(system, "rarity", detail.key);
         rarityDetail = detail;
         if (["uncommon", "rare", "veryRare", "legendary", "artifact"].includes(detail.key) && allowProperty("mgc")) properties.add("mgc");
-        describe(`${LIB}Describe.Rarity`, { rarity: detail.key }, detail, { group: "details", paths: ["system.rarities"] });
+        describe(`${LIB}Describe.Rarity`, { rarity: detail.key }, detail, { group: "details", paths: ["system.rarity"] });
         break;
       case "attunement":
         setPath(system, "attunement", detail.key);
@@ -142,6 +142,7 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
 
   // ---- Effects (first: the activities list their ids) -----------------------------------------------------------
   const effectIds = new Map();
+  const effectChanges = [];
   const effects = (item.effects ?? []).map((effect, n) => {
     const label = effect.name || name || "Effect";
     const planEffects = effect.changes.map((change) => toItemEffect(change, effect));
@@ -152,16 +153,21 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
     if (!source) {
       // Nothing dnd5e can write: the clause stays visible, with its quote
       clause(effect.quotes[0], effect);
+      effectChanges[n] = null;
       return null;
     }
+    // Where each of Claude's changes landed: the same change translated alone, located in the combined list
+    effectChanges[n] = planEffects.map((planEffect) => {
+      const alone = parser.toEffects({ name: label, effects: [planEffect] }, { keys, idGen: () => "", name: label });
+      return changeIndices(source.changes, alone[0]?.changes);
+    });
     source.name = label;
     source.transfer = effect.transfer;
     if (source.flags) delete source.flags;
-    if (!effect.transfer && effect.duration) {
-      const units = EFFECT_UNITS[effect.duration.units];
-      if (effect.duration.until) source.duration = { expiry: effect.duration.until, value: null };
-      else if (units && effect.duration.value) source.duration = { value: effect.duration.value, units };
-    } else delete source.duration;
+    // Foundry v13 duration (`{ seconds | rounds | turns }`): "until the end of the next turn" lasts one turn
+    const duration = !effect.transfer && effect.duration ? parser.toEffectDuration(effect.duration) : null;
+    if (duration) source.duration = duration;
+    else delete source.duration;
     effectIds.set(effect.ref, source._id);
     // A change the library skipped (`Note.EffectSkipped { kind, scope }`) is a clause of its own; the others are
     // described one by one (C12: every line cites its passage)
@@ -173,7 +179,9 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
       });
     });
     if (source.duration) {
-      describe(`${OWN}Fact.EffectDuration`, { value: source.duration.value ?? "", units: source.duration.units ?? "", until: source.duration.expiry ?? "" }, effect, {
+      // The descriptor shows Claude's reading (`value`, `units`, `until`): the v13 source only holds seconds / turns
+      const { value, units, until } = effect.duration;
+      describe(`${OWN}Fact.EffectDuration`, { value: until ? "" : (value ?? ""), units: until ? "" : (units ?? ""), until: until ?? "" }, effect, {
         group: "effects", paths: [`effects.${n}`]
       });
     }
@@ -273,7 +281,7 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
     describe(NOTE_FLAVOR, { text: entry.text }, { quotes: [entry.text], paragraphs: entry.paragraphs }, { group: null, raw: entry.text });
   }
 
-  return { system, activities, effects, descriptors, notes };
+  return { system, activities, effects, effectChanges, descriptors, notes };
 }
 
 /**

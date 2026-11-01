@@ -4,7 +4,7 @@ import { carryOverSystem } from "../../scripts/core/convert.mjs";
 const oldSystem = () => ({
   description: { value: "<p>Text</p>", chat: "c" }, identifier: "my-item", source: { book: "PHB" },
   identified: true, unidentified: { name: "Strange" },
-  container: "abc", quantity: 3, weight: { value: 2, units: "lb" }, price: { value: 10, denomination: "gp" }, rarities: undefined,
+  container: "abc", quantity: 3, weight: { value: 2, units: "lb" }, price: { value: 10, denomination: "gp" }, rarity: undefined,
   attunement: "required", attuned: true, equipped: true,
   activities: { a1: { type: "attack" } }, uses: { max: "3" }, type: { value: "martialM" }, damage: { base: {} }
 });
@@ -26,7 +26,7 @@ describe("carryOverSystem (C4)", () => {
     for (const key of ["attunement", "attuned", "equipped"]) expect(r).not.toHaveProperty(key);
   });
   it("does not carry undefined fields", () => {
-    expect(carryOverSystem(oldSystem(), "weapon", "tool")).not.toHaveProperty("rarities");
+    expect(carryOverSystem(oldSystem(), "weapon", "tool")).not.toHaveProperty("rarity");
   });
   it("deep copies: mutating the result leaves the source untouched", () => {
     const src = oldSystem();

@@ -12,7 +12,7 @@
  * - `path`: where the element lands in the proposal (`activities.<n>`, `effects.<n>`, `system.<field>`): for Claude,
  *   `<n>` is the index in `item.activities` / `item.effects` of the validated answer (`buildFromClaude` keeps it);
  * - `patch`: `[{ field, form, data }]`, the dnd5e-shaped value(s) the fact writes, relative to the element (`healing`,
- *   `save.dc.formula`, `system.changes.<j>.value`) or absolute for details (`system.armor.value`). In a conflict, the
+ *   `save.dc.formula`, `changes.<j>.value`, `duration`) or absolute for details (`system.armor.value`). In a conflict, the
  *   rules' alternative is rendered in the `form` of Claude's fields, so that a click writes it in Claude's element;
  * - `canon`: the family's canonical value, from which `render` builds any form.
  */
@@ -43,14 +43,14 @@ const ITEM_LEVEL = new Set(["rarity", "attunement", "magicalBonus", "ac"]);
 /** Effect kinds whose value is a number the two readings can disagree on. */
 const BONUS_KINDS = ["ac", "attack", "damage", "save", "check", "abilityScore", "speed", "damageReduction", "sense", "speedMultiplier"];
 
-/** Seconds of a duration unit (dnd5e `timePeriods` and Foundry `ACTIVE_EFFECT_DURATION_UNITS`); a turn is a round. */
+/** Seconds of a duration unit (dnd5e `timePeriods`, singular, and their Foundry plural names); a turn is a round. */
 const UNIT_SECONDS = {
   turn: 6, turns: 6, round: 6, rounds: 6, second: 1, seconds: 1, minute: 60, minutes: 60, hour: 3600, hours: 3600,
   day: 86400, days: 86400, month: 2592000, months: 2592000, year: 31536000, years: 31536000
 };
-/** Foundry effect unit of a dnd5e time period (`duration-field.mjs`, `getEffectDuration`). */
-const EFFECT_UNITS = { turn: "turns", round: "rounds", second: "seconds", minute: "minutes", hour: "hours", day: "days", month: "months", year: "years" };
-const ACTIVITY_UNITS = Object.fromEntries(Object.entries(EFFECT_UNITS).map(([a, e]) => [e, a]));
+/** Plural (Foundry) name of each dnd5e time period, as Claude or the plan may give either. */
+const PLURAL_UNITS = { turn: "turns", round: "rounds", second: "seconds", minute: "minutes", hour: "hours", day: "days", month: "months", year: "years" };
+const ACTIVITY_UNITS = Object.fromEntries(Object.entries(PLURAL_UNITS).map(([a, e]) => [e, a]));
 
 /** Feet of a distance unit; `null` when the unit is not a length (`self`, `touch`, `any`, `spec`...). */
 const UNIT_FEET = { ft: 1, feet: 1, mi: 5280, m: 10 / 3, km: 10000 / 3 };
@@ -137,8 +137,8 @@ const secondsOf = (value, units) => {
 };
 
 /**
- * Render a canonical value in the form of a field (`part`, `formula`, `string`, `number`, `key`, `keyList`,
- * `recovery`, `activityUnits`, `effectUnits`, `durationValue`, `distanceValue`, `distanceUnits`).
+ * Render a canonical value in the form of a field (`part`, `formula`, `string`, `signed`, `number`, `key`, `keyList`,
+ * `recovery`, `activityUnits`, `effectDuration`, `durationValue`, `distanceValue`, `distanceUnits`).
  * @param {string} family
  * @param {*} canon
  * @param {string} form
@@ -149,6 +149,11 @@ export function render(family, canon, form) {
     case "part": return { number: canon.number, denomination: canon.denomination, bonus: canon.bonus, types: [...canon.types] };
     case "formula": return family === "dice" ? diceFormula(canon) : String(canon);
     case "string": return String(canon);
+    case "signed": {
+      // Effect bonus as `toEffects` writes it: "+1", "-1", "+0" (an unsigned number would change the stored form)
+      const n = num(canon);
+      return n === null ? String(canon) : (n >= 0 ? `+${n}` : String(n));
+    }
     case "number": return num(canon);
     case "key": return canon;
     case "keyList": return [canon];
@@ -156,7 +161,11 @@ export function render(family, canon, form) {
     case "recovery": return canon.period ? [{ period: canon.period, type: "recoverAll" }] : [];
     case "durationValue": return canon.value;
     case "activityUnits": return ACTIVITY_UNITS[canon.units] ?? canon.units;
-    case "effectUnits": return EFFECT_UNITS[canon.units] ?? canon.units;
+    case "effectDuration":
+      // Foundry v13 `EffectDurationData` of a duration canon (`units` singular, `seconds` computed)
+      if (canon.units === "turn") return { turns: canon.value };
+      if (canon.units === "round") return { rounds: canon.value };
+      return { seconds: canon.seconds };
     case "distanceValue": return canon.value;
     case "distanceUnits": return canon.units;
     default: return canon;
@@ -187,15 +196,18 @@ const usesFact = ({ max, period }, { prefix, ...rest }) => fact("uses", {
   patch: [{ field: `${prefix}max`, form: "usesMax", data: String(max) }, { field: `${prefix}recovery`, form: "recovery", data: render("uses", { max, period }, "recovery") }],
   ...rest
 });
+/**
+ * Duration fact. An activity duration (`prefix`, `form: "activityUnits"`) patches `duration.value` and
+ * `duration.units`; an effect duration (`form: "effectDuration"`) patches the whole v13 `duration`
+ * (`{ seconds | rounds | turns }`) of the effect source.
+ */
 const durationFact = ({ value, units }, { prefix, form, ...rest }) => {
   const seconds = secondsOf(value, units);
   if (seconds === null) return null;
   const canon = { value: num(value), units: ACTIVITY_UNITS[units] ?? units, seconds };
-  return fact("duration", {
-    value: seconds, display: `${value} ${units}`, canon,
-    patch: [{ field: `${prefix}value`, form: "durationValue", data: canon.value }, { field: `${prefix}units`, form, data: units }],
-    ...rest
-  });
+  const patch = form === "effectDuration" ? [{ field: "duration", form, data: render("duration", canon, form) }]
+    : [{ field: `${prefix}value`, form: "durationValue", data: canon.value }, { field: `${prefix}units`, form, data: units }];
+  return fact("duration", { value: seconds, display: `${value} ${units}`, canon, patch, ...rest });
 };
 const distanceFact = ({ value, units }, { prefix, ...rest }) => {
   const feet = feetOf(value, units);
@@ -207,16 +219,48 @@ const distanceFact = ({ value, units }, { prefix, ...rest }) => {
     ...rest
   });
 };
-const effectBonusFact = ({ kind, scope, value }, { field, ...rest }) => {
+/**
+ * Bonus fact of one plan / Claude change. `fields` are the `changes.<k>.value` paths of every Foundry change the
+ * bonus produced in the effect source (an attack bonus gives four, a speed multiplier five): a choice writes them all.
+ */
+const effectBonusFact = ({ kind, scope, value }, { fields, ...rest }) => {
   const amount = num(bonusText(value));
   if (amount === null || !BONUS_KINDS.includes(kind)) return null;
   const where = scope ?? "";
   const sign = amount >= 0 && kind !== "speedMultiplier" ? "+" : "";
+  // A bonus is stored signed ("+1"); a speed multiplier is a bare factor ("0.5")
+  const form = kind === "speedMultiplier" ? "string" : "signed";
   return fact("effectBonus", {
     value: `${kind}:${where}=${amount}`, display: `${kind}${where ? ` (${where})` : ""} ${sign}${amount}`,
-    canon: amount, patch: [{ field, form: "string", data: String(value) }], ...rest
+    canon: amount, patch: list(fields).map((field) => ({ field, form, data: String(value) })), ...rest
   });
 };
+
+/**
+ * Indices, in the `changes` of an effect source, of the entries of `wanted` (same `key|mode|value`, in order; an
+ * entry deduplicated by `toEffects` is skipped). Aligns a plan / Claude change with the Foundry changes it produced.
+ * @param {object[]} changes  `changes` of the effect source written by `parser.toEffects`.
+ * @param {object[]} wanted   `changes` of the same plan change translated alone.
+ * @returns {number[]}
+ */
+export function changeIndices(changes, wanted) {
+  const signature = (c) => `${c.key}|${c.mode}|${c.value}`;
+  const result = [];
+  let cursor = 0;
+  for (const entry of list(wanted)) {
+    const at = list(changes).findIndex((c, i) => i >= cursor && signature(c) === signature(entry));
+    if (at < 0) continue;
+    result.push(at);
+    cursor = at + 1;
+  }
+  return result;
+}
+
+/**
+ * `changes.<k>.value` fields of a change: its real indices when the alignment is known (none for a change the library
+ * skipped or an effect it dropped), else its own index.
+ */
+const changeFields = (indices, fallback) => (indices === undefined ? [fallback] : list(indices)).map((k) => `changes.${k}.value`);
 
 /* -------------------------------------------- */
 /*  Rules                                        */
@@ -226,15 +270,18 @@ const effectBonusFact = ({ kind, scope, value }, { field, ...rest }) => {
  * Facts of the rules' plan (`parser.parseItem`).
  * @param {object} plan                        ItemPlan.
  * @param {(string|{ text: string })[]} paragraphs
+ * @param {{ effectChanges?: (number[]|null)[] }} [alignment]  `effectChanges[n]`: indices, in the `changes` of the
+ *   effect source `toEffects` wrote for plan effect `n`, of the Foundry changes it produced (`changeIndices`); `null`
+ *   when it produced none. Without it, the plan index stands for the change index.
  * @returns {object[]}  Facts (`path` of an activity / effect is its index in the plan).
  */
-export function factsFromRules(plan, paragraphs) {
+export function factsFromRules(plan, paragraphs, { effectChanges } = {}) {
   const locate = paragraphLocator(paragraphs);
   const facts = [];
   const add = (f) => { if (f) facts.push(f); };
   const details = plan?.details ?? {};
 
-  if (details.rarity) add(keyFact("rarity", details.rarity, { ref: "details.rarity", path: "system.rarities", field: "system.rarities", form: "keyList", paragraph: locate(details.rarityRaw) }));
+  if (details.rarity) add(keyFact("rarity", details.rarity, { ref: "details.rarity", path: "system.rarity", field: "system.rarity", form: "key", paragraph: locate(details.rarityRaw) }));
   if (details.attunement) add(keyFact("attunement", details.attunement, { ref: "details.attunement", path: "system.attunement", field: "system.attunement", paragraph: locate(details.attunementRaw) }));
   for (const [name, part] of Object.entries({ weapon: details.weapon, armor: details.armor })) {
     if (!part) continue;
@@ -276,8 +323,8 @@ export function factsFromRules(plan, paragraphs) {
   list(plan?.effects).forEach((effect, n) => {
     const ref = `effects.${n}`;
     const base = { ref, path: ref, paragraph: locate(effect.raw), raw: text(effect.raw) };
-    add(effectBonusFact(effect, { field: `system.changes.${n}.value`, ...base }));
-    if (effect.duration) add(durationFact(effect.duration, { prefix: "duration.", form: "effectUnits", ...base }));
+    add(effectBonusFact(effect, { fields: changeFields(effectChanges?.[n], n), ...base }));
+    if (effect.duration) add(durationFact(effect.duration, { form: "effectDuration", ...base }));
   });
   return facts;
 }
@@ -288,7 +335,7 @@ export function factsFromRules(plan, paragraphs) {
 
 /** Claude detail fields that carry a fact, with their family and target. */
 const DETAIL_FACTS = {
-  rarity: { family: "rarity", path: "system.rarities", form: "keyList" },
+  rarity: { family: "rarity", path: "system.rarity", form: "key" },
   attunement: { family: "attunement", path: "system.attunement", form: "key" },
   magicalBonus: { family: "magicalBonus", path: "system.magicalBonus", form: "number" },
   armorValue: { family: "ac", path: "system.armor.value", form: "number" },
@@ -300,9 +347,12 @@ const DETAIL_FACTS = {
  * Facts of Claude's validated answer (schema of `ai/claude-schema.mjs`).
  * @param {object} item                        Validated item (`details`, `uses`, `activities`, `effects`).
  * @param {(string|{ text: string })[]} paragraphs
+ * @param {{ effectChanges?: (number[][]|null)[] }} [alignment]  `effectChanges[n][j]`: indices, in the `changes` of
+ *   the effect source `buildFromClaude` wrote for `item.effects[n]`, of the Foundry changes of its change `j`
+ *   (`buildFromClaude(...).effectChanges`). Without it, `j` stands for the change index.
  * @returns {object[]}  Facts (`path` of an activity / effect is its index in the item's list).
  */
-export function factsFromClaude(item, paragraphs) {
+export function factsFromClaude(item, paragraphs, { effectChanges } = {}) {
   const locate = paragraphLocator(paragraphs);
   const facts = [];
   const add = (f) => { if (f) facts.push(f); };
@@ -349,8 +399,8 @@ export function factsFromClaude(item, paragraphs) {
 
   list(item?.effects).forEach((effect, n) => {
     const base = { ref: text(effect.ref) || `effects.${n}`, path: `effects.${n}`, paragraph: firstParagraph(locate, effect.quotes), inferred: Boolean(effect.inferred), raw: text(effect.quotes?.[0]) };
-    list(effect.changes).forEach((change, j) => add(effectBonusFact(change, { field: `system.changes.${j}.value`, ...base })));
-    if (effect.duration?.units) add(durationFact(effect.duration, { prefix: "duration.", form: "effectUnits", ...base }));
+    list(effect.changes).forEach((change, j) => add(effectBonusFact(change, { fields: changeFields(effectChanges?.[n]?.[j], j), ...base })));
+    if (effect.duration?.units) add(durationFact(effect.duration, { form: "effectDuration", ...base }));
   });
   return facts;
 }

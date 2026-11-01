@@ -30,7 +30,7 @@ describe("construction: the ring (expected.json)", async () => {
   });
   it("details and uses on the item", () => {
     expect(cs.systemPatch["system.type.value"]).toBe("ring");
-    expect(cs.systemPatch["system.rarities"]).toEqual([expected.system.rarity]);
+    expect(cs.systemPatch["system.rarity"]).toBe(expected.system.rarity);
     expect(cs.systemPatch["system.attunement"]).toBe("required");
     expect(cs.systemPatch["system.uses.max"]).toBe(expected.system["uses.max"]);
     expect(cs.systemPatch["system.uses.recovery"]).toEqual(expected.system["uses.recovery"]);
@@ -47,15 +47,17 @@ describe("construction: the ring (expected.json)", async () => {
     expect(a.range.units).toBe(e["range.units"]);
     expect(a.target.affects.type).toBe("self");
   });
-  it("the temporary effect: written by the library (change type, no mode), not transferred, ends at the end of the next turn", () => {
+  it("the temporary effect: written by the library (v13 changes: numeric mode, no system), not transferred, lasts one turn", () => {
     expect(cs.effects.add).toHaveLength(1);
     const [effect] = cs.effects.add;
     expect(effect.transfer).toBe(false);
-    expect(effect.duration.expiry).toBe("sourceEnd");
-    expect(effect.system.changes).toMatchObject(expected.effects[0].changes);
-    for (const change of effect.system.changes) {
-      expect(change).toHaveProperty("type");
-      expect(change).not.toHaveProperty("mode");
+    expect(effect.duration).toEqual(expected.effects[0].duration);
+    expect(effect).not.toHaveProperty("system");
+    expect(effect.changes).toMatchObject(expected.effects[0].changes);
+    for (const change of effect.changes) {
+      expect(typeof change.mode).toBe("number");
+      expect(typeof change.value).toBe("string");
+      expect(change).not.toHaveProperty("type");
       expect(change.key).toMatch(/^system\./);
     }
   });
@@ -87,7 +89,7 @@ describe("construction: the compass (expected.json)", async () => {
   const [a1, a2, a3, a4] = cs.activities.add;
   it("item level: wondrous, uncommon, no attunement, magical, no uses on the item", () => {
     expect(cs.systemPatch["system.type.value"]).toBe("wondrous");
-    expect(cs.systemPatch["system.rarities"]).toEqual(["uncommon"]);
+    expect(cs.systemPatch["system.rarity"]).toBe("uncommon");
     expect(cs.systemPatch["system.attunement"]).toBe("");
     expect(cs.systemPatch["system.properties"]).toEqual(expect.arrayContaining(["mgc"]));
     expect(cs.systemPatch["system.uses.max"]).toBeUndefined();
@@ -248,10 +250,10 @@ describe("selection (checkboxes and 'to check' choices)", () => {
   });
   it("an unchecked detail entry leaves its field out of the patch", async () => {
     const { cs } = await fromFixture("ring");
-    const entries = cs.entries.filter((e) => e.group === "details" && (e.refs?.paths ?? []).includes("system.rarities"));
+    const entries = cs.entries.filter((e) => e.group === "details" && (e.refs?.paths ?? []).includes("system.rarity"));
     expect(entries.length).toBeGreaterThan(0);
     const result = applySelection(cs, { selected: Object.fromEntries(entries.map((e) => [e.id, false])) });
-    expect(result.systemPatch).not.toHaveProperty("system.rarities");
+    expect(result.systemPatch).not.toHaveProperty("system.rarity");
     expect(result.systemPatch["system.attunement"]).toBe("required");
   });
   it("a low-certainty element is proposed unchecked and is not applied", async () => {

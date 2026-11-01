@@ -1,5 +1,7 @@
 # Builds and attaches module.json + module.zip when a GitHub release is published.
-# Tag format: v1.2.3 (the "v" is stripped to get the module version).
+# Tag format: v1.2.3-v13 (the "v" is stripped to get the module version).
+# v13 branch: publish the release with --latest=false (the v14 line on main follows releases/latest); the
+# manifest URL is the raw module.json of the v13 branch, never releases/latest.
 name: Release
 
 on:
@@ -21,7 +23,7 @@ jobs:
 
       # Dev dependency "file:../dnd5e-text-parser": fetch the published library next to the repo.
       - name: Fetch dnd5e-text-parser
-        run: git clone --depth 1 --branch v1.1.0 https://github.com/rydka/dnd5e-text-parser.git ../dnd5e-text-parser
+        run: git clone --depth 1 --branch v1.1.0-v13 https://github.com/rydka/dnd5e-text-parser.git ../dnd5e-text-parser
 
       - run: npm ci
       - run: npm run lint
@@ -37,7 +39,7 @@ jobs:
             const m = JSON.parse(fs.readFileSync("module.json", "utf8"));
             const tag = process.env.TAG;
             m.version = tag.replace(/^v/, "");
-            m.manifest = `https://github.com/${process.env.REPO}/releases/latest/download/module.json`;
+            m.manifest = "https://raw.githubusercontent.com/rydka/item-configurator/v13/module.json";
             m.download = `https://github.com/${process.env.REPO}/releases/download/${tag}/module.zip`;
             fs.writeFileSync("module.json", JSON.stringify(m, null, 2) + "\n");
           '

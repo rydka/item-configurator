@@ -2,14 +2,14 @@
 
 Configure a dnd5e item (details, activities, active effects) from its description, with a preview and optional local AI.
 
-Module Foundry VTT v14 pour le système dnd5e 6.x.
+Module Foundry VTT **v13** pour le système dnd5e **5.3.x** (branche `v13`, version `0.1.0-v13`). La version pour Foundry v14 / dnd5e 6 vit sur la branche `main` et suit `releases/latest` ; les deux lignes ont chacune leur manifeste.
 
 ## Installation
 
 Dans Foundry : **Add-on Modules → Install Module**, puis coller l'adresse du manifeste :
 
 ```
-https://github.com/rydka/item-configurator/releases/latest/download/module.json
+https://raw.githubusercontent.com/rydka/item-configurator/v13/module.json
 ```
 
 ## Utilisation

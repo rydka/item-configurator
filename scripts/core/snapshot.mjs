@@ -72,7 +72,7 @@ export function modifiedSince(snapshot, currentSource) {
 
 /**
  * Compute the operations that restore the item from a snapshot.
- * The caller writes `update.system` with `_replace(...)`, removes the undo flag with `_del`, deletes
+ * The caller writes `update` with `restoreUpdate` of `update-ops.mjs` (`==system`, `-=undo`), deletes
  * `deleteEffectIds`, then creates `createEffects` with `{ keepId: true }`.
  * @param {object} snapshot
  * @param {object} currentSource  `item.toObject()` now.

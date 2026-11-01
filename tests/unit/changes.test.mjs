@@ -14,16 +14,16 @@ const CLOAK = p("Wondrous item, uncommon (requires attunement)", "You gain a +1 
 const partialWeapon = () => ({
   type: "weapon",
   system: {
-    rarities: ["common"], attunement: "optional", type: { value: "simpleM" }, price: { value: 5, denomination: "sp" },
+    rarity: "common", attunement: "optional", type: { value: "simpleM" }, price: { value: 5, denomination: "sp" },
     weight: { value: 2, units: "lb" },
     activities: { handmade000000001: { _id: "handmade000000001", type: "attack", name: "Mine", damage: { parts: [] } } }
   },
-  effects: [{ _id: "handeffect000001", name: "Mine", transfer: true, system: { changes: [{ key: "system.attributes.ac.bonus", type: "add", value: "+9", phase: "initial" }] } }]
+  effects: [{ _id: "handeffect000001", name: "Mine", transfer: true, changes: [{ key: "system.attributes.ac.bonus", mode: 2, value: "+9", priority: null }], duration: { seconds: null, rounds: null, turns: null } }]
 });
 const partialEquipment = () => ({
   type: "equipment",
-  system: { rarities: ["rare"], attunement: "optional", type: { value: "clothing" } },
-  effects: [{ _id: "handeffect000002", name: "Mine", transfer: true, system: { changes: [{ key: "system.traits.dr.value", type: "add", value: "cold", phase: "initial" }] } }]
+  system: { rarity: "rare", attunement: "optional", type: { value: "clothing" } },
+  effects: [{ _id: "handeffect000002", name: "Mine", transfer: true, changes: [{ key: "system.traits.dr.value", mode: 2, value: "cold", priority: null }], duration: { seconds: null, rounds: null, turns: null } }]
 });
 
 const filled = (parser, source, path) => {
@@ -37,7 +37,7 @@ describe("merge without 'Replace existing' (C13, M6)", () => {
     const { changeSet: cs } = await run({ html: FLAME, type: "weapon", value: "martialM" }, { source });
     // The sub-type the user picked in the type window (system.type.value) is explicit and may replace the old one.
     for (const path of Object.keys(cs.systemPatch).filter((k) => k !== "system.type.value")) expect(filled(parser, source, path), path).toBe(false);
-    expect(cs.systemPatch).not.toHaveProperty("system.rarities");
+    expect(cs.systemPatch).not.toHaveProperty("system.rarity");
     expect(cs.systemPatch).not.toHaveProperty("system.attunement");
   });
   it("kept fields are listed as 'keep' with their previous value", async () => {
@@ -51,7 +51,7 @@ describe("merge without 'Replace existing' (C13, M6)", () => {
     delete source.system.price;
     const { changeSet: cs } = await run({ html: p("Weapon, rare", "This weapon costs 50 gp."), type: "weapon", value: "simpleM" }, { source });
     expect(cs.systemPatch).toMatchObject({ "system.price.value": 50, "system.price.denomination": "gp" });
-    expect(cs.systemPatch).not.toHaveProperty("system.rarities");
+    expect(cs.systemPatch).not.toHaveProperty("system.rarity");
   });
   it("never removes existing activities or effects", async () => {
     const { changeSet: cs } = await run({ html: FLAME, type: "weapon", value: "martialM" }, { source: partialWeapon() });
@@ -79,7 +79,7 @@ describe("merge without 'Replace existing' (C13, M6)", () => {
 describe("'Replace existing' (C13)", () => {
   it("overwrites proposed details and lists the replaced value", async () => {
     const { changeSet: cs } = await run({ html: FLAME, type: "weapon", value: "martialM" }, { source: partialWeapon(), replace: true });
-    expect(cs.systemPatch).toMatchObject({ "system.rarities": ["rare"], "system.attunement": "required" });
+    expect(cs.systemPatch).toMatchObject({ "system.rarity": "rare", "system.attunement": "required" });
     const replaced = cs.entries.filter((e) => e.action === "replace");
     expect(replaced.length).toBeGreaterThan(0);
     expect(JSON.stringify(replaced.map((e) => e.previous))).toContain("common");

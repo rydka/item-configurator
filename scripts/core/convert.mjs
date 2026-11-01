@@ -2,10 +2,10 @@ import { SUPPORTED_TYPES } from "./types.mjs";
 
 const DESCRIPTION = ["description", "identifier", "source"];
 const IDENTIFIABLE = ["identified", "unidentified"];
-const PHYSICAL = ["container", "quantity", "weight", "price", "rarities"];
+const PHYSICAL = ["container", "quantity", "weight", "price", "rarity"];
 const EQUIPPABLE = ["attunement", "attuned", "equipped"];
 
-/** Fields shared with other types, per target type (dnd5e 6 templates, `data/item/*.mjs`). */
+/** Fields shared with other types, per target type (dnd5e 5.3.3 templates, `data/item/*.mjs`). */
 const TEMPLATE_FIELDS = {
   weapon: [...DESCRIPTION, ...IDENTIFIABLE, ...PHYSICAL, ...EQUIPPABLE],
   equipment: [...DESCRIPTION, ...IDENTIFIABLE, ...PHYSICAL, ...EQUIPPABLE],
@@ -17,7 +17,7 @@ const TEMPLATE_FIELDS = {
 
 /**
  * Build the `system` source of an item converted to another type (C4). The result is meant to be written with
- * `update({ type, system: _replace(result) })`. Only the fields common to both templates are kept (description,
+ * `update(typeChangeUpdate(type, result))` (`==system`). Only the fields common to both templates are kept (description,
  * source, identification, container, quantity, weight, price, rarity, attunement, equipped); activities, uses, type
  * and type-specific fields are dropped (the pre-conversion state is kept in the undo snapshot). The target's
  * type/subtype are not set here.

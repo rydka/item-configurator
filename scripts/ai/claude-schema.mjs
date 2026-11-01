@@ -44,7 +44,7 @@ export const WEIGHT_UNITS = ["lb", "kg"];
  * detail carries (`key`, `number`, `dice`, or nothing).
  */
 export const DETAIL_FIELDS = {
-  rarity: { value: "key", key: "itemRarity", path: "rarities" },
+  rarity: { value: "key", key: "itemRarity", path: "rarity" },
   attunement: { value: "key", key: "attunementTypes", path: "attunement" },
   attunementCondition: { value: "", path: null },           // kept as a clause: dnd5e 6 has no field for it
   magicalBonus: { value: "number", path: { weapon: "magicalBonus", equipment: "armor.magicalBonus" } },
