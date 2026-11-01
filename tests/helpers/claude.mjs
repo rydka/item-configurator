@@ -13,8 +13,14 @@ export const ITEMS = readJson(dir, "items.json");
 export { K };
 
 const snapshot = referenceFile("schema-enums.json");
-/** Enumerations of the world (Foundry 14.369 / dnd5e 6.0.6 snapshot). */
-export const ENUMS = schemaEnums(snapshot.dnd5e, { ACTIVE_EFFECT_DURATION_UNITS: Object.fromEntries(snapshot.const.ACTIVE_EFFECT_DURATION_UNITS.map((u) => [u, u])) });
+/** Enumerations of the world (Foundry 13 / dnd5e 5.3.3 snapshot; Foundry 13 has no ACTIVE_EFFECT_DURATION_UNITS). */
+export const ENUMS = schemaEnums(snapshot.dnd5e, durationUnitsOf(snapshot.const));
+
+/** `CONST` stand-in for `schemaEnums`: the duration units only when the snapshot has them. */
+export function durationUnitsOf(snapshotConst) {
+  const units = snapshotConst?.ACTIVE_EFFECT_DURATION_UNITS;
+  return units ? { ACTIVE_EFFECT_DURATION_UNITS: Object.fromEntries(units.map((u) => [u, u])) } : {};
+}
 
 /** The JSON Claude answered in a fixture (null when the text is not JSON). */
 export function answerOf(name) {

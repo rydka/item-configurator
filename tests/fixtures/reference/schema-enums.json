@@ -1,7 +1,7 @@
 {
  "versions": {
-  "foundry": "14.369",
-  "dnd5e": "6.0.6"
+  "foundry": "13",
+  "dnd5e": "5.3.3"
  },
  "dnd5e": {
   "damageTypes": {
@@ -170,7 +170,6 @@
    "cylinder": "Cylinder",
    "line": "Line",
    "radius": "Emanation",
-   "ring": "Ring",
    "sphere": "Sphere",
    "square": "Square",
    "wall": "Wall"
@@ -311,7 +310,6 @@
    "order",
    "save",
    "summon",
-   "teleport",
    "transform",
    "utility"
   ],
@@ -338,7 +336,6 @@
    ],
    "container": [
     "mgc",
-    "unidentifiedContents",
     "weightlessContents"
    ],
    "equipment": [
@@ -448,16 +445,6 @@
   ]
  },
  "const": {
-  "ACTIVE_EFFECT_DURATION_UNITS": [
-   "years",
-   "months",
-   "days",
-   "hours",
-   "minutes",
-   "seconds",
-   "rounds",
-   "turns"
-  ],
   "ACTIVE_EFFECT_MODES": {
    "CUSTOM": 0,
    "MULTIPLY": 1,

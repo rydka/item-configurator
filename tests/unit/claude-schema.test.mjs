@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import { ACTIVITY_TYPES, DETAIL_FIELDS, EFFECT_KINDS, buildItemSchema, countOptional, schemaEnums } from "../../scripts/ai/claude-schema.mjs";
 import { referenceFile } from "../helpers/keys.mjs";
-import { ENUMS } from "../helpers/claude.mjs";
+import { ENUMS, durationUnitsOf } from "../helpers/claude.mjs";
 
 const snapshot = referenceFile("schema-enums.json");
 const schema = buildItemSchema(ENUMS);
@@ -20,12 +20,14 @@ describe("schemaEnums", () => {
   it("rebuilds sorted enumerations from the Foundry snapshot", () => {
     for (const [name, values] of Object.entries(ENUMS)) {
       if (name === "validProperties" || name === "weightUnits") continue; // weightUnits: fixed ["lb","kg"], deterministic
+      if (name === "effectDurationUnits") continue; // Foundry 13 has no CONST.ACTIVE_EFFECT_DURATION_UNITS (I9), checked below
       expect(values, name).toEqual([...values].sort());
       expect(values.length, name).toBeGreaterThan(0);
     }
     expect(ENUMS.timePeriods).toEqual(expect.arrayContaining(["inst", "minute", "hour", "day", "perm", "round", "turn"]));
     expect(ENUMS.distanceUnits).toEqual(expect.arrayContaining(["ft", "m", "mi", "km", "self", "touch"]));
-    expect(ENUMS.effectDurationUnits).toEqual(["days", "hours", "minutes", "months", "rounds", "seconds", "turns", "years"]);
+    // I9: Foundry 13 has no CONST.ACTIVE_EFFECT_DURATION_UNITS
+    expect(ENUMS.effectDurationUnits).toEqual([]);
     expect(ENUMS.validProperties.equipment).toContain("mgc");
     expect(ENUMS.limitedUsePeriods).toEqual(expect.arrayContaining(["lr", "sr", "dawn", "dusk", "day"]));
   });
@@ -66,7 +68,7 @@ describe("output schema (structured-output limits)", () => {
     expect(countOptional(schema)).toBe(17);
   });
   it("is stable: the same enumerations give the byte-identical schema (cache)", () => {
-    const again = buildItemSchema(schemaEnums(snapshot.dnd5e, { ACTIVE_EFFECT_DURATION_UNITS: Object.fromEntries(snapshot.const.ACTIVE_EFFECT_DURATION_UNITS.map((u) => [u, u])) }));
+    const again = buildItemSchema(schemaEnums(snapshot.dnd5e, durationUnitsOf(snapshot.const)));
     expect(JSON.stringify(again)).toBe(JSON.stringify(schema));
     expect(JSON.stringify(buildItemSchema(ENUMS))).toBe(JSON.stringify(schema));
   });

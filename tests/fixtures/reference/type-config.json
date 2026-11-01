@@ -70,12 +70,11 @@
   "order",
   "save",
   "summon",
-  "teleport",
   "transform",
   "utility"
  ],
  "versions": {
-  "foundry": "14.369",
-  "dnd5e": "6.0.6"
+  "foundry": "13",
+  "dnd5e": "5.3.3"
  }
 }
