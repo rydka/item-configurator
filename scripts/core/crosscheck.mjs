@@ -12,7 +12,7 @@
  * - `path`: where the element lands in the proposal (`activities.<n>`, `effects.<n>`, `system.<field>`): for Claude,
  *   `<n>` is the index in `item.activities` / `item.effects` of the validated answer (`buildFromClaude` keeps it);
  * - `patch`: `[{ field, form, data }]`, the dnd5e-shaped value(s) the fact writes, relative to the element (`healing`,
- *   `save.dc.formula`, `system.changes.<j>.value`) or absolute for details (`system.armor.value`). In a conflict, the
+ *   `save.dc.formula`, `changes.<j>.value`, `duration`) or absolute for details (`system.armor.value`). In a conflict, the
  *   rules' alternative is rendered in the `form` of Claude's fields, so that a click writes it in Claude's element;
  * - `canon`: the family's canonical value, from which `render` builds any form.
  */
@@ -43,14 +43,14 @@ const ITEM_LEVEL = new Set(["rarity", "attunement", "magicalBonus", "ac"]);
 /** Effect kinds whose value is a number the two readings can disagree on. */
 const BONUS_KINDS = ["ac", "attack", "damage", "save", "check", "abilityScore", "speed", "damageReduction", "sense", "speedMultiplier"];
 
-/** Seconds of a duration unit (dnd5e `timePeriods` and Foundry `ACTIVE_EFFECT_DURATION_UNITS`); a turn is a round. */
+/** Seconds of a duration unit (dnd5e `timePeriods`, singular, and their Foundry plural names); a turn is a round. */
 const UNIT_SECONDS = {
   turn: 6, turns: 6, round: 6, rounds: 6, second: 1, seconds: 1, minute: 60, minutes: 60, hour: 3600, hours: 3600,
   day: 86400, days: 86400, month: 2592000, months: 2592000, year: 31536000, years: 31536000
 };
-/** Foundry effect unit of a dnd5e time period (`duration-field.mjs`, `getEffectDuration`). */
-const EFFECT_UNITS = { turn: "turns", round: "rounds", second: "seconds", minute: "minutes", hour: "hours", day: "days", month: "months", year: "years" };
-const ACTIVITY_UNITS = Object.fromEntries(Object.entries(EFFECT_UNITS).map(([a, e]) => [e, a]));
+/** Plural (Foundry) name of each dnd5e time period, as Claude or the plan may give either. */
+const PLURAL_UNITS = { turn: "turns", round: "rounds", second: "seconds", minute: "minutes", hour: "hours", day: "days", month: "months", year: "years" };
+const ACTIVITY_UNITS = Object.fromEntries(Object.entries(PLURAL_UNITS).map(([a, e]) => [e, a]));
 
 /** Feet of a distance unit; `null` when the unit is not a length (`self`, `touch`, `any`, `spec`...). */
 const UNIT_FEET = { ft: 1, feet: 1, mi: 5280, m: 10 / 3, km: 10000 / 3 };
@@ -138,7 +138,7 @@ const secondsOf = (value, units) => {
 
 /**
  * Render a canonical value in the form of a field (`part`, `formula`, `string`, `number`, `key`, `keyList`,
- * `recovery`, `activityUnits`, `effectUnits`, `durationValue`, `distanceValue`, `distanceUnits`).
+ * `recovery`, `activityUnits`, `effectDuration`, `durationValue`, `distanceValue`, `distanceUnits`).
  * @param {string} family
  * @param {*} canon
  * @param {string} form
@@ -156,7 +156,11 @@ export function render(family, canon, form) {
     case "recovery": return canon.period ? [{ period: canon.period, type: "recoverAll" }] : [];
     case "durationValue": return canon.value;
     case "activityUnits": return ACTIVITY_UNITS[canon.units] ?? canon.units;
-    case "effectUnits": return EFFECT_UNITS[canon.units] ?? canon.units;
+    case "effectDuration":
+      // Foundry v13 `EffectDurationData` of a duration canon (`units` singular, `seconds` computed)
+      if (canon.units === "turn") return { turns: canon.value };
+      if (canon.units === "round") return { rounds: canon.value };
+      return { seconds: canon.seconds };
     case "distanceValue": return canon.value;
     case "distanceUnits": return canon.units;
     default: return canon;
@@ -187,15 +191,18 @@ const usesFact = ({ max, period }, { prefix, ...rest }) => fact("uses", {
   patch: [{ field: `${prefix}max`, form: "usesMax", data: String(max) }, { field: `${prefix}recovery`, form: "recovery", data: render("uses", { max, period }, "recovery") }],
   ...rest
 });
+/**
+ * Duration fact. An activity duration (`prefix`, `form: "activityUnits"`) patches `duration.value` and
+ * `duration.units`; an effect duration (`form: "effectDuration"`) patches the whole v13 `duration`
+ * (`{ seconds | rounds | turns }`) of the effect source.
+ */
 const durationFact = ({ value, units }, { prefix, form, ...rest }) => {
   const seconds = secondsOf(value, units);
   if (seconds === null) return null;
   const canon = { value: num(value), units: ACTIVITY_UNITS[units] ?? units, seconds };
-  return fact("duration", {
-    value: seconds, display: `${value} ${units}`, canon,
-    patch: [{ field: `${prefix}value`, form: "durationValue", data: canon.value }, { field: `${prefix}units`, form, data: units }],
-    ...rest
-  });
+  const patch = form === "effectDuration" ? [{ field: "duration", form, data: render("duration", canon, form) }]
+    : [{ field: `${prefix}value`, form: "durationValue", data: canon.value }, { field: `${prefix}units`, form, data: units }];
+  return fact("duration", { value: seconds, display: `${value} ${units}`, canon, patch, ...rest });
 };
 const distanceFact = ({ value, units }, { prefix, ...rest }) => {
   const feet = feetOf(value, units);
@@ -234,7 +241,7 @@ export function factsFromRules(plan, paragraphs) {
   const add = (f) => { if (f) facts.push(f); };
   const details = plan?.details ?? {};
 
-  if (details.rarity) add(keyFact("rarity", details.rarity, { ref: "details.rarity", path: "system.rarities", field: "system.rarities", form: "keyList", paragraph: locate(details.rarityRaw) }));
+  if (details.rarity) add(keyFact("rarity", details.rarity, { ref: "details.rarity", path: "system.rarity", field: "system.rarity", form: "key", paragraph: locate(details.rarityRaw) }));
   if (details.attunement) add(keyFact("attunement", details.attunement, { ref: "details.attunement", path: "system.attunement", field: "system.attunement", paragraph: locate(details.attunementRaw) }));
   for (const [name, part] of Object.entries({ weapon: details.weapon, armor: details.armor })) {
     if (!part) continue;
@@ -276,8 +283,8 @@ export function factsFromRules(plan, paragraphs) {
   list(plan?.effects).forEach((effect, n) => {
     const ref = `effects.${n}`;
     const base = { ref, path: ref, paragraph: locate(effect.raw), raw: text(effect.raw) };
-    add(effectBonusFact(effect, { field: `system.changes.${n}.value`, ...base }));
-    if (effect.duration) add(durationFact(effect.duration, { prefix: "duration.", form: "effectUnits", ...base }));
+    add(effectBonusFact(effect, { field: `changes.${n}.value`, ...base }));
+    if (effect.duration) add(durationFact(effect.duration, { form: "effectDuration", ...base }));
   });
   return facts;
 }
@@ -288,7 +295,7 @@ export function factsFromRules(plan, paragraphs) {
 
 /** Claude detail fields that carry a fact, with their family and target. */
 const DETAIL_FACTS = {
-  rarity: { family: "rarity", path: "system.rarities", form: "keyList" },
+  rarity: { family: "rarity", path: "system.rarity", form: "key" },
   attunement: { family: "attunement", path: "system.attunement", form: "key" },
   magicalBonus: { family: "magicalBonus", path: "system.magicalBonus", form: "number" },
   armorValue: { family: "ac", path: "system.armor.value", form: "number" },
@@ -349,8 +356,8 @@ export function factsFromClaude(item, paragraphs) {
 
   list(item?.effects).forEach((effect, n) => {
     const base = { ref: text(effect.ref) || `effects.${n}`, path: `effects.${n}`, paragraph: firstParagraph(locate, effect.quotes), inferred: Boolean(effect.inferred), raw: text(effect.quotes?.[0]) };
-    list(effect.changes).forEach((change, j) => add(effectBonusFact(change, { field: `system.changes.${j}.value`, ...base })));
-    if (effect.duration?.units) add(durationFact(effect.duration, { prefix: "duration.", form: "effectUnits", ...base }));
+    list(effect.changes).forEach((change, j) => add(effectBonusFact(change, { field: `changes.${j}.value`, ...base })));
+    if (effect.duration?.units) add(durationFact(effect.duration, { form: "effectDuration", ...base }));
   });
   return facts;
 }

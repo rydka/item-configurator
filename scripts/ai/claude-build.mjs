@@ -19,10 +19,6 @@ export const NOTE_FLAVOR = `${LIB}Note.Flavor`;
 export const NOTE_EFFECT_SKIPPED = `${LIB}Note.EffectSkipped`;
 export const NOTE_SPELL_NOT_FOUND = `${LIB}Note.SpellNotFound`;
 
-/** dnd5e time period -> Foundry ActiveEffect duration unit (`duration-field.mjs`, `getEffectDuration`). */
-export const EFFECT_UNITS = {
-  turn: "turns", round: "rounds", second: "seconds", minute: "minutes", hour: "hours", day: "days", month: "months", year: "years"
-};
 /** Property group of `validProperties` per item type. */
 const PROPERTY_GROUP = { weapon: "weapon", equipment: "equipment", consumable: "consumable" };
 /** Scopes that mean "every roll" for the library (which expects no scope then). */
@@ -72,10 +68,10 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
     const quotes = detail.quotes.join(" ");
     switch (detail.field) {
       case "rarity":
-        setPath(system, "rarities", [detail.key]);
+        setPath(system, "rarity", detail.key);
         rarityDetail = detail;
         if (["uncommon", "rare", "veryRare", "legendary", "artifact"].includes(detail.key) && allowProperty("mgc")) properties.add("mgc");
-        describe(`${LIB}Describe.Rarity`, { rarity: detail.key }, detail, { group: "details", paths: ["system.rarities"] });
+        describe(`${LIB}Describe.Rarity`, { rarity: detail.key }, detail, { group: "details", paths: ["system.rarity"] });
         break;
       case "attunement":
         setPath(system, "attunement", detail.key);
@@ -157,11 +153,10 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
     source.name = label;
     source.transfer = effect.transfer;
     if (source.flags) delete source.flags;
-    if (!effect.transfer && effect.duration) {
-      const units = EFFECT_UNITS[effect.duration.units];
-      if (effect.duration.until) source.duration = { expiry: effect.duration.until, value: null };
-      else if (units && effect.duration.value) source.duration = { value: effect.duration.value, units };
-    } else delete source.duration;
+    // Foundry v13 duration (`{ seconds | rounds | turns }`): "until the end of the next turn" lasts one turn
+    const duration = !effect.transfer && effect.duration ? parser.toEffectDuration(effect.duration) : null;
+    if (duration) source.duration = duration;
+    else delete source.duration;
     effectIds.set(effect.ref, source._id);
     // A change the library skipped (`Note.EffectSkipped { kind, scope }`) is a clause of its own; the others are
     // described one by one (C12: every line cites its passage)
@@ -173,7 +168,9 @@ export function buildFromClaude(item, { parser, keys, idGen, type, name = "", re
       });
     });
     if (source.duration) {
-      describe(`${OWN}Fact.EffectDuration`, { value: source.duration.value ?? "", units: source.duration.units ?? "", until: source.duration.expiry ?? "" }, effect, {
+      // The descriptor shows Claude's reading (`value`, `units`, `until`): the v13 source only holds seconds / turns
+      const { value, units, until } = effect.duration;
+      describe(`${OWN}Fact.EffectDuration`, { value: until ? "" : (value ?? ""), units: until ? "" : (units ?? ""), until: until ?? "" }, effect, {
         group: "effects", paths: [`effects.${n}`]
       });
     }

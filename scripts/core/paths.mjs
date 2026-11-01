@@ -15,12 +15,12 @@ export function getPath(object, path) {
   return current;
 }
 
-/** Set a dotted path, creating the parents. */
+/** Set a dotted path, creating the parents (an existing array is traversed by index, `changes.0.value`). */
 export function setPath(object, path, value) {
   const keys = String(path).split(".");
   let current = object;
   for (const key of keys.slice(0, -1)) {
-    if (!isPlain(current[key])) current[key] = {};
+    if (!isPlain(current[key]) && !Array.isArray(current[key])) current[key] = {};
     current = current[key];
   }
   current[keys.at(-1)] = value;
