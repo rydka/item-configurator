@@ -137,7 +137,7 @@ const secondsOf = (value, units) => {
 };
 
 /**
- * Render a canonical value in the form of a field (`part`, `formula`, `string`, `number`, `key`, `keyList`,
+ * Render a canonical value in the form of a field (`part`, `formula`, `string`, `signed`, `number`, `key`, `keyList`,
  * `recovery`, `activityUnits`, `effectDuration`, `durationValue`, `distanceValue`, `distanceUnits`).
  * @param {string} family
  * @param {*} canon
@@ -149,6 +149,11 @@ export function render(family, canon, form) {
     case "part": return { number: canon.number, denomination: canon.denomination, bonus: canon.bonus, types: [...canon.types] };
     case "formula": return family === "dice" ? diceFormula(canon) : String(canon);
     case "string": return String(canon);
+    case "signed": {
+      // Effect bonus as `toEffects` writes it: "+1", "-1", "+0" (an unsigned number would change the stored form)
+      const n = num(canon);
+      return n === null ? String(canon) : (n >= 0 ? `+${n}` : String(n));
+    }
     case "number": return num(canon);
     case "key": return canon;
     case "keyList": return [canon];
@@ -223,9 +228,11 @@ const effectBonusFact = ({ kind, scope, value }, { fields, ...rest }) => {
   if (amount === null || !BONUS_KINDS.includes(kind)) return null;
   const where = scope ?? "";
   const sign = amount >= 0 && kind !== "speedMultiplier" ? "+" : "";
+  // A bonus is stored signed ("+1"); a speed multiplier is a bare factor ("0.5")
+  const form = kind === "speedMultiplier" ? "string" : "signed";
   return fact("effectBonus", {
     value: `${kind}:${where}=${amount}`, display: `${kind}${where ? ` (${where})` : ""} ${sign}${amount}`,
-    canon: amount, patch: list(fields).map((field) => ({ field, form: "string", data: String(value) })), ...rest
+    canon: amount, patch: list(fields).map((field) => ({ field, form, data: String(value) })), ...rest
   });
 };
 
